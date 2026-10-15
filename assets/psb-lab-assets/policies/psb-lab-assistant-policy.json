@@ -1,0 +1,23 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "InvokeNovaLiteThroughApacProfileOnly",
+      "Effect": "Allow",
+      "Action": [
+        "bedrock:InvokeModel",
+        "bedrock:InvokeModelWithResponseStream"
+      ],
+      "Resource": [
+        "arn:aws:bedrock:ap-southeast-1:<AWS-ACCOUNT-ID>:inference-profile/apac.amazon.nova-lite-v1:0",
+        "arn:aws:bedrock:*::foundation-model/amazon.nova-lite-v1:0"
+      ]
+    },
+    {
+      "Sid": "InvokeQueryFunctionOnly",
+      "Effect": "Allow",
+      "Action": "lambda:InvokeFunction",
+      "Resource": "arn:aws:lambda:ap-southeast-1:<AWS-ACCOUNT-ID>:function:psb-query-telemetry"
+    }
+  ]
+}

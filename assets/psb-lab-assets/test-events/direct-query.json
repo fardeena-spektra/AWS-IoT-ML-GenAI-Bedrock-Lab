@@ -1,0 +1,5 @@
+{
+  "metric": "temperature_c",
+  "window_minutes": 30,
+  "bucket_seconds": 60
+}

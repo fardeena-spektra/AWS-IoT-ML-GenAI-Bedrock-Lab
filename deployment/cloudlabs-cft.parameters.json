@@ -1,0 +1,43 @@
+{
+  "parameters": {
+    "CloudLabsDeploymentID": {
+      "value": "GET-DEPLOYMENT-ID"
+    },
+    "CheckAcknowledgement": {
+      "value": "TRUE"
+    },
+    "vpcCidr": {
+      "value": "10.10.0.0/16"
+    },
+    "subnetCidr": {
+      "value": "10.10.0.0/24"
+    },
+    "clgclusterSubnetCidr": {
+      "value": "10.10.1.0/24"
+    },
+    "AmazonECSTaskExecutionRolePolicy": {
+      "value": "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+    },
+    "windowsvmAdminUsername": {
+      "value": "labuser"
+    },
+    "WindowsvmPassword": {
+      "value": "GEN-PASSWORD"
+    },
+    "windowsami": {
+      "value": "/aws/service/ami-windows-latest/Windows_Server-2022-English-Full-Base"
+    },
+    "vmInstanceType": {
+      "value": "t3.medium"
+    },
+    "AccountId": {
+      "value": "GET-TENANT-FQDN"
+    },
+    "AWSuserName": {
+      "value": "GET-AZUSER-UPN"
+    },
+    "AWSpassword": {
+      "value": "GET-AZUSER-PASSWORD"
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowReadInfluxToken",
+      "Effect": "Allow",
+      "Action": "secretsmanager:GetSecretValue",
+      "Resource": "<SECRET-ARN>"
+    },
+    {
+      "Sid": "AllowInvokeAnomalyEndpoint",
+      "Effect": "Allow",
+      "Action": "sagemaker:InvokeEndpoint",
+      "Resource": "arn:aws:sagemaker:<AWS-REGION>:<AWS-ACCOUNT-ID>:endpoint/psb-anomaly-endpoint"
+    },
+    {
+      "Sid": "AllowWriteCuratedOnly",
+      "Effect": "Allow",
+      "Action": "s3:PutObject",
+      "Resource": "arn:aws:s3:::psb-lab-<DEPLOYMENT-ID>/curated/*"
+    }
+  ]
+}

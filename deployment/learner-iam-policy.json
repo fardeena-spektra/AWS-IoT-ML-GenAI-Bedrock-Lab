@@ -1,0 +1,181 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "LabServicesInSingapore",
+      "Effect": "Allow",
+      "Action": [
+        "iot:*",
+        "timestream-influxdb:*",
+        "lambda:*",
+        "secretsmanager:*",
+        "apigateway:*",
+        "execute-api:*",
+        "cognito-idp:*",
+        "amplify:*",
+        "sagemaker:*",
+        "events:*",
+        "scheduler:*",
+        "logs:*",
+        "cloudwatch:*",
+        "cloudshell:*",
+        "kms:DescribeKey",
+        "kms:ListAliases",
+        "kms:ListKeys",
+        "ec2:Describe*",
+        "ec2:CreateSecurityGroup",
+        "ec2:AuthorizeSecurityGroupIngress",
+        "ec2:RevokeSecurityGroupIngress",
+        "ec2:CreateTags",
+        "ec2:CreateNetworkInterface",
+        "ec2:DeleteNetworkInterface",
+        "elasticfilesystem:Describe*",
+        "servicequotas:Get*",
+        "servicequotas:List*",
+        "tag:GetResources",
+        "sts:GetCallerIdentity",
+        "ssm:GetParameter*"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "ap-southeast-1"
+        }
+      }
+    },
+    {
+      "Sid": "S3LabBuckets",
+      "Effect": "Allow",
+      "Action": [
+        "s3:ListAllMyBuckets",
+        "s3:GetBucketLocation",
+        "s3:ListBucket",
+        "s3:GetBucket*",
+        "s3:GetObject*",
+        "s3:PutObject*",
+        "s3:DeleteObject*",
+        "s3:GetEncryptionConfiguration",
+        "s3:GetLifecycleConfiguration",
+        "s3:PutLifecycleConfiguration"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "BedrockNovaAndModelAccess",
+      "Effect": "Allow",
+      "Action": [
+        "bedrock:InvokeModel",
+        "bedrock:InvokeModelWithResponseStream",
+        "bedrock:List*",
+        "bedrock:Get*",
+        "bedrock:PutFoundationModelEntitlement",
+        "bedrock:CreateFoundationModelAgreement",
+        "bedrock:PutUseCaseForModelAccess",
+        "aws-marketplace:ViewSubscriptions",
+        "aws-marketplace:Subscribe"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "IamReadOnly",
+      "Effect": "Allow",
+      "Action": [
+        "iam:Get*",
+        "iam:List*",
+        "iam:SimulatePrincipalPolicy"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "IamLabRoles",
+      "Effect": "Allow",
+      "Action": [
+        "iam:CreateRole",
+        "iam:DeleteRole",
+        "iam:TagRole",
+        "iam:UpdateAssumeRolePolicy",
+        "iam:PutRolePolicy",
+        "iam:DeleteRolePolicy",
+        "iam:AttachRolePolicy",
+        "iam:DetachRolePolicy",
+        "iam:CreatePolicy",
+        "iam:CreatePolicyVersion",
+        "iam:DeletePolicyVersion",
+        "iam:DeletePolicy"
+      ],
+      "Resource": [
+        "arn:aws:iam::*:role/psb-*",
+        "arn:aws:iam::*:role/service-role/psb-*",
+        "arn:aws:iam::*:policy/service-role/*",
+        "arn:aws:iam::*:policy/psb-*"
+      ]
+    },
+    {
+      "Sid": "PassLabRoles",
+      "Effect": "Allow",
+      "Action": "iam:PassRole",
+      "Resource": [
+        "arn:aws:iam::*:role/psb-*",
+        "arn:aws:iam::*:role/service-role/psb-*"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "iam:PassedToService": [
+            "lambda.amazonaws.com",
+            "iot.amazonaws.com",
+            "sagemaker.amazonaws.com",
+            "events.amazonaws.com"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "ServiceLinkedRoles",
+      "Effect": "Allow",
+      "Action": "iam:CreateServiceLinkedRole",
+      "Resource": "arn:aws:iam::*:role/aws-service-role/*"
+    },
+    {
+      "Sid": "DenyLargeSageMakerInstances",
+      "Effect": "Deny",
+      "Action": [
+        "sagemaker:CreateTrainingJob",
+        "sagemaker:CreateApp",
+        "sagemaker:CreateSpace",
+        "sagemaker:UpdateSpace",
+        "sagemaker:CreateEndpointConfig",
+        "sagemaker:CreateProcessingJob",
+        "sagemaker:CreateNotebookInstance",
+        "sagemaker:CreateTransformJob",
+        "sagemaker:CreateHyperParameterTuningJob"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "ForAnyValue:StringNotLike": {
+          "sagemaker:InstanceTypes": [
+            "ml.m5.large",
+            "ml.t3.medium",
+            "system"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "ProtectCloudLabsResources",
+      "Effect": "Deny",
+      "Action": [
+        "ec2:TerminateInstances",
+        "ec2:StopInstances",
+        "ec2:DeleteSecurityGroup",
+        "ec2:DeleteVpc",
+        "ec2:DeleteSubnet",
+        "cloudformation:DeleteStack",
+        "cloudformation:UpdateStack",
+        "sagemaker:DeleteDomain",
+        "sagemaker:DeleteUserProfile",
+        "s3:DeleteBucket"
+      ],
+      "Resource": "*"
+    }
+  ]
+}

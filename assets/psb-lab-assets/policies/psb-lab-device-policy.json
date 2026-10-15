@@ -1,0 +1,29 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowConnectAsThisDeviceOnly",
+      "Effect": "Allow",
+      "Action": "iot:Connect",
+      "Resource": "arn:aws:iot:<AWS-REGION>:<AWS-ACCOUNT-ID>:client/psb-lab-sensor-01"
+    },
+    {
+      "Sid": "AllowPublishToOwnTelemetryTopicOnly",
+      "Effect": "Allow",
+      "Action": "iot:Publish",
+      "Resource": "arn:aws:iot:<AWS-REGION>:<AWS-ACCOUNT-ID>:topic/psb/lab/psb-lab-sensor-01/telemetry"
+    },
+    {
+      "Sid": "AllowSubscribeToOwnCommandTopicOnly",
+      "Effect": "Allow",
+      "Action": "iot:Subscribe",
+      "Resource": "arn:aws:iot:<AWS-REGION>:<AWS-ACCOUNT-ID>:topicfilter/psb/lab/psb-lab-sensor-01/commands"
+    },
+    {
+      "Sid": "AllowReceiveOnOwnCommandTopicOnly",
+      "Effect": "Allow",
+      "Action": "iot:Receive",
+      "Resource": "arn:aws:iot:<AWS-REGION>:<AWS-ACCOUNT-ID>:topic/psb/lab/psb-lab-sensor-01/commands"
+    }
+  ]
+}

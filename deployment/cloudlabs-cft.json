@@ -1,0 +1,729 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "CloudLabs | AWS Demo || Bedrock with Claude (PSB IoT + ML + GenAI). Deploy in ap-southeast-1. Lab VM + pre-seeded S3 bucket and SageMaker Studio domain.",
+  "Parameters": {
+    "CloudLabsDeploymentID": {
+      "Type": "String",
+      "Description": "Unique deployment ID supplied by CloudLabs"
+    },
+    "CheckAcknowledgement": {
+      "Type": "String",
+      "Default": "TRUE",
+      "Description": "CloudLabs acknowledgement flag"
+    },
+    "vpcCidr": {
+      "Type": "String",
+      "Default": "10.10.0.0/16"
+    },
+    "subnetCidr": {
+      "Type": "String",
+      "Default": "10.10.0.0/24"
+    },
+    "clgclusterSubnetCidr": {
+      "Type": "String",
+      "Default": "10.10.1.0/24"
+    },
+    "AmazonECSTaskExecutionRolePolicy": {
+      "Type": "String",
+      "Default": "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+    },
+    "windowsvmAdminUsername": {
+      "Type": "String",
+      "Default": "labuser"
+    },
+    "WindowsvmPassword": {
+      "Type": "String",
+      "MinLength": 8
+    },
+    "windowsami": {
+      "Type": "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>",
+      "Default": "/aws/service/ami-windows-latest/Windows_Server-2022-English-Full-Base"
+    },
+    "vmInstanceType": {
+      "Type": "String",
+      "Default": "t3.medium",
+      "AllowedValues": [
+        "t3.medium",
+        "t2.medium",
+        "t3.large"
+      ]
+    },
+    "AccountId": {
+      "Type": "String",
+      "Description": "AWS account ID / alias used in the console sign-in URL"
+    },
+    "AWSuserName": {
+      "Type": "String",
+      "Description": "Learner IAM user name"
+    },
+    "AWSpassword": {
+      "Type": "String",
+      "Description": "Learner IAM user password"
+    }
+  },
+  "Resources": {
+    "TaskExecutionRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ecs-tasks.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "ManagedPolicyArns": [
+          {
+            "Ref": "AmazonECSTaskExecutionRolePolicy"
+          }
+        ]
+      }
+    },
+    "clgVpc": {
+      "Type": "AWS::EC2::VPC",
+      "Properties": {
+        "CidrBlock": {
+          "Ref": "vpcCidr"
+        },
+        "EnableDnsSupport": true,
+        "EnableDnsHostnames": true,
+        "Tags": [
+          {
+            "Key": "aws-apn-id",
+            "Value": "pc:7finjv2fdluw3t9gvedjkgubj"
+          },
+          {
+            "Key": "Name",
+            "Value": {
+              "Fn::Sub": "clgvpc-${CloudLabsDeploymentID}"
+            }
+          }
+        ]
+      }
+    },
+    "clgInternetGateway": {
+      "Type": "AWS::EC2::InternetGateway",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "aws-apn-id",
+            "Value": "pc:7finjv2fdluw3t9gvedjkgubj"
+          },
+          {
+            "Key": "Name",
+            "Value": {
+              "Fn::Sub": "clgigw-${CloudLabsDeploymentID}"
+            }
+          }
+        ]
+      }
+    },
+    "clgGatewayAttachment": {
+      "Type": "AWS::EC2::VPCGatewayAttachment",
+      "Properties": {
+        "VpcId": {
+          "Ref": "clgVpc"
+        },
+        "InternetGatewayId": {
+          "Ref": "clgInternetGateway"
+        }
+      }
+    },
+    "vmSubnet": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "VpcId": {
+          "Ref": "clgVpc"
+        },
+        "CidrBlock": {
+          "Ref": "subnetCidr"
+        },
+        "AvailabilityZone": {
+          "Fn::Select": [
+            0,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "MapPublicIpOnLaunch": true,
+        "Tags": [
+          {
+            "Key": "aws-apn-id",
+            "Value": "pc:7finjv2fdluw3t9gvedjkgubj"
+          },
+          {
+            "Key": "Name",
+            "Value": {
+              "Fn::Sub": "vmsubnet-${CloudLabsDeploymentID}"
+            }
+          }
+        ]
+      }
+    },
+    "clgClusterSubnet": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "VpcId": {
+          "Ref": "clgVpc"
+        },
+        "CidrBlock": {
+          "Ref": "clgclusterSubnetCidr"
+        },
+        "AvailabilityZone": {
+          "Fn::Select": [
+            1,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "MapPublicIpOnLaunch": true,
+        "Tags": [
+          {
+            "Key": "aws-apn-id",
+            "Value": "pc:7finjv2fdluw3t9gvedjkgubj"
+          },
+          {
+            "Key": "Name",
+            "Value": {
+              "Fn::Sub": "clgsubnet-${CloudLabsDeploymentID}"
+            }
+          }
+        ]
+      }
+    },
+    "clgRouteTable": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": {
+          "Ref": "clgVpc"
+        },
+        "Tags": [
+          {
+            "Key": "aws-apn-id",
+            "Value": "pc:7finjv2fdluw3t9gvedjkgubj"
+          },
+          {
+            "Key": "Name",
+            "Value": {
+              "Fn::Sub": "clgrt-${CloudLabsDeploymentID}"
+            }
+          }
+        ]
+      }
+    },
+    "clgDefaultRoute": {
+      "Type": "AWS::EC2::Route",
+      "DependsOn": "clgGatewayAttachment",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "clgRouteTable"
+        },
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": {
+          "Ref": "clgInternetGateway"
+        }
+      }
+    },
+    "vmSubnetRouteAssoc": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "SubnetId": {
+          "Ref": "vmSubnet"
+        },
+        "RouteTableId": {
+          "Ref": "clgRouteTable"
+        }
+      }
+    },
+    "clgClusterSubnetRouteAssoc": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "SubnetId": {
+          "Ref": "clgClusterSubnet"
+        },
+        "RouteTableId": {
+          "Ref": "clgRouteTable"
+        }
+      }
+    },
+    "vmSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Lab VM access (RDP/SSH and CloudLabs cluster)",
+        "VpcId": {
+          "Ref": "clgVpc"
+        },
+        "SecurityGroupIngress": [
+          {
+            "IpProtocol": "tcp",
+            "FromPort": 3389,
+            "ToPort": 3389,
+            "CidrIp": "0.0.0.0/0"
+          },
+          {
+            "IpProtocol": "tcp",
+            "FromPort": 22,
+            "ToPort": 22,
+            "CidrIp": "0.0.0.0/0"
+          },
+          {
+            "IpProtocol": "-1",
+            "CidrIp": {
+              "Ref": "clgclusterSubnetCidr"
+            }
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "aws-apn-id",
+            "Value": "pc:7finjv2fdluw3t9gvedjkgubj"
+          },
+          {
+            "Key": "Name",
+            "Value": {
+              "Fn::Sub": "vmsg-${CloudLabsDeploymentID}"
+            }
+          }
+        ]
+      }
+    },
+    "clgSg": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupName": {
+          "Fn::Sub": "clgSg-${CloudLabsDeploymentID}"
+        },
+        "GroupDescription": "CloudLabs cluster HTTPS",
+        "VpcId": {
+          "Ref": "clgVpc"
+        },
+        "SecurityGroupIngress": [
+          {
+            "IpProtocol": "tcp",
+            "FromPort": 443,
+            "ToPort": 443,
+            "CidrIp": "0.0.0.0/0"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "aws-apn-id",
+            "Value": "pc:7finjv2fdluw3t9gvedjkgubj"
+          },
+          {
+            "Key": "Name",
+            "Value": {
+              "Fn::Sub": "clgSg-${CloudLabsDeploymentID}"
+            }
+          }
+        ]
+      }
+    },
+    "vmKeyPair": {
+      "Type": "AWS::EC2::KeyPair",
+      "Properties": {
+        "KeyName": {
+          "Fn::Sub": "labkeypair-${CloudLabsDeploymentID}"
+        },
+        "Tags": [
+          {
+            "Key": "aws-apn-id",
+            "Value": "pc:7finjv2fdluw3t9gvedjkgubj"
+          }
+        ]
+      }
+    },
+    "vmInstanceRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "RoleName": {
+          "Fn::Sub": "psb-lab-vm-role-${CloudLabsDeploymentID}"
+        },
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ec2.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "ManagedPolicyArns": [
+          "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+        ]
+      }
+    },
+    "vmInstanceProfile": {
+      "Type": "AWS::IAM::InstanceProfile",
+      "Properties": {
+        "Roles": [
+          {
+            "Ref": "vmInstanceRole"
+          }
+        ]
+      }
+    },
+    "vmInstance": {
+      "Type": "AWS::EC2::Instance",
+      "DependsOn": "clgDefaultRoute",
+      "Properties": {
+        "ImageId": {
+          "Ref": "windowsami"
+        },
+        "InstanceType": {
+          "Ref": "vmInstanceType"
+        },
+        "KeyName": {
+          "Ref": "vmKeyPair"
+        },
+        "SubnetId": {
+          "Ref": "vmSubnet"
+        },
+        "SecurityGroupIds": [
+          {
+            "Ref": "vmSecurityGroup"
+          }
+        ],
+        "IamInstanceProfile": {
+          "Ref": "vmInstanceProfile"
+        },
+        "BlockDeviceMappings": [
+          {
+            "DeviceName": "/dev/sda1",
+            "Ebs": {
+              "VolumeSize": 60,
+              "VolumeType": "gp3",
+              "DeleteOnTermination": true
+            }
+          }
+        ],
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Sub": [
+              "<powershell>\nStart-Transcript -Path \"C:\\cloudlabs-bootstrap.log\" -Append\n$ErrorActionPreference = \"Continue\"\n[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12\n$ProgressPreference = \"SilentlyContinue\"\n\n# ---------- 1. Lab user (RDP login) ----------\n$vmUser = \"${windowsvmAdminUsername}\"\n$vmPass = \"${WindowsvmPassword}\"\n$secure = ConvertTo-SecureString $vmPass -AsPlainText -Force\nif (-not (Get-LocalUser -Name $vmUser -ErrorAction SilentlyContinue)) {\n    New-LocalUser -Name $vmUser -Password $secure -FullName \"Lab User\" -PasswordNeverExpires -AccountNeverExpires | Out-Null\n} else {\n    Set-LocalUser -Name $vmUser -Password $secure -PasswordNeverExpires $true\n}\nAdd-LocalGroupMember -Group \"Administrators\" -Member $vmUser -ErrorAction SilentlyContinue\nAdd-LocalGroupMember -Group \"Remote Desktop Users\" -Member $vmUser -ErrorAction SilentlyContinue\n\n# ---------- 2. CloudLabs common functions + standard AWS workstation script ----------\nNew-Item -ItemType Directory -Path \"C:\\Packages\" -Force | Out-Null\ntry {\n    Invoke-WebRequest -UseBasicParsing -Uri \"https://experienceazure.blob.core.windows.net/templates/cloudlabs-common/cloudlabs-windows-functions.ps1\" -OutFile \"C:\\Packages\\cloudlabs-windows-functions.ps1\"\n    . \"C:\\Packages\\cloudlabs-windows-functions.ps1\"\n} catch { Write-Output \"cloudlabs-windows-functions.ps1: $_\" }\ntry {\n    # Chrome, Edge, IE ESC off, Chocolatey, VS Code, AWS CLI, AWS Console shortcut\n    Invoke-WebRequest -UseBasicParsing -Uri \"https://cloudlabs-prod-templates-s3.s3.amazonaws.com/aws-certification-labs/psscript.ps1\" -OutFile \"C:\\Packages\\psscript.ps1\"\n    & powershell.exe -ExecutionPolicy Bypass -File \"C:\\Packages\\psscript.ps1\"\n} catch { Write-Output \"psscript.ps1: $_\" }\n\n# ---------- 3. Lab tooling: Python 3.12, Node.js LTS, Git ----------\n$choco = \"C:\\ProgramData\\chocolatey\\bin\\choco.exe\"\nif (-not (Test-Path $choco)) {\n    Set-ExecutionPolicy Bypass -Scope Process -Force\n    Invoke-Expression ((New-Object System.Net.WebClient).DownloadString(\"https://community.chocolatey.org/install.ps1\"))\n}\n& $choco install python312 nodejs-lts git awscli -y --no-progress\n$env:Path = [Environment]::GetEnvironmentVariable(\"Path\", \"Machine\")\n$py = (Get-ChildItem \"C:\\Python312\\python.exe\", \"C:\\Program Files\\Python312\\python.exe\" -ErrorAction SilentlyContinue | Select-Object -First 1).FullName\nif ($py) {\n    & $py -m pip install --upgrade pip\n    & $py -m pip install \"paho-mqtt==1.6.1\"\n}\n\n# ---------- 4. Lab assets -> C:\\psb-lab-assets + desktop shortcut ----------\n$zip = \"C:\\Packages\\psb-lab-assets.zip\"\nfor ($i = 1; $i -le 5; $i++) {\n    try { Invoke-WebRequest -UseBasicParsing -Uri \"https://raw.githubusercontent.com/fardeena-spektra/AWS-IoT-ML-GenAI-Bedrock-Lab/main/assets/psb-lab-assets.zip\" -OutFile $zip; break }\n    catch { Write-Output \"assets download attempt $i failed: $_\"; Start-Sleep -Seconds 15 }\n}\nif (Test-Path $zip) { Expand-Archive -Path $zip -DestinationPath \"C:\\psb-lab-assets\" -Force }\nNew-Item -ItemType Directory -Path \"C:\\psb-lab-assets\\simulator\\certs\" -Force | Out-Null\nicacls \"C:\\psb-lab-assets\" /grant \"Users:(OI)(CI)M\" /T | Out-Null\n$shell = New-Object -ComObject WScript.Shell\n$lnk = $shell.CreateShortcut(\"C:\\Users\\Public\\Desktop\\psb-lab-assets.lnk\")\n$lnk.TargetPath = \"C:\\psb-lab-assets\"\n$lnk.Save()\n\n# ---------- 5. Credentials file on the desktop ----------\n@\"\nAWS Console sign-in URL : ${SignInUrlValue}\nUsername                : ${AWSuserName}\nPassword                : ${AWSpassword}\nRegion                  : ${AWS::Region} (Asia Pacific Singapore)\nLab S3 bucket           : psb-lab-${CloudLabsDeploymentID}\nSageMaker domain / user : psb-lab-domain / psb-lab-user\n\"@ | Set-Content -Path \"C:\\Users\\Public\\Desktop\\aws credentials.txt\" -Encoding UTF8\n\n# ---------- 6. Default AWS CLI region for the lab user ----------\n[Environment]::SetEnvironmentVariable(\"AWS_DEFAULT_REGION\", \"${AWS::Region}\", \"Machine\")\n\n# ---------- 7. Restart the SSM agent so Session Manager / Run Command connect ----------\nRestart-Service AmazonSSMAgent -Force -ErrorAction SilentlyContinue\nStop-Transcript\n</powershell>\n",
+              {
+                "SignInUrlValue": {
+                  "Fn::Sub": "https://${AccountId}.signin.aws.amazon.com/console?region=${AWS::Region}"
+                }
+              }
+            ]
+          }
+        },
+        "Tags": [
+          {
+            "Key": "aws-apn-id",
+            "Value": "pc:7finjv2fdluw3t9gvedjkgubj"
+          },
+          {
+            "Key": "Name",
+            "Value": {
+              "Fn::Sub": "windowsvm-${CloudLabsDeploymentID}"
+            }
+          }
+        ]
+      }
+    },
+    "LabBucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketName": {
+          "Fn::Sub": "psb-lab-${CloudLabsDeploymentID}"
+        },
+        "PublicAccessBlockConfiguration": {
+          "BlockPublicAcls": true,
+          "BlockPublicPolicy": true,
+          "IgnorePublicAcls": true,
+          "RestrictPublicBuckets": true
+        },
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256"
+              }
+            }
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "aws-apn-id",
+            "Value": "pc:7finjv2fdluw3t9gvedjkgubj"
+          },
+          {
+            "Key": "Name",
+            "Value": {
+              "Fn::Sub": "psb-lab-${CloudLabsDeploymentID}"
+            }
+          }
+        ]
+      }
+    },
+    "SageMakerExecutionRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "RoleName": {
+          "Fn::Sub": "psb-lab-sagemaker-exec-${CloudLabsDeploymentID}"
+        },
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "sagemaker.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "ManagedPolicyArns": [
+          "arn:aws:iam::aws:policy/AmazonSageMakerFullAccess"
+        ],
+        "Policies": [
+          {
+            "PolicyName": "psb-lab-bucket-access",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "s3:ListBucket",
+                    "s3:GetBucketLocation"
+                  ],
+                  "Resource": {
+                    "Fn::Sub": "arn:aws:s3:::psb-lab-${CloudLabsDeploymentID}"
+                  }
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "s3:GetObject",
+                    "s3:PutObject",
+                    "s3:DeleteObject"
+                  ],
+                  "Resource": {
+                    "Fn::Sub": "arn:aws:s3:::psb-lab-${CloudLabsDeploymentID}/*"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "SageMakerDomain": {
+      "Type": "AWS::SageMaker::Domain",
+      "DependsOn": "clgDefaultRoute",
+      "Properties": {
+        "DomainName": "psb-lab-domain",
+        "AuthMode": "IAM",
+        "AppNetworkAccessType": "PublicInternetOnly",
+        "VpcId": {
+          "Ref": "clgVpc"
+        },
+        "SubnetIds": [
+          {
+            "Ref": "vmSubnet"
+          }
+        ],
+        "DefaultUserSettings": {
+          "ExecutionRole": {
+            "Fn::GetAtt": [
+              "SageMakerExecutionRole",
+              "Arn"
+            ]
+          },
+          "StudioWebPortal": "ENABLED",
+          "DefaultLandingUri": "studio::",
+          "SpaceStorageSettings": {
+            "DefaultEbsStorageSettings": {
+              "DefaultEbsVolumeSizeInGb": 5,
+              "MaximumEbsVolumeSizeInGb": 100
+            }
+          }
+        },
+        "DefaultSpaceSettings": {
+          "ExecutionRole": {
+            "Fn::GetAtt": [
+              "SageMakerExecutionRole",
+              "Arn"
+            ]
+          }
+        },
+        "Tags": [
+          {
+            "Key": "aws-apn-id",
+            "Value": "pc:7finjv2fdluw3t9gvedjkgubj"
+          }
+        ]
+      }
+    },
+    "SageMakerUserProfile": {
+      "Type": "AWS::SageMaker::UserProfile",
+      "Properties": {
+        "DomainId": {
+          "Fn::GetAtt": [
+            "SageMakerDomain",
+            "DomainId"
+          ]
+        },
+        "UserProfileName": "psb-lab-user",
+        "UserSettings": {
+          "ExecutionRole": {
+            "Fn::GetAtt": [
+              "SageMakerExecutionRole",
+              "Arn"
+            ]
+          }
+        },
+        "Tags": [
+          {
+            "Key": "aws-apn-id",
+            "Value": "pc:7finjv2fdluw3t9gvedjkgubj"
+          }
+        ]
+      }
+    }
+  },
+  "Outputs": {
+    "CloudLabsDeploymentID": {
+      "Description": "CloudLabs deployment ID",
+      "Value": {
+        "Ref": "CloudLabsDeploymentID"
+      }
+    },
+    "clusterSubnetId": {
+      "Description": "CloudLabs cluster subnet",
+      "Value": {
+        "Ref": "clgClusterSubnet"
+      }
+    },
+    "clusterSecurityGroupId": {
+      "Description": "CloudLabs cluster security group",
+      "Value": {
+        "Fn::GetAtt": [
+          "clgSg",
+          "GroupId"
+        ]
+      }
+    },
+    "TaskExecutionRole": {
+      "Description": "CloudLabs task execution role",
+      "Value": {
+        "Fn::GetAtt": [
+          "TaskExecutionRole",
+          "Arn"
+        ]
+      }
+    },
+    "VMPublicDNSName": {
+      "Description": "Lab VM public DNS",
+      "Value": {
+        "Fn::GetAtt": [
+          "vmInstance",
+          "PublicDnsName"
+        ]
+      }
+    },
+    "windowsvmAdminUsername": {
+      "Description": "Lab VM username",
+      "Value": {
+        "Ref": "windowsvmAdminUsername"
+      }
+    },
+    "WindowsVMPassword": {
+      "Description": "Lab VM password",
+      "Value": {
+        "Ref": "WindowsvmPassword"
+      }
+    },
+    "WindowsVMPublicIP": {
+      "Description": "Lab VM public IP",
+      "Value": {
+        "Fn::GetAtt": [
+          "vmInstance",
+          "PublicIp"
+        ]
+      }
+    },
+    "WindowsVMPrivateIP": {
+      "Description": "Lab VM private IP",
+      "Value": {
+        "Fn::GetAtt": [
+          "vmInstance",
+          "PrivateIp"
+        ]
+      }
+    },
+    "SignInUrl": {
+      "Description": "AWS console sign-in URL",
+      "Value": {
+        "Fn::Sub": "https://${AccountId}.signin.aws.amazon.com/console?region=${AWS::Region}"
+      }
+    },
+    "AWSUserName": {
+      "Description": "Learner IAM user",
+      "Value": {
+        "Ref": "AWSuserName"
+      }
+    },
+    "AWSPassword": {
+      "Description": "Learner IAM password",
+      "Value": {
+        "Ref": "AWSpassword"
+      }
+    },
+    "LabRegion": {
+      "Description": "Lab Region",
+      "Value": {
+        "Ref": "AWS::Region"
+      }
+    },
+    "LabBucketName": {
+      "Description": "Pre-created lab bucket",
+      "Value": {
+        "Ref": "LabBucket"
+      }
+    },
+    "SageMakerDomainName": {
+      "Description": "Pre-created SageMaker Studio domain",
+      "Value": "psb-lab-domain"
+    },
+    "SageMakerDomainId": {
+      "Description": "SageMaker domain ID",
+      "Value": {
+        "Fn::GetAtt": [
+          "SageMakerDomain",
+          "DomainId"
+        ]
+      }
+    },
+    "SageMakerUserProfile": {
+      "Description": "Pre-created SageMaker user profile",
+      "Value": "psb-lab-user"
+    }
+  }
+}
