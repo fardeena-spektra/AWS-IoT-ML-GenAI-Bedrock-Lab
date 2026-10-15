@@ -163,7 +163,7 @@ simulator (backfill 24h) ──► IoT rule ──► S3 raw/ ──► JupyterL
    > - If not, carefully read the error message and retry the step, following the instructions in the lab guide.
    > - If you need any assistance, please contact us at cloudlabs-support@spektrasystems.com. We are available 24/7 to help you out.
 
-   <validation step="6fbeccac-a90e-4b5c-bdff-42f1a7e47d06" />
+   <validation step="2b42ba6d-dde6-4d2c-a1ff-17d30f14b658" />
 
 ## 📝 Summary
 

@@ -233,7 +233,7 @@ Sample telemetry message:
    > - If not, carefully read the error message and retry the step, following the instructions in the lab guide.
    > - If you need any assistance, please contact us at cloudlabs-support@spektrasystems.com. We are available 24/7 to help you out.
 
-   <validation step="59e26375-0ffb-4c71-9cb9-f49c28ae85b5" />
+   <validation step="4a7868a3-a363-44f0-990c-e45b7e2c1324" />
 
 ## 📝 Summary
 

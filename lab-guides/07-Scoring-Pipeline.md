@@ -188,7 +188,7 @@ EventBridge rate(5 minutes) ──► psb-score-telemetry
    > - If not, carefully read the error message and retry the step, following the instructions in the lab guide.
    > - If you need any assistance, please contact us at cloudlabs-support@spektrasystems.com. We are available 24/7 to help you out.
 
-   <validation step="764c112b-0f8a-4fe6-bd41-1600dcacdfc2" />
+   <validation step="288bdeee-f5bd-42b3-a40d-91bc17f3add8" />
 
 ## 📝 Summary
 

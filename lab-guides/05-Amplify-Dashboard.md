@@ -199,7 +199,7 @@ Browser ──► Amplify (https://main.<appid>.amplifyapp.com/)
    > - If not, carefully read the error message and retry the step, following the instructions in the lab guide.
    > - If you need any assistance, please contact us at cloudlabs-support@spektrasystems.com. We are available 24/7 to help you out.
 
-   <validation step="385a58e4-0c21-49a6-8b28-97567e7c1d96" />
+   <validation step="82bd0de8-3c01-41d1-9851-9caa8732cf60" />
 
 ## 📝 Summary
 

@@ -273,7 +273,7 @@ Dashboard chat ──► POST /assistant (JWT authorizer) ──► psb-assistan
    > - If not, carefully read the error message and retry the step, following the instructions in the lab guide.
    > - If you need any assistance, please contact us at cloudlabs-support@spektrasystems.com. We are available 24/7 to help you out.
 
-   <validation step="e1a21ce3-4651-45b5-9ae9-cd24b2830886" />
+   <validation step="1bf8d00e-c157-4605-849d-6f74e935a67c" />
 
 ## 📝 Summary
 

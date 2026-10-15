@@ -324,7 +324,7 @@ IoT Core topic psb/lab/+/telemetry ──> Rule psb_telemetry_rule ─┬─> La
    > - If not, carefully read the error message and retry the step, following the instructions in the lab guide.
    > - If you need any assistance, please contact us at cloudlabs-support@spektrasystems.com. We are available 24/7 to help you out.
 
-   <validation step="ec8803f3-325c-470e-9da5-42325d1dc1f5" />
+   <validation step="adb3daf1-20c5-45b3-87e6-b458a8052bb5" />
 
 ## 📝 Summary
 

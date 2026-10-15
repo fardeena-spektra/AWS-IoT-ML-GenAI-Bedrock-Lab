@@ -195,7 +195,7 @@ Client ──HTTPS──> API Gateway psb-lab-api ──(GET /telemetry, GET /an
    > - If not, carefully read the error message and retry the step, following the instructions in the lab guide.
    > - If you need any assistance, please contact us at cloudlabs-support@spektrasystems.com. We are available 24/7 to help you out.
 
-   <validation step="b3b85ffd-0738-464e-95e6-961cb0e28b22" />
+   <validation step="e3f71658-7f13-4f1f-b292-d0b6308aee2e" />
 
 ## 📝 Summary
 

@@ -169,7 +169,7 @@ Client ──Authorization: Bearer <id_token>──> API Gateway (psb-lab-cognit
    > - If not, carefully read the error message and retry the step, following the instructions in the lab guide.
    > - If you need any assistance, please contact us at cloudlabs-support@spektrasystems.com. We are available 24/7 to help you out.
 
-   <validation step="e7c33a7a-0ce1-4bf3-8625-fe61aca5a505" />
+   <validation step="82ec5de0-5dd0-40ef-962b-db3d389c3679" />
 
 ## 📝 Summary
 
