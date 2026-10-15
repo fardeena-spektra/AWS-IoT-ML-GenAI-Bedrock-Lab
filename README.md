@@ -13,7 +13,7 @@ CloudLabs guided lab package: **IoT sensors → time-series → ML anomaly detec
 | Path | What it is |
 |---|---|
 | `deployment/cloudlabs-cft.json` | CloudLabs CloudFormation template (VM + pre-seeding) |
-| `deployment/cloudlabs-cft.parameters.json` | CloudLabs parameters file |
+| `deployment/cloudlabs-cft-parameters.json` | CloudLabs parameters file |
 | `deployment/learner-iam-policy.json` | Suggested policy for the learner IAM user (scoped to ap-southeast-1) |
 | `lab-guides/masterdoc.json` | Master document (10 pages) |
 | `lab-guides/*.md` | Getting Started + Labs 01 to 09 |
