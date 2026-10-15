@@ -1,5 +1,5 @@
 <h1 align="center">🔎 Lab 03: Query Lambda and HTTP API</h1>
-<p align="center"><b>AWS Demo || Bedrock with Claude</b> | ⏱️ <b>Estimated Timing: 55 Minutes</b></p>
+<p align="center"><b>AWS Demo || Bedrock with Claude</b> | ⏱️ <b>Estimated Timing: 55 Minutes</b> | 🏆 <b>Points: 10</b></p>
 
 ---
 

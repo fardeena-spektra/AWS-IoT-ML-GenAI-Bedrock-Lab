@@ -1,5 +1,5 @@
 <h1 align="center">🔀 Lab 02: Rules Engine to InfluxDB and S3</h1>
-<p align="center"><b>AWS Demo || Bedrock with Claude</b> | ⏱️ <b>Estimated Timing: 65 Minutes</b></p>
+<p align="center"><b>AWS Demo || Bedrock with Claude</b> | ⏱️ <b>Estimated Timing: 65 Minutes</b> | 🏆 <b>Points: 16</b></p>
 
 ---
 

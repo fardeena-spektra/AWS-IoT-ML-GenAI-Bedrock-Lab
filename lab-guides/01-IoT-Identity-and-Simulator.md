@@ -1,5 +1,5 @@
 <h1 align="center">🛰️ Lab 01: IoT Identity and Device Simulator</h1>
-<p align="center"><b>AWS Demo || Bedrock with Claude</b> | ⏱️ <b>Estimated Timing: 45 Minutes</b></p>
+<p align="center"><b>AWS Demo || Bedrock with Claude</b> | ⏱️ <b>Estimated Timing: 45 Minutes</b> | 🏆 <b>Points: 10</b></p>
 
 ---
 

@@ -1,5 +1,5 @@
 <h1 align="center">📊 Lab 05: Host the Dashboard on AWS Amplify</h1>
-<p align="center"><b>AWS Demo || Bedrock with Claude</b> | ⏱️ <b>Estimated Timing: 45 Minutes</b></p>
+<p align="center"><b>AWS Demo || Bedrock with Claude</b> | ⏱️ <b>Estimated Timing: 45 Minutes</b> | 🏆 <b>Points: 9</b></p>
 
 ---
 

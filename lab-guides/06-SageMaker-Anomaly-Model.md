@@ -1,5 +1,5 @@
 <h1 align="center">🧠 Lab 06: Train an Anomaly Detection Model with SageMaker AI</h1>
-<p align="center"><b>AWS Demo || Bedrock with Claude</b> | ⏱️ <b>Estimated Timing: 70 Minutes</b></p>
+<p align="center"><b>AWS Demo || Bedrock with Claude</b> | ⏱️ <b>Estimated Timing: 70 Minutes</b> | 🏆 <b>Points: 15</b></p>
 
 ---
 

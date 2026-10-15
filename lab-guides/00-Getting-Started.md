@@ -1,5 +1,5 @@
 <h1 align="center">🚀 Getting Started: AWS Demo || Bedrock with Claude</h1>
-<p align="center"><b>AWS Demo || Bedrock with Claude</b> | ⏱️ <b>Estimated Timing: 8 Hours 10 Minutes</b></p>
+<p align="center"><b>AWS Demo || Bedrock with Claude</b> | ⏱️ <b>Estimated Timing: 8 Hours 10 Minutes</b> | 🏆 <b>Total Points: 100</b></p>
 
 ---
 
@@ -17,18 +17,18 @@ In this hands-on lab, you build a complete **IoT to Machine Learning to Generati
 
 ### 🗺️ Labs Overview
 
-| Lab | Title | Phase | ⏱️ Timing |
-|:---:|---|:---:|:---:|
-| 01 | 🛰️ IoT Identity and Device Simulator | I | 45 min |
-| 02 | 🔀 Rules Engine to InfluxDB and S3 | I | 65 min |
-| 03 | 🔎 Query Lambda and HTTP API | I | 55 min |
-| 04 | 🔐 Cognito Authentication | I | 40 min |
-| 05 | 📊 Amplify Dashboard | I | 45 min |
-| 06 | 🧪 SageMaker Anomaly Model | II | 70 min |
-| 07 | ⚙️ Automated Scoring Pipeline | II | 50 min |
-| 08 | 🤖 Bedrock Assistant | III | 60 min |
-| 09 | 📈 Observability and Teardown | III | 40 min |
-| | **Total** | | **8 h 10 min** |
+| Lab | Title | Phase | ⏱️ Timing | 🏆 Points |
+|:---:|---|:---:|:---:|:---:|
+| 01 | 🛰️ IoT Identity and Device Simulator | I | 45 min | 10 |
+| 02 | 🔀 Rules Engine to InfluxDB and S3 | I | 65 min | 16 |
+| 03 | 🔎 Query Lambda and HTTP API | I | 55 min | 10 |
+| 04 | 🔐 Cognito Authentication | I | 40 min | 10 |
+| 05 | 📊 Amplify Dashboard | I | 45 min | 9 |
+| 06 | 🧪 SageMaker Anomaly Model | II | 70 min | 15 |
+| 07 | ⚙️ Automated Scoring Pipeline | II | 50 min | 12 |
+| 08 | 🤖 Bedrock Assistant | III | 60 min | 13 |
+| 09 | 📈 Observability and Teardown | III | 40 min | 5 |
+| | **Total** | | **8 h 10 min** | **100** |
 
 ### 🏗️ What you build
 
@@ -128,7 +128,7 @@ Your lab VM (left) and the lab **Guide** (right) open together in your web brows
 
 ### 📈 Progress
 
-The **Progress** tab shows your overall points, with separate views for **Validations** and **Questions**.
+The **Progress** tab shows your overall points and the status of each **Validation** check. Each lab has one validation, and its points are shown in the lab header.
 
 ![Progress tab](./media/gs-progress.png)
 

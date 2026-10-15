@@ -1,5 +1,5 @@
 <h1 align="center">🔐 Lab 04: Cognito Authentication</h1>
-<p align="center"><b>AWS Demo || Bedrock with Claude</b> | ⏱️ <b>Estimated Timing: 40 Minutes</b></p>
+<p align="center"><b>AWS Demo || Bedrock with Claude</b> | ⏱️ <b>Estimated Timing: 40 Minutes</b> | 🏆 <b>Points: 10</b></p>
 
 ---
 

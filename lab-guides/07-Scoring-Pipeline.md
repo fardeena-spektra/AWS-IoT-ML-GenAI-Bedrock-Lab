@@ -1,5 +1,5 @@
 <h1 align="center">⚙️ Lab 07: Build the Scheduled Scoring Pipeline</h1>
-<p align="center"><b>AWS Demo || Bedrock with Claude</b> | ⏱️ <b>Estimated Timing: 50 Minutes</b></p>
+<p align="center"><b>AWS Demo || Bedrock with Claude</b> | ⏱️ <b>Estimated Timing: 50 Minutes</b> | 🏆 <b>Points: 12</b></p>
 
 ---
 

@@ -1,5 +1,5 @@
 <h1 align="center">🤖 Lab 08: Build a Generative AI Assistant with Amazon Bedrock</h1>
-<p align="center"><b>AWS Demo || Bedrock with Claude</b> | ⏱️ <b>Estimated Timing: 60 Minutes</b></p>
+<p align="center"><b>AWS Demo || Bedrock with Claude</b> | ⏱️ <b>Estimated Timing: 60 Minutes</b> | 🏆 <b>Points: 13</b></p>
 
 ---
 
