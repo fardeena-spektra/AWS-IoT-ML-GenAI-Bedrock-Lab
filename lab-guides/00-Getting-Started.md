@@ -116,6 +116,8 @@ Your lab VM (left) and the lab **Guide** (right) open together in your web brows
 
 ### 7️⃣ Lab Guide Menu
 
+![Lab guide menu](./media/gs-menu.png)
+
 | Option | Use |
 |---|---|
 | 📖 **Guide** | All tasks and lab information. |
@@ -123,6 +125,12 @@ Your lab VM (left) and the lab **Guide** (right) open together in your web brows
 | 📈 **Progress** | Your points for validations. |
 | ⚙️ **Resources** | Start, stop or restart the lab VM. |
 | ❓ **Help** | Support information. |
+
+### 📈 Progress
+
+The **Progress** tab shows your overall points, with separate views for **Validations** and **Questions**.
+
+![Progress tab](./media/gs-progress.png)
 
 ### 🔑 Exploring Your Resources
 
