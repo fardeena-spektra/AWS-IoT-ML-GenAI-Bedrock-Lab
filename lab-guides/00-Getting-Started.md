@@ -87,40 +87,42 @@ The **psb-lab-assets** folder on the desktop (**C:\psb-lab-assets**) contains ev
 
 ---
 
-## 🧭 Lab Window Controls
+## 🧭 Navigating Your Lab Environment
 
-| # | Control | Use |
-|:---:|---|---|
-| 1 | **VM name** | Shows the lab VM you are connected to. |
-| 2 | **Timer** | Time remaining in your lab session. |
-| 3 | **Progress bar** | Your progress through the lab. |
-| 4 | **A↕** | Change the text size of the lab guide. |
-| 5 | **Refresh** | Reconnect the VM if the screen stops responding. |
-| 6 | **More (...)** | Language, Delete and VM Native Clipboard options. |
-| 7 | **Lab guide menu** | Guide, Environment, Progress, Resources and Help. |
-| 8 | **Split window** | Split the lab guide and the VM into separate windows. |
+Your lab VM (left) and the lab **Guide** (right) open together in your web browser. Use the tabs at the top of the guide to move around:
 
-### 6️⃣ More Options
-
-| Option | Use |
-|---|---|
-| 🌍 **Language** | Switch the lab language, if multi-language support is enabled. |
-| 🗑️ **Delete** | Delete the environment once your lab is complete. |
-| 📋 **VM Native Clipboard** | Allows copying files within the VM. While it is on, text copied from your local PC cannot be pasted into the VM using keyboard shortcuts. You can turn it off at any time from **More (...)**. |
-
-### 7️⃣ Lab Guide Menu
-
-| Option | Use |
+| Tab | Use |
 |---|---|
 | 📖 **Guide** | All tasks and lab information. |
-| 🔑 **Environment** | All required credentials and lab details. |
+| 🔑 **Environment** | AWS console credentials and lab details. |
+| ✅ **Lab Validation** | Status of each validation check. |
 | 📈 **Progress** | Your points for validations. |
-| ⚙️ **Resources** | Start and stop the lab VM. |
+| ⚙️ **Resources** | Start, stop or restart the lab VM. |
 | ❓ **Help** | Support information. |
+
+### 🔑 Exploring Your Resources
+
+To view your AWS console credentials and resource details, navigate to the **Environment** tab.
+
+![Environment tab](./media/gs-02.png)
+
+### 🪟 Utilizing the Split Window Feature
+
+For convenience, you can open the lab guide in a separate window by selecting the **Split Window** button from the top-right corner.
+
+![Split window](./media/gs-05.png)
+
+### 🖥️ Managing Your Virtual Machine
+
+You can start, stop or restart your virtual machine as needed from the **Resources** tab.
+
+![Resources tab](./media/gs-06.png)
 
 ### 📄 Page Navigation
 
 Use **Previous**, the page numbers and **Next** at the bottom of the guide to move between pages.
+
+![Page navigation](./media/gs-next.png)
 
 ---
 
@@ -149,11 +151,15 @@ Each lab ends with a **Validate** button that checks your work.
     | 👤 **IAM username** | <inject key="AWSUserName" enableCopy="true"/> |
     | 🔒 **Password** | <inject key="AWSPassword" enableCopy="true"/> |
 
-1. Enter the **IAM username** and **Password**, then click **Sign in**.
+1. Enter the **IAM username (1)** and **Password (2)**, then click **Sign in (3)**.
+
+    ![AWS sign-in](./media/gs-03.png)
 
     > 💡 **Tip:** The same credentials are also saved in the **aws credentials.txt** file on the VM desktop.
 
 1. In the top-right corner of the console, open the **Region** selector and choose **Asia Pacific (Singapore) ap-southeast-1**.
+
+    ![Region selector](./media/gs-04.png)
 
 > ⚠️ **Note:** Create **every** resource in **Asia Pacific (Singapore) ap-southeast-1**. The pre-provisioned resources and the validation checks only look in this region. If something "disappears" from a console page, check the region selector first.
 
