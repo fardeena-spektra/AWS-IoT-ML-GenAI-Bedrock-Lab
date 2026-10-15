@@ -87,15 +87,39 @@ The **psb-lab-assets** folder on the desktop (**C:\psb-lab-assets**) contains ev
 
 ---
 
-## 🧭 Navigating Your Lab Environment
+## 🧭 Lab Window Controls
 
-Your lab VM (left) and the lab **Guide** (right) open together in your web browser. Use the tabs at the top of the guide to move around:
+Your lab VM (left) and the lab **Guide** (right) open together in your web browser.
 
-| Tab | Use |
+![Lab window controls](./media/gs-topbar.png)
+
+| # | Control | Use |
+|:---:|---|---|
+| 1 | **VM name** | Shows the lab VM you are connected to. |
+| 2 | **Timer** | Time remaining in your lab session. |
+| 3 | **Progress bar** | Your progress through the lab. |
+| 4 | **A↕** | Change the text size of the lab guide. |
+| 5 | **Refresh** | Reconnect the VM if the screen stops responding. |
+| 6 | **More (...)** | Language, Delete and VM Native Clipboard options. |
+| 7 | **Lab guide menu** | Guide, Environment, Progress, Resources and Help. |
+| 8 | **Split window** | Split the lab guide and the VM into separate windows. |
+
+### 6️⃣ More Options
+
+![More options](./media/gs-more-menu.png)
+
+| Option | Use |
+|---|---|
+| 🌍 **Language** | Switch the lab language, if multi-language support is enabled. |
+| 🗑️ **Delete** | Delete the environment once your lab is complete. |
+| 📋 **VM Native Clipboard** | Allows copying files within the VM. While it is on, text copied from your local PC cannot be pasted into the VM using keyboard shortcuts. You can turn it off at any time from **More (...)**. |
+
+### 7️⃣ Lab Guide Menu
+
+| Option | Use |
 |---|---|
 | 📖 **Guide** | All tasks and lab information. |
 | 🔑 **Environment** | AWS console credentials and lab details. |
-| ✅ **Lab Validation** | Status of each validation check. |
 | 📈 **Progress** | Your points for validations. |
 | ⚙️ **Resources** | Start, stop or restart the lab VM. |
 | ❓ **Help** | Support information. |
@@ -131,8 +155,10 @@ Use **Previous**, the page numbers and **Next** at the bottom of the guide to mo
 Each lab ends with a **Validate** button that checks your work.
 
 1. Complete all tasks in the lab.
-1. Scroll to the validation check at the end of the last task.
+1. Scroll to the **Validation Check** at the end of the last task.
 1. Click **Validate**.
+
+    ![Validate button](./media/gs-validate.png)
 
 - On success, the status shows **Success** and the points are added to your **Progress**.
 - If a check fails, read the message, fix the issue and click **Validate** again.
