@@ -4,7 +4,7 @@
  Lab: AWS Demo || Bedrock with Claude
 
  Script Type : PowerShellV2      Run As : System
- Parameters  : DeploymentId = GET-DEPLOYMENT-ID, AccessKey / SecretKey = lab AWS access keys, Region = ap-southeast-1
+ Parameters  : DeploymentId = GET-DEPLOYMENT-ID, Region = ap-southeast-1 (AccessKey / SecretKey optional; blank = Function App lab credentials)
 
  Passes when:
    - InfluxDB psb-lab-influx is AVAILABLE, publicly accessible, db.influx.medium
@@ -42,9 +42,13 @@ function New-Result([string]$Status, [string]$Message) {
 
 # Load AWS.Tools modules and sign in with the lab access keys
 function Initialize-Aws([string[]]$Modules) {
+    # Use AWS.Tools modules when present; otherwise fall back to AWSPowerShell.NetCore / command auto-loading
+    $missing = @()
     foreach ($mod in @("AWS.Tools.Common") + $Modules) {
-        try { Import-Module $mod -ErrorAction Stop }
-        catch { throw "PowerShell module $mod is not available on the validation Function App. Add it to requirements.psd1 (see validation/README.md)." }
+        try { Import-Module $mod -ErrorAction Stop } catch { $missing += $mod }
+    }
+    if ($missing.Count -gt 0) {
+        try { Import-Module AWSPowerShell.NetCore -ErrorAction Stop } catch { Write-Host "Modules not imported explicitly ($($missing -join ', ')); relying on auto-loading." }
     }
     if ($AccessKey -and $SecretKey) {
         Remove-Item Env:AWS_SESSION_TOKEN -ErrorAction SilentlyContinue
