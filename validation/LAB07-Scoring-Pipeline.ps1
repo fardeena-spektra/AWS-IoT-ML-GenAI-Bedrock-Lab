@@ -12,12 +12,15 @@
    - EventBridge rule psb-lab-score-every-5-min (rate(5 minutes), ENABLED) targets the Lambda
    - "[ok] scored=" logged in the last 30 minutes and scored CSV files exist under curated/scored/
 #>
-param(
-    [string]$DeploymentId,
-    [string]$AccessKey,
-    [string]$SecretKey,
-    [string]$Region = "ap-southeast-1"
-)
+# CloudLabs injects the step parameters as variables before this script runs,
+# so there is no param() block here (it would fail with "The term 'param' is not recognized").
+$DeploymentId = "$(Get-Variable -Name DeploymentId -ValueOnly -ErrorAction SilentlyContinue)".Trim()
+$AccessKey    = "$(Get-Variable -Name AccessKey    -ValueOnly -ErrorAction SilentlyContinue)".Trim()
+$SecretKey    = "$(Get-Variable -Name SecretKey    -ValueOnly -ErrorAction SilentlyContinue)".Trim()
+$Region       = "$(Get-Variable -Name Region       -ValueOnly -ErrorAction SilentlyContinue)".Trim()
+if (-not $Region) { $Region = "$env:AWS_REGION".Trim() }
+if (-not $Region) { $Region = "ap-southeast-1" }
+Write-Host "DeploymentId: $DeploymentId | Region: $Region"
 
 $LabTitle        = "Lab 07"
 $RequiredModules = @("AWS.Tools.Lambda", "AWS.Tools.IdentityManagement", "AWS.Tools.EventBridge", "AWS.Tools.CloudWatchLogs", "AWS.Tools.S3")

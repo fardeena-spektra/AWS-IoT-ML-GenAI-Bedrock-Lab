@@ -11,12 +11,15 @@
    - HTTP API psb-lab-api has CORS, routes GET /telemetry + GET /anomalies -> psb-query-telemetry (payload 2.0), $default auto-deploy
    - a direct invoke of psb-query-telemetry returns temperature points from InfluxDB
 #>
-param(
-    [string]$DeploymentId,
-    [string]$AccessKey,
-    [string]$SecretKey,
-    [string]$Region = "ap-southeast-1"
-)
+# CloudLabs injects the step parameters as variables before this script runs,
+# so there is no param() block here (it would fail with "The term 'param' is not recognized").
+$DeploymentId = "$(Get-Variable -Name DeploymentId -ValueOnly -ErrorAction SilentlyContinue)".Trim()
+$AccessKey    = "$(Get-Variable -Name AccessKey    -ValueOnly -ErrorAction SilentlyContinue)".Trim()
+$SecretKey    = "$(Get-Variable -Name SecretKey    -ValueOnly -ErrorAction SilentlyContinue)".Trim()
+$Region       = "$(Get-Variable -Name Region       -ValueOnly -ErrorAction SilentlyContinue)".Trim()
+if (-not $Region) { $Region = "$env:AWS_REGION".Trim() }
+if (-not $Region) { $Region = "ap-southeast-1" }
+Write-Host "DeploymentId: $DeploymentId | Region: $Region"
 
 $LabTitle        = "Lab 03"
 $RequiredModules = @("AWS.Tools.Lambda", "AWS.Tools.IdentityManagement", "AWS.Tools.SecretsManager", "AWS.Tools.ApiGatewayV2")

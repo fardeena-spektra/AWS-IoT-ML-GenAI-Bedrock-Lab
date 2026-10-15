@@ -13,12 +13,15 @@
    - psb-assistant was invoked in the last 24 hours
    - Amplify branch main has at least 2 successful deployments (redeployed with assistantEnabled true)
 #>
-param(
-    [string]$DeploymentId,
-    [string]$AccessKey,
-    [string]$SecretKey,
-    [string]$Region = "ap-southeast-1"
-)
+# CloudLabs injects the step parameters as variables before this script runs,
+# so there is no param() block here (it would fail with "The term 'param' is not recognized").
+$DeploymentId = "$(Get-Variable -Name DeploymentId -ValueOnly -ErrorAction SilentlyContinue)".Trim()
+$AccessKey    = "$(Get-Variable -Name AccessKey    -ValueOnly -ErrorAction SilentlyContinue)".Trim()
+$SecretKey    = "$(Get-Variable -Name SecretKey    -ValueOnly -ErrorAction SilentlyContinue)".Trim()
+$Region       = "$(Get-Variable -Name Region       -ValueOnly -ErrorAction SilentlyContinue)".Trim()
+if (-not $Region) { $Region = "$env:AWS_REGION".Trim() }
+if (-not $Region) { $Region = "ap-southeast-1" }
+Write-Host "DeploymentId: $DeploymentId | Region: $Region"
 
 $LabTitle        = "Lab 08"
 $RequiredModules = @("AWS.Tools.Lambda", "AWS.Tools.IdentityManagement", "AWS.Tools.ApiGatewayV2", "AWS.Tools.CloudWatchLogs", "AWS.Tools.Amplify")

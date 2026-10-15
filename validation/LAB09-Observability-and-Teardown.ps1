@@ -12,12 +12,15 @@
    - teardown done: endpoint psb-anomaly-endpoint deleted, rule psb_telemetry_rule disabled,
      InfluxDB psb-lab-influx deleted (or deleting), no running app in space psb-lab-space
 #>
-param(
-    [string]$DeploymentId,
-    [string]$AccessKey,
-    [string]$SecretKey,
-    [string]$Region = "ap-southeast-1"
-)
+# CloudLabs injects the step parameters as variables before this script runs,
+# so there is no param() block here (it would fail with "The term 'param' is not recognized").
+$DeploymentId = "$(Get-Variable -Name DeploymentId -ValueOnly -ErrorAction SilentlyContinue)".Trim()
+$AccessKey    = "$(Get-Variable -Name AccessKey    -ValueOnly -ErrorAction SilentlyContinue)".Trim()
+$SecretKey    = "$(Get-Variable -Name SecretKey    -ValueOnly -ErrorAction SilentlyContinue)".Trim()
+$Region       = "$(Get-Variable -Name Region       -ValueOnly -ErrorAction SilentlyContinue)".Trim()
+if (-not $Region) { $Region = "$env:AWS_REGION".Trim() }
+if (-not $Region) { $Region = "ap-southeast-1" }
+Write-Host "DeploymentId: $DeploymentId | Region: $Region"
 
 $LabTitle        = "Lab 09"
 $RequiredModules = @("AWS.Tools.CloudWatchLogs", "AWS.Tools.CloudWatch", "AWS.Tools.SageMaker", "AWS.Tools.IoT", "AWS.Tools.TimestreamInfluxDB")

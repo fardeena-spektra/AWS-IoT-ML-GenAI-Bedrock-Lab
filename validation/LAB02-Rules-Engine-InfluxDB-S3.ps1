@@ -15,12 +15,15 @@
    - rule psb_telemetry_rule is enabled with the Lambda + S3 actions
    - telemetry objects exist under raw/ and the ingest log shows "[ok] wrote" in the last 24 hours
 #>
-param(
-    [string]$DeploymentId,
-    [string]$AccessKey,
-    [string]$SecretKey,
-    [string]$Region = "ap-southeast-1"
-)
+# CloudLabs injects the step parameters as variables before this script runs,
+# so there is no param() block here (it would fail with "The term 'param' is not recognized").
+$DeploymentId = "$(Get-Variable -Name DeploymentId -ValueOnly -ErrorAction SilentlyContinue)".Trim()
+$AccessKey    = "$(Get-Variable -Name AccessKey    -ValueOnly -ErrorAction SilentlyContinue)".Trim()
+$SecretKey    = "$(Get-Variable -Name SecretKey    -ValueOnly -ErrorAction SilentlyContinue)".Trim()
+$Region       = "$(Get-Variable -Name Region       -ValueOnly -ErrorAction SilentlyContinue)".Trim()
+if (-not $Region) { $Region = "$env:AWS_REGION".Trim() }
+if (-not $Region) { $Region = "ap-southeast-1" }
+Write-Host "DeploymentId: $DeploymentId | Region: $Region"
 
 $LabTitle        = "Lab 02"
 $RequiredModules = @("AWS.Tools.TimestreamInfluxDB", "AWS.Tools.S3", "AWS.Tools.IdentityManagement", "AWS.Tools.SecretsManager",
