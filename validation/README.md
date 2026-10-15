@@ -9,8 +9,7 @@ One CloudLabs validation per lab. Each script checks **all tasks of its lab**, p
 | Script Type | PowerShellV2 |
 | Run As | System |
 | Parameter `DeploymentId` | `GET-DEPLOYMENT-ID` |
-| Parameter `AccessKey` | lab account access key ID available to the CloudLabs validation function |
-| Parameter `SecretKey` | matching secret access key |
+| Parameter `AccessKey` / `SecretKey` | Optional. Leave unmapped: the scripts then use the lab account credentials of the CloudLabs validation Function App (same as other CloudLabs AWS validators) |
 | Parameter `Region` | `ap-southeast-1` (default in the script, map it only if you want to be explicit) |
 
 The bucket is derived as `psb-lab-<DeploymentId>`. All other resources are found by the exact names from the lab guide. Every AWS call is wrapped so a missing resource gives a clean fix message, not an exception. Each script finishes in a few seconds (log searches are capped at about 15 s).
