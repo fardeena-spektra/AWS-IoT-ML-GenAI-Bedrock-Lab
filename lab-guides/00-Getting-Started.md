@@ -91,6 +91,8 @@ The **psb-lab-assets** folder on the desktop (**C:\psb-lab-assets**) contains ev
 
 Your lab VM (left) and the lab **Guide** (right) open together in your web browser.
 
+![Lab environment](./media/gs-01.png)
+
 ![Lab window controls](./media/gs-topbar.png)
 
 | # | Control | Use |
