@@ -85,13 +85,34 @@
 .psbgs .psb-panel{padding:14px 12px!important;margin:14px 0!important}
 .psbgs .psb-shot{margin:6px 0 10px!important;padding:3px!important}
 .psbgs .psb-ico{width:1.7em!important;height:1.7em!important;margin-right:6px!important}
+/* v7: vibrant highlights instead of plain bold, icons sized to the text, tight spacing */
+.psbgs strong,.psbgs b{color:#0e7490!important;font-weight:600!important}
+.psbgs th strong,.psbgs th b,.psbgs .psb-hero b{color:inherit!important}
+.psbgs h1 strong,.psbgs h2 strong,.psbgs h3 strong{color:inherit!important}
+.psbgs .psb-ico{width:1.3em!important;height:1.3em!important;margin-right:.35em!important;vertical-align:-0.22em!important;border-radius:7px!important;font-size:1em!important;line-height:1!important}
+.psbgs .psb-ico img{width:.95em!important;height:.95em!important}
+.psbgs h2 .psb-ico,.psbgs h3 .psb-ico{font-size:1em!important}
+.psbgs td .psb-ico{font-size:.95em!important}
+.psbgs .psb-panel{padding:10px 10px!important;margin:10px 0!important}
+.psbgs ol{padding-left:1.75em!important;margin:2px 0 6px!important}
+.psbgs ul{padding-left:1.15em!important;margin:2px 0 6px!important}
+.psbgs img{max-width:100%!important;height:auto!important}
+.psbgs li{margin:0 0 4px!important;padding-left:0!important}
+.psbgs li>p,.psbgs p{margin:0 0 6px!important}
+.psbgs table{display:table!important;width:100%!important;max-width:100%!important;margin:4px 0 8px!important}
+.psbgs th,.psbgs td{padding:6px 8px!important}
+.psbgs blockquote{margin:4px 0 8px!important;padding:6px 10px!important}
+.psbgs pre{margin:4px 0 8px!important}
+.psbgs .psb-shot{margin:4px 0 8px!important;padding:2px!important}
+.psbgs h2{margin:0 0 8px!important;padding-bottom:8px!important}
+.psbgs h3{margin:10px 0 4px!important}
 @media (prefers-reduced-motion:reduce){.psbgs *,.psbgs *::before,.psbgs *::after{animation:none!important;transition:none!important}}
 </style>
 
 <div class="psbgs">
 
 <div class="psb-hero" style="position:relative;overflow:hidden;border-radius:16px;padding:28px 20px 24px;margin:0 0 6px;text-align:center;color:#ffffff;background:linear-gradient(120deg,#070b1a,#121a3a,#0d2b36,#16123a);">
-<div class="psb-title" style="color:#ffffff;font-size:1.6em;font-weight:700;line-height:1.3;text-align:center;">Lab 03: Query Lambda and HTTP API</div>
+<div class="psb-title" style="color:#ffffff;font-size:1.6em;font-weight:700;line-height:1.3;text-align:center;">Lab 03: Build the Serverless Data API with AWS Lambda and Amazon API Gateway</div>
 <div class="psb-line" style="width:90px;height:3px;margin:14px auto 12px;border-radius:3px;background:linear-gradient(90deg,#e9b949,#14b8a6);"></div>
 <div class="psb-meta" style="color:#d5dbe3;margin-top:6px;text-align:center;">55 Minutes&nbsp;&nbsp;|&nbsp;&nbsp;10 Points</div>
 </div>
@@ -100,82 +121,245 @@
 
 ## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🎯</span>Overview
 
-Telemetry is now flowing into InfluxDB. In this lab, you build a read path: a **Lambda** function that runs safe, allow-listed **Flux** queries, exposed through an **Amazon API Gateway HTTP API**. The dashboard (Lab 05) and the Bedrock assistant (Lab 08) both use this API.
+Your telemetry is now durable and queryable, but only from inside AWS, with an admin token. A web dashboard cannot and must not hold that token. In this lab you will put a proper API in front of the data.
+
+You will write a query Lambda function that runs a Flux query against Timestream for InfluxDB and returns a clean JSON time series. You will front it with an Amazon API Gateway HTTP API, and you will test it end to end. In Lab 04 you will lock it down with Amazon Cognito; in Lab 05 a React dashboard will consume it; and in Lab 08 your generative-AI assistant will call this very same function as a tool.
 
 </div>
 
 <div class="psb-panel" style="background:#ffffff;border:1px solid #d5dbe3;border-radius:16px;padding:18px 16px;margin:24px 0;">
 
-## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">📋</span>Objectives
+## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">📋</span>Lab Objectives
 
-- **Task 1:** Create and test the query Lambda function **psb-query-telemetry**.
-- **Task 2:** Create the HTTP API **psb-lab-api** with two routes and CORS.
-- **Task 3:** Test the API from PowerShell and compare with the InfluxDB Data Explorer.
+You will be able to complete the following tasks:
 
-</div>
-
-<div class="psb-panel" style="background:#ffffff;border:1px solid #d5dbe3;border-radius:16px;padding:18px 16px;margin:24px 0;">
-
-## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🏗️</span>What you build
-
-```text
-Client ──HTTPS──> API Gateway psb-lab-api ──(GET /telemetry, GET /anomalies)──> Lambda psb-query-telemetry ──Flux──> InfluxDB
-```
+- Task 1: Build the query Lambda function
+- Task 2: Create the API Gateway HTTP API and routes
+- Task 3: Test the API and inspect the Flux query
 
 </div>
 
 <div class="psb-panel" style="background:#ffffff;border:1px solid #d5dbe3;border-radius:16px;padding:18px 16px;margin:24px 0;">
 
-## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧩</span>Task 1: Create the Query Lambda Function
+## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧩</span>Task 1: Build the Query Lambda Function
 
-🎯 **Goal:** Create **psb-query-telemetry**, which returns time-bucketed statistics for one metric.
+1. In the AWS Management Console search bar, type **Lambda** and select **Lambda**.
 
-1. Open **Lambda** > **Functions** > **Create function** > **Author from scratch**:
+1. Click **Create function**.
 
-   | Setting | Value |
+1. On the **Create function** page:
+
+   | Field | Value |
    |---|---|
+   | Option | **Author from scratch** |
    | Function name | **psb-query-telemetry** |
    | Runtime | **Python 3.13** |
    | Architecture | **x86_64** |
-   | Execution role | **Create a new role with basic Lambda permissions** |
 
-   Click **Create function**.
+1. Expand **Change default execution role**, select **Create a new role with basic Lambda permissions**, and click **Create function**.
 
-1. Open **C:\psb-lab-assets\lambdas\psb-query-telemetry\lambda_function.py** in **VS Code**, copy all, paste it into the Lambda **Code** tab (replacing everything in **lambda_function.py**) and click **Deploy**.
+1. In the **Code source** editor, replace the contents of **lambda_function.py** with the following:
 
-   **What this code does:**
+   ```python
+   """
+   PSB Academy CloudLab - telemetry query API.
 
-   | Step | Behaviour |
-   |---|---|
-   | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧾</span>Inputs | **metric** (default **temperature_c**), **window_minutes** (1 to 1440, default **30**), **bucket_seconds** (default **60**) and optional **location**. |
-   | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🛡️</span>Allow-lists | **metric** must be one of **temperature_c**, **humidity_pct**, **co2_ppm**, **vibration_g** (or **anomaly_score**), and **location** one of **north-lab**, **south-lab**, **server-room**. Anything else returns **400** with **{"error": ...}**. This prevents **Flux injection**, because user input is never pasted into the query unchecked. |
-   | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">📡</span>Query | Sends a Flux query to **POST /api/v2/query** with **Accept: application/csv** and parses the **annotated CSV** response. |
-   | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🌐</span>API mode | For API Gateway HTTP API (payload **v2.0**) events with route **GET /telemetry** or **GET /anomalies**, it reads **queryStringParameters** and returns **{statusCode, headers, body}** with CORS **\*** and JSON content type. |
-   | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧪</span>Direct mode | When invoked directly (no **requestContext**), it returns the raw result dictionary. |
-   | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">📦</span>Response | **{"metric", "window_minutes", "bucket_seconds", "location", "points":[{"time","location","value"}], "summary":{"count","min","max","mean","latest"}}** |
-   | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🚨</span>Anomalies | **GET /anomalies** returns **{"window_minutes", "points":[{"time","location","anomaly_score","flagged",...}], "flagged_count"}** from the **anomaly** measurement (filled in Lab 07). |
+   Two responsibilities:
+     * HTTP entry point behind API Gateway  (GET /telemetry, GET /anomalies)
+     * Direct invocation as a tool by the Bedrock assistant (Lab 08)
+   """
+   import csv
+   import io
+   import json
+   import os
+   import urllib.parse
+   import urllib.request
 
-1. Select **Configuration** > **General configuration** > **Edit** and set:
+   import boto3
 
-   | Setting | Value |
+   INFLUX_URL = os.environ["INFLUX_URL"]
+   INFLUX_ORG = os.environ["INFLUX_ORG"]
+   INFLUX_BUCKET = os.environ["INFLUX_BUCKET"]
+   SECRET_ID = os.environ["INFLUX_SECRET_ID"]
+
+   ALLOWED_METRICS = {
+       "temperature_c", "humidity_pct", "co2_ppm",
+       "vibration_g", "anomaly_score",
+   }
+   ALLOWED_LOCATIONS = {"north-lab", "south-lab", "server-room"}
+
+   _sm = boto3.client("secretsmanager")
+   _token_cache = None
+
+   def _token():
+       global _token_cache
+       if _token_cache is None:
+           secret = _sm.get_secret_value(SecretId=SECRET_ID)["SecretString"]
+           _token_cache = json.loads(secret)["token"]
+       return _token_cache
+
+   def _flux(metric, minutes, every, location):
+       """Build a Flux query. Inputs are allow-listed by the caller."""
+       location_filter = ""
+       if location:
+           location_filter = (
+               f'\n  |> filter(fn: (r) => r["location"] == "{location}")'
+           )
+       return f'''
+   from(bucket: "{INFLUX_BUCKET}")
+     |> range(start: -{minutes}m)
+     |> filter(fn: (r) => r["_measurement"] == "reading")
+     |> filter(fn: (r) => r["_field"] == "{metric}"){location_filter}
+     |> aggregateWindow(every: {every}, fn: mean, createEmpty: false)
+     |> keep(columns: ["_time", "_value", "location"])
+     |> sort(columns: ["_time"])
+   '''.strip()
+
+   def _parse_annotated_csv(body):
+       """
+       InfluxDB /api/v2/query returns ANNOTATED CSV: each result table is
+       preceded by #datatype / #group / #default comment lines and its own
+       header row. A plain csv.DictReader would read the first comment line
+       as the header and silently return nothing, so parse it explicitly.
+       """
+       rows, header = [], None
+       for line in body.splitlines():
+           if not line.strip() or line.lstrip().startswith("#"):
+               continue                       # annotation or blank line
+           fields = next(csv.reader([line]))
+           if "_time" in fields or "result" in fields:
+               header = fields                # a new table's header row
+               continue
+           if header:
+               rows.append(dict(zip(header, fields)))
+       return rows
+
+   def _run_flux(query):
+       url = f"{INFLUX_URL}/api/v2/query?org={urllib.parse.quote(INFLUX_ORG)}"
+       request = urllib.request.Request(
+           url=url,
+           data=query.encode("utf-8"),
+           method="POST",
+           headers={
+               "Authorization": f"Token {_token()}",
+               "Content-Type": "application/vnd.flux",
+               "Accept": "application/csv",
+           },
+       )
+       with urllib.request.urlopen(request, timeout=12) as response:
+           body = response.read().decode("utf-8")
+
+       points = []
+       for row in _parse_annotated_csv(body):
+           if not row.get("_time"):
+               continue
+           try:
+               value = float(row["_value"])
+           except (TypeError, ValueError):
+               continue
+           points.append({
+               "time": row["_time"],
+               "location": row.get("location") or "all",
+               "value": round(value, 4),
+           })
+       return points
+
+   def query_metric(metric="temperature_c", window_minutes=60,
+                    location=None, bucket_seconds=60):
+       """Core logic. Called by the HTTP handler and by the Lab 08 tool."""
+       if metric not in ALLOWED_METRICS:
+           raise ValueError(
+               f"metric must be one of {sorted(ALLOWED_METRICS)}")
+       if location and location not in ALLOWED_LOCATIONS:
+           raise ValueError(
+               f"location must be one of {sorted(ALLOWED_LOCATIONS)}")
+       window_minutes = max(1, min(int(window_minutes), 1440))
+       bucket_seconds = max(10, min(int(bucket_seconds), 3600))
+
+       points = _run_flux(
+           _flux(metric, window_minutes, f"{bucket_seconds}s", location))
+       values = [p["value"] for p in points]
+       summary = {
+           "metric": metric,
+           "location": location or "all",
+           "window_minutes": window_minutes,
+           "point_count": len(values),
+           "min": round(min(values), 4) if values else None,
+           "max": round(max(values), 4) if values else None,
+           "mean": round(sum(values) / len(values), 4) if values else None,
+           "latest": values[-1] if values else None,
+       }
+       return {"summary": summary, "points": points}
+
+   def _response(status, body):
+       return {
+           "statusCode": status,
+           "headers": {
+               "Content-Type": "application/json",
+               "Access-Control-Allow-Origin": "*",
+           },
+           "body": json.dumps(body),
+       }
+
+   def lambda_handler(event, context):
+       # Direct invocation (Lab 08 assistant tool) - no HTTP envelope.
+       if "requestContext" not in event:
+           try:
+               return query_metric(**event)
+           except ValueError as err:
+               return {"error": str(err)}
+
+       params = event.get("queryStringParameters") or {}
+       path = event.get("rawPath", "/telemetry")
+       metric = params.get("metric",
+                           "anomaly_score" if path.endswith("/anomalies")
+                           else "temperature_c")
+       try:
+           result = query_metric(
+               metric=metric,
+               window_minutes=params.get("window_minutes", 60),
+               location=params.get("location"),
+               bucket_seconds=params.get("bucket_seconds", 60),
+           )
+       except ValueError as err:
+           return _response(400, {"error": str(err)})
+       except Exception as err:                      # noqa: BLE001
+           print(f"[error] {type(err).__name__}: {err}")
+           return _response(502, {"error": "upstream query failed"})
+
+       return _response(200, result)
+   ```
+
+   Three things worth understanding before you deploy:
+
+   - **InfluxDB answers in annotated CSV.** Every result table is preceded by `#datatype`, `#group` and `#default` comment lines and then its own header row. Handing that straight to `csv.DictReader` is the single most common mistake against this API: the reader treats `#datatype,...` as the field names, every lookup for `_time` misses, and the function returns an empty list with no error. `_parse_annotated_csv` skips the comment lines and picks up each table's real header, which is why it also handles a multi-table result correctly.
+   - **Flux is a pipeline language.** `from(...) |> range(...) |> filter(...) |> aggregateWindow(...)` reads left to right like a Unix pipe. `aggregateWindow(every: 60s, fn: mean)` downsamples; without it, an hour of ten-second readings would return 360 points per location and the chart would be unreadable.
+   - **ALLOWED_METRICS and ALLOWED_LOCATIONS are the security boundary.** The Flux query is built by string interpolation, so unvalidated input would be a query-injection vulnerability. Allow-listing is the correct fix here: an attacker cannot inject a Flux clause because the only values that reach the string are ones you enumerated.
+   - **The function has two entry points.** When API Gateway invokes it the event has a `requestContext` key and the function returns an HTTP envelope; when the Lab 08 assistant invokes it directly it returns the raw result. One function, two consumers, no duplicated query logic.
+
+1. Click **Deploy**.
+
+1. Open the **Configuration** tab → **General configuration** → **Edit**, and set:
+
+   | Field | Value |
    |---|---|
    | Memory | **256 MB** |
    | Timeout | **0 min 30 sec** |
 
    Click **Save**.
 
-1. Select **Configuration** > **Environment variables** > **Edit** and add the same 4 variables as the ingest function:
+1. Open **Configuration** → **Environment variables** → **Edit**, and add the same four variables you used in Lab 02:
 
    | Key | Value |
    |---|---|
-   | **INFLUX_URL** | **https://&lt;INFLUX-ENDPOINT&gt;:8086** |
-   | **INFLUX_ORG** | **psb** |
-   | **INFLUX_BUCKET** | **telemetry** |
-   | **INFLUX_SECRET_ID** | **psb/influxdb/admin-token** |
+   | INFLUX_URL | **https://&lt;INFLUX-ENDPOINT&gt;:8086** |
+   | INFLUX_ORG | **psb** |
+   | INFLUX_BUCKET | **telemetry** |
+   | INFLUX_SECRET_ID | **psb/influxdb/admin-token** |
 
    Click **Save**.
 
-1. Select **Configuration** > **Permissions**, click the **Role name** link, then **Add permissions** > **Create inline policy** > **JSON**. Paste the same policy as Lab 02 (replace **&lt;SECRET-ARN&gt;**):
+1. Open **Configuration** → **Permissions**, click the **Role name** link, and add the same inline secret-read policy you created in Lab 02 Task 4:
 
    ```json
    {
@@ -191,112 +375,172 @@ Client ──HTTPS──> API Gateway psb-lab-api ──(GET /telemetry, GET /an
    }
    ```
 
-   Click **Next**, name it **psb-lab-read-influx-token** and click **Create policy**.
+   Name it **psb-lab-read-influx-token** and click **Create policy**.
 
-1. Back in Lambda, open the **Test** tab, create a new event named **direct-query** with this content (also in **C:\psb-lab-assets\test-events\direct-query.json**):
+1. Return to the function, open the **Test** tab, and create a test event named **direct-query** with this body:
 
    ```json
-   {"metric":"temperature_c","window_minutes":30,"bucket_seconds":60}
+   {
+     "metric": "temperature_c",
+     "window_minutes": 30,
+     "bucket_seconds": 60
+   }
    ```
 
-1. Click **Save**, then **Test**. Confirm the response contains a **points** list and a **summary** with **count**, **min**, **max**, **mean** and **latest**.
+1. Click **Test**. You should get a result like:
 
-✅ **Expected result:** The direct test returns temperature points from the last 30 minutes with a summary.
+   ```json
+   {
+     "summary": {
+       "metric": "temperature_c",
+       "location": "all",
+       "window_minutes": 30,
+       "point_count": 28,
+       "min": 21.94,
+       "max": 24.11,
+       "mean": 22.87,
+       "latest": 23.02
+     },
+     "points": [ { "time": "2026-09-10T14:02:00Z", "location": "north-lab", "value": 22.84 } ]
+   }
+   ```
+
+   > **Troubleshooting:** `point_count: 0` means no data in the window; confirm your simulator is still running and try `window_minutes: 240`.
 
 </div>
 
 <div class="psb-panel" style="background:#ffffff;border:1px solid #d5dbe3;border-radius:16px;padding:18px 16px;margin:24px 0;">
 
-## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧩</span>Task 2: Create the HTTP API
+## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧩</span>Task 2: Create the API Gateway HTTP API and Routes
 
-🎯 **Goal:** Expose the query Lambda over HTTPS with two routes.
+1. In the AWS Management Console search bar, type **API Gateway** and select **API Gateway**.
 
-1. Open **API Gateway** and click **Create API**. Under **HTTP API**, click **Build**.
+1. On the **APIs** page, find the **HTTP API** card and click **Build**.
 
-1. On **Create and configure integrations**:
+   > **Note:** You are deliberately choosing HTTP API rather than REST API. HTTP APIs cost roughly 70% less per request, have lower latency, and include a native JWT authorizer, which you will use in Lab 04. REST APIs offer features this lab does not need, such as request validation models, API keys and usage plans.
 
-   | Setting | Value |
+1. On the **Create and configure integrations** page, click **Add integration**:
+
+   | Field | Value |
    |---|---|
-   | Integrations | **Add integration** > **Lambda** |
-   | AWS Region | **ap-southeast-1** |
+   | Integration type | **Lambda** |
+   | AWS Region | **<inject key="LabRegion" enableCopy="false"/>** |
    | Lambda function | **psb-query-telemetry** |
    | Version | **2.0** |
-   | API name | **psb-lab-api** |
+
+1. For **API name**, enter:
+
+   - **API name:** **psb-lab-api**
 
    Click **Next**.
 
-1. On **Configure routes**, set the first route and add a second one with **Add route**:
+1. On the **Configure routes** page, set the first route:
 
-   | Method | Resource path | Integration target |
-   |---|---|---|
-   | **GET** | **/telemetry** | **psb-query-telemetry** |
-   | **GET** | **/anomalies** | **psb-query-telemetry** |
+   | Field | Value |
+   |---|---|
+   | Method | **GET** |
+   | Resource path | **/telemetry** |
+   | Integration target | **psb-query-telemetry** |
+
+1. Click **Add route** and configure a second route:
+
+   | Field | Value |
+   |---|---|
+   | Method | **GET** |
+   | Resource path | **/anomalies** |
+   | Integration target | **psb-query-telemetry** |
 
    Click **Next**.
 
-1. On **Define stages**, keep the stage **$default** with **Auto-deploy** turned **on**. Click **Next**, review and click **Create**.
+1. On the **Configure stages** page, confirm a stage named **$default** with **Auto-deploy** enabled, then click **Next**.
 
-1. In the left menu, under **Develop**, select **CORS** and click **Configure**:
+1. Review and click **Create**.
 
-   | Setting | Value |
+1. On the API detail page, copy the **Invoke URL** from the top of the page. It looks like:
+
+   ```text
+   https://abc123xyz.execute-api.ap-southeast-1.amazonaws.com
+   ```
+
+   Paste it into your notepad; you will need it in Labs 05 and 08.
+
+1. Now enable CORS so the browser-based dashboard can call the API. In the left-hand navigation pane, click **CORS**, then click **Configure**.
+
+1. Set the following, clicking **Add** after typing each value:
+
+   | Field | Value |
    |---|---|
    | Access-Control-Allow-Origin | **\*** |
-   | Access-Control-Allow-Headers | **authorization**, **content-type** |
-   | Access-Control-Allow-Methods | **GET**, **POST**, **OPTIONS** |
+   | Access-Control-Allow-Headers | **authorization, content-type** |
+   | Access-Control-Allow-Methods | **GET, POST, OPTIONS** |
    | Access-Control-Max-Age | **300** |
 
    Click **Save**.
 
-1. Select **API: psb-lab-api** at the top of the left menu (or **Deploy** > **Stages** > **$default**) and copy the **Invoke URL** into Notepad as **API-URL** (for example **https://abc123.execute-api.ap-southeast-1.amazonaws.com**, with no trailing slash).
-
-✅ **Expected result:** **psb-lab-api** has routes **GET /telemetry** and **GET /anomalies**, the **$default** stage auto-deploys, and CORS is configured.
+   > **Note:** `Access-Control-Allow-Origin: *` is acceptable for a lab. In production you would set it to your Amplify domain only, so that an arbitrary site cannot make authenticated calls on a user's behalf.
 
 </div>
 
 <div class="psb-panel" style="background:#ffffff;border:1px solid #d5dbe3;border-radius:16px;padding:18px 16px;margin:24px 0;">
 
-## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧩</span>Task 3: Test the API
+## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧩</span>Task 3: Test the API and Inspect the Flux Query
 
-🎯 **Goal:** Call the API from the lab VM and confirm that input validation works.
+1. On the Lab VM, open your second PowerShell window (the one not running the simulator).
 
-1. Open **PowerShell** on the lab VM. Replace **&lt;API-URL&gt;** with your Invoke URL and run:
-
-   ```powershell
-   curl.exe "<API-URL>/telemetry?metric=temperature_c&window_minutes=30"
-   ```
-
-   Confirm the JSON response contains **points** and a **summary**.
-
-1. Filter by metric and location:
+1. Call the API. Replace `<INVOKE-URL>` with the value you copied in Task 2:
 
    ```powershell
-   curl.exe "<API-URL>/telemetry?metric=co2_ppm&window_minutes=60&location=north-lab"
+   curl.exe "<INVOKE-URL>/telemetry?metric=temperature_c&window_minutes=30"
    ```
 
-   Confirm all returned points have **location** **north-lab**.
+1. You should receive a JSON response containing a **summary** object and a **points** array.
 
-1. Try an invalid metric:
+   > **Note:** Use `curl.exe`, not `curl`. In PowerShell, `curl` is an alias for `Invoke-WebRequest`, which has different argument handling.
+
+1. Try filtering by location:
 
    ```powershell
-   curl.exe "<API-URL>/telemetry?metric=DROP_TABLE"
+   curl.exe "<INVOKE-URL>/telemetry?metric=co2_ppm&window_minutes=60&location=north-lab"
    ```
 
-   Confirm you receive a **400** response with an **error** message. The allow-list blocked the input.
+1. Now confirm the allow-list is doing its job. Try an unlisted metric:
 
-   > 💡 **Tip:** Use **curl.exe** (not **curl**) in PowerShell, because **curl** is an alias for **Invoke-WebRequest**.
+   ```powershell
+   curl.exe "<INVOKE-URL>/telemetry?metric=DROP_TABLE"
+   ```
 
-1. Compare with InfluxDB directly. Open the **InfluxDB UI**, sign in as **psbadmin**, select **Data Explorer**, switch to **Script Editor** and run:
+   You should receive an HTTP 400 with:
+
+   ```json
+   { "error": "metric must be one of ['anomaly_score', 'co2_ppm', 'humidity_pct', 'temperature_c', 'vibration_g']" }
+   ```
+
+   The invalid value never reaches the Flux string.
+
+1. Finally, look at the raw data in InfluxDB itself so you can see what Flux is querying. In the Amazon Timestream console, open **InfluxDB instances** → **psb-lab-influx** and click the **InfluxDB UI** link under **Connectivity & security**.
+
+1. Sign in with the credentials from Lab 02 Task 1:
+
+   | Field | Value |
+   |---|---|
+   | Username | **psbadmin** |
+   | Password | **PsbLab#2026!Influx** |
+
+1. In the left-hand navigation of the InfluxDB UI, click the **Data Explorer** icon (the graph icon).
+
+1. Click the **Script Editor** button and paste:
 
    ```text
    from(bucket: "telemetry")
-     |> range(start: -30m)
-     |> filter(fn: (r) => r._measurement == "telemetry" and r._field == "temperature_c")
-     |> aggregateWindow(every: 1m, fn: mean)
+     |> range(start: -1h)
+     |> filter(fn: (r) => r["_measurement"] == "reading")
+     |> filter(fn: (r) => r["_field"] == "temperature_c")
+     |> aggregateWindow(every: 1m, fn: mean, createEmpty: false)
    ```
 
-   Click **Submit** and confirm the chart matches the values returned by the API.
+1. Click **Submit**. You should see a chart of your temperature readings, one line per location.
 
-   ✅ **Expected result:** Valid requests return data, the invalid metric returns **400**, and the Flux query shows the same temperature trend.
+1. Change `_field` to **co2_ppm** and click **Submit** again. Notice the periodic spikes: those are the anomalies the simulator injects, and they are what your Phase II model will learn to flag.
 
    > **Congratulations** on completing the task! Now, it's time to validate it. Here are the steps:
    >
@@ -312,14 +556,14 @@ Client ──HTTPS──> API Gateway psb-lab-api ──(GET /telemetry, GET /an
 
 ## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">📝</span>Summary
 
-In this lab, you:
+In this lab, you have completed the following:
 
-- Built **psb-query-telemetry**, a Lambda that runs allow-listed Flux queries and parses annotated CSV.
-- Created the HTTP API **psb-lab-api** with **GET /telemetry** and **GET /anomalies** on the auto-deployed **$default** stage.
-- Configured CORS for the dashboard.
-- Tested valid and invalid requests and compared the results with the InfluxDB Data Explorer.
+- Built an AWS Lambda function that queries Timestream for InfluxDB with Flux and returns a clean JSON time series.
+- Applied allow-list validation to prevent query injection.
+- Created an Amazon API Gateway HTTP API with two routes and CORS configured.
+- Tested the API end to end and explored the underlying data in the InfluxDB UI.
 
-Click **Next** to continue.
+You have successfully completed the lab. Click **Next** to continue to the next lab.
 
 </div>
 

@@ -2,10 +2,10 @@
   "Version": "2012-10-17",
   "Statement": [
     {
-      "Sid": "AllowWriteRawTelemetryOnly",
+      "Sid": "AllowRuleToLandRawTelemetry",
       "Effect": "Allow",
       "Action": "s3:PutObject",
-      "Resource": "arn:aws:s3:::psb-lab-<DEPLOYMENT-ID>/raw/*"
+      "Resource": "arn:aws:s3:::<S3-BUCKET>/raw/*"
     }
   ]
 }

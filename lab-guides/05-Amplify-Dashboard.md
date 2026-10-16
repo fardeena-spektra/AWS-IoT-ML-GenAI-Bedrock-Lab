@@ -85,13 +85,34 @@
 .psbgs .psb-panel{padding:14px 12px!important;margin:14px 0!important}
 .psbgs .psb-shot{margin:6px 0 10px!important;padding:3px!important}
 .psbgs .psb-ico{width:1.7em!important;height:1.7em!important;margin-right:6px!important}
+/* v7: vibrant highlights instead of plain bold, icons sized to the text, tight spacing */
+.psbgs strong,.psbgs b{color:#0e7490!important;font-weight:600!important}
+.psbgs th strong,.psbgs th b,.psbgs .psb-hero b{color:inherit!important}
+.psbgs h1 strong,.psbgs h2 strong,.psbgs h3 strong{color:inherit!important}
+.psbgs .psb-ico{width:1.3em!important;height:1.3em!important;margin-right:.35em!important;vertical-align:-0.22em!important;border-radius:7px!important;font-size:1em!important;line-height:1!important}
+.psbgs .psb-ico img{width:.95em!important;height:.95em!important}
+.psbgs h2 .psb-ico,.psbgs h3 .psb-ico{font-size:1em!important}
+.psbgs td .psb-ico{font-size:.95em!important}
+.psbgs .psb-panel{padding:10px 10px!important;margin:10px 0!important}
+.psbgs ol{padding-left:1.75em!important;margin:2px 0 6px!important}
+.psbgs ul{padding-left:1.15em!important;margin:2px 0 6px!important}
+.psbgs img{max-width:100%!important;height:auto!important}
+.psbgs li{margin:0 0 4px!important;padding-left:0!important}
+.psbgs li>p,.psbgs p{margin:0 0 6px!important}
+.psbgs table{display:table!important;width:100%!important;max-width:100%!important;margin:4px 0 8px!important}
+.psbgs th,.psbgs td{padding:6px 8px!important}
+.psbgs blockquote{margin:4px 0 8px!important;padding:6px 10px!important}
+.psbgs pre{margin:4px 0 8px!important}
+.psbgs .psb-shot{margin:4px 0 8px!important;padding:2px!important}
+.psbgs h2{margin:0 0 8px!important;padding-bottom:8px!important}
+.psbgs h3{margin:10px 0 4px!important}
 @media (prefers-reduced-motion:reduce){.psbgs *,.psbgs *::before,.psbgs *::after{animation:none!important;transition:none!important}}
 </style>
 
 <div class="psbgs">
 
 <div class="psb-hero" style="position:relative;overflow:hidden;border-radius:16px;padding:28px 20px 24px;margin:0 0 6px;text-align:center;color:#ffffff;background:linear-gradient(120deg,#070b1a,#121a3a,#0d2b36,#16123a);">
-<div class="psb-title" style="color:#ffffff;font-size:1.6em;font-weight:700;line-height:1.3;text-align:center;">Lab 05: AWS Amplify Dashboard</div>
+<div class="psb-title" style="color:#ffffff;font-size:1.6em;font-weight:700;line-height:1.3;text-align:center;">Lab 05: Deploy the React Dashboard on AWS Amplify Hosting</div>
 <div class="psb-line" style="width:90px;height:3px;margin:14px auto 12px;border-radius:3px;background:linear-gradient(90deg,#e9b949,#14b8a6);"></div>
 <div class="psb-meta" style="color:#d5dbe3;margin-top:6px;text-align:center;">45 Minutes&nbsp;&nbsp;|&nbsp;&nbsp;9 Points</div>
 </div>
@@ -100,205 +121,229 @@
 
 ## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🎯</span>Overview
 
-Your telemetry API is now protected by Amazon Cognito. In this lab, you give operators a friendly way to see the data: a small **React** dashboard that signs users in through the Cognito Hosted UI, calls your API with the user's token, and draws live charts. You build it on the lab VM and host it on **AWS Amplify Hosting** using **Deploy without Git**.
+You now have a secured API over live sensor data. In this lab you will give it a face.
+
+You will configure a provided React single-page application with your own Cognito and API values, build it on the Lab VM, and publish it to AWS Amplify Hosting using a manual deployment. Amplify will serve it over HTTPS from a CDN with an atomic, versioned deploy: no server, no certificate management, no build pipeline to maintain.
 
 </div>
 
 <div class="psb-panel" style="background:#ffffff;border:1px solid #d5dbe3;border-radius:16px;padding:18px 16px;margin:24px 0;">
 
-## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">📋</span>Objectives
+## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">📋</span>Lab Objectives
 
-In this lab, you will complete the following tasks:
+You will be able to complete the following tasks:
 
-1. 🛠️ **Task 1:** Configure and build the dashboard.
-1. 🚀 **Task 2:** Deploy the dashboard to Amplify and connect it to Cognito.
-
-</div>
-
-<div class="psb-panel" style="background:#ffffff;border:1px solid #d5dbe3;border-radius:16px;padding:18px 16px;margin:24px 0;">
-
-## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🏗️</span>What you build
-
-```text
-Browser ──► Amplify (https://main.<appid>.amplifyapp.com/)
-   │            │
-   │            └─► Cognito Hosted UI (sign in, id_token)
-   │
-   └─► API Gateway psb-lab-api (Authorization: Bearer <id_token>) ──► psb-query-telemetry ──► InfluxDB
-```
-
-> ⚠️ **Note:** Keep the simulator from Lab 01 running so the charts have fresh data. Work in the **<inject key="LabRegion" enableCopy="false"/>** Region throughout.
+- Task 1: Configure and build the React dashboard
+- Task 2: Publish to AWS Amplify Hosting and sign in
 
 </div>
 
 <div class="psb-panel" style="background:#ffffff;border:1px solid #d5dbe3;border-radius:16px;padding:18px 16px;margin:24px 0;">
 
-## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧩</span>Task 1: Configure and Build the Dashboard
+## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧩</span>Task 1: Configure and Build the React Dashboard
 
-🎯 **Goal:** Point the dashboard at your Cognito user pool and API, then produce a deployable zip file.
+1. On the Lab VM, open **VS Code** and use **File** → **Open Folder** to open:
 
-1. Gather the values you recorded in Lab 03 and Lab 04:
-
-   | Value | Where to find it | Example format |
-   |---|---|---|
-   | **User pool ID** | Cognito > User pools > **psb-lab-users** > Overview | ap-southeast-1_AbCdEf123 |
-   | **Client ID** | Cognito > **psb-lab-users** > App clients > **psb-lab-dashboard** | 1a2b3c4d5e6f7g8h9i0j |
-   | **Cognito domain** | Cognito > **psb-lab-users** > Branding > Domain | https://psb-lab-<inject key="DeploymentID" enableCopy="false"/>.auth.ap-southeast-1.amazoncognito.com |
-   | **API URL** | API Gateway > **psb-lab-api** > Stages > **$default** > Invoke URL | https://abc123.execute-api.ap-southeast-1.amazonaws.com |
-
-1. On the lab VM, open **VS Code** and open the file **C:\psb-lab-assets\dashboard\src\config.js**.
-
-1. The file looks like this. Replace only the placeholder values inside the quotes and keep the rest of the file (including **export default config;**) unchanged:
-
-   ```javascript
-   const config = {
-     region: 'ap-southeast-1',
-     userPoolId: '<USER-POOL-ID>',
-     userPoolClientId: '<CLIENT-ID>',
-     cognitoDomain: 'https://<COGNITO-DOMAIN>',
-     apiBaseUrl: 'https://<API-ID>.execute-api.ap-southeast-1.amazonaws.com',
-     assistantEnabled: false,
-   };
-
-   export default config;
+   ```text
+   C:\psb-lab-assets\dashboard
    ```
 
-   | Setting | Rule |
-   |---|---|
-   | **region** | ap-southeast-1 |
-   | **userPoolId** | Your user pool ID |
-   | **userPoolClientId** | Your app client ID |
-   | **cognitoDomain** | Starts with **https://**, **no trailing slash** |
-   | **apiBaseUrl** | Your full Invoke URL (**API-URL**), **no trailing slash** |
-   | **assistantEnabled** | **false** for now |
+1. In the **Explorer** pane, open the file **src/config.js**. It contains placeholders you must replace with your own values:
 
-   > ⚠️ **Note:** A trailing slash on **cognitoDomain** or **apiBaseUrl** produces URLs with a double slash and the sign-in or API calls fail.
+   ```javascript
+   // PSB Academy CloudLab - dashboard configuration.
+   // Replace every <PLACEHOLDER> with the value from your own lab environment.
 
-1. Save the file (**Ctrl+S**).
+   export const config = {
+     region: "ap-southeast-1",
 
-1. Open **C:\psb-lab-assets\dashboard\src\App.jsx** and review how sign-in works:
+     // From Lab 04, Task 1
+     userPoolId:        "<USER-POOL-ID>",
+     userPoolClientId:  "<CLIENT-ID>",
+     cognitoDomain:     "<COGNITO-DOMAIN>",
 
-   > ℹ️ **Info:** The **useAuth** hook in App.jsx:
-   > - Reads the **id_token** from the URL hash after Cognito redirects back to the app.
-   > - Stores it in **sessionStorage** under the key **psb_id_token**.
-   > - Redirects the user to the Cognito **Hosted UI** when the token is missing or expired.
-   > - Sends the token as **Authorization: Bearer** on every API call (see **src/api.js**).
-   >
-   > Charts are drawn with inline SVG, so no chart library is needed.
+     // From Lab 03, Task 2
+     apiBaseUrl:        "<INVOKE-URL>",
 
-1. Open **Windows PowerShell** and build the app:
+     // Leave as-is
+     redirectUri:       window.location.origin + "/",
+     defaultMetric:     "temperature_c",
+     defaultWindowMins: 60,
+     refreshSeconds:    30,
+   };
+   ```
+
+1. Replace the four placeholders with the values from your notepad, then save the file with **Ctrl + S**.
+
+   > **Note:** **cognitoDomain** must include the `https://` scheme and must not have a trailing slash. **apiBaseUrl** must not have a trailing slash either.
+
+1. Take a moment to look at **src/App.jsx**. The parts worth understanding:
+
+   ```javascript
+   // 1. Auth: exchange the Cognito redirect for a token, or send the user to sign in.
+   function useAuth() {
+     const [idToken, setIdToken] = useState(
+       () => sessionStorage.getItem("psb_id_token") || "");
+
+     useEffect(() => {
+       const hash = new URLSearchParams(window.location.hash.slice(1));
+       const token = hash.get("id_token");
+       if (token) {
+         sessionStorage.setItem("psb_id_token", token);
+         setIdToken(token);
+         window.history.replaceState({}, "", window.location.pathname);
+       }
+     }, []);
+
+     const signIn = () => {
+       const u = new URL(config.cognitoDomain + "/login");
+       u.searchParams.set("client_id", config.userPoolClientId);
+       u.searchParams.set("response_type", "token");
+       u.searchParams.set("scope", "email openid");
+       u.searchParams.set("redirect_uri", config.redirectUri);
+       window.location.href = u.toString();
+     };
+
+     return { idToken, signIn };
+   }
+
+   // 2. Data: every API call carries the bearer token.
+   async function fetchSeries(idToken, path, params) {
+     const url = new URL(config.apiBaseUrl + path);
+     Object.entries(params).forEach(([k, v]) =>
+       v != null && url.searchParams.set(k, v));
+     const res = await fetch(url, {
+       headers: { Authorization: `Bearer ${idToken}` },
+     });
+     if (res.status === 401) throw new Error("Session expired - sign in again.");
+     if (!res.ok) throw new Error(`API returned ${res.status}`);
+     return res.json();
+   }
+
+   // 3. Render: a metric selector, a summary strip, a chart, and (from Lab 08)
+   //    the assistant chat panel.
+   ```
+
+   > **Note:** The token is held in `sessionStorage`, not `localStorage`. `sessionStorage` is cleared when the tab closes, which limits the window in which a stolen token is useful. Neither is ideal: a production SPA would use the Authorization Code flow with PKCE and keep the refresh token in an HttpOnly cookie.
+
+1. Open a PowerShell terminal inside VS Code with **Terminal** → **New Terminal** and install the dependencies:
 
    ```powershell
    cd C:\psb-lab-assets\dashboard
    npm install
-   npm run build
-   Compress-Archive -Path dist\* -DestinationPath dashboard-build.zip -Force
    ```
 
-   > 💡 **Tip:** Zip the **contents** of the **dist** folder (dist\*), not the folder itself. Amplify needs **index.html** at the root of the zip.
+   This takes about a minute.
 
-1. Confirm that **C:\psb-lab-assets\dashboard\dashboard-build.zip** exists.
+1. Build the production bundle:
 
-   > ⚠️ **Fallback if the build fails:** Use the prebuilt **C:\psb-lab-assets\dashboard\dist.zip** instead.
-   > 1. Extract **dist.zip** to a folder.
-   > 1. Open **config.json** at the root of the extracted folder and enter the same values as above (it overrides src/config.js at runtime).
-   > 1. Zip the folder **contents** again (index.html and config.json at the zip root) and use that zip in Task 2.
+   ```powershell
+   npm run build
+   ```
 
-✅ **Expected result:** You have **dashboard-build.zip** (or a re-zipped **dist.zip**) containing **index.html** at its root, configured with your Cognito and API values.
+1. Confirm the build succeeded. You should see output ending with something like:
+
+   ```text
+   vite v5.4.8 building for production...
+   ✓ 214 modules transformed.
+   dist/index.html                   0.48 kB
+   dist/assets/index-a1b2c3d4.css    3.17 kB
+   dist/assets/index-e5f6g7h8.js   183.42 kB
+   ✓ built in 4.21s
+   ```
+
+1. Package the build output as a ZIP that Amplify can accept:
+
+   ```powershell
+   Compress-Archive -Path .\dist\* -DestinationPath .\dashboard-build.zip -Force
+   ```
+
+1. Confirm **dashboard-build.zip** now exists in **C:\psb-lab-assets\dashboard**.
+
+   > **Troubleshooting:** If `npm run build` fails, a pre-built fallback is provided at **C:\psb-lab-assets\dashboard\dist.zip**. It reads its configuration from a **config.json** file at the site root, which you can edit after deploying. Use it only if the build will not complete; building it yourself is part of the exercise.
 
 </div>
 
 <div class="psb-panel" style="background:#ffffff;border:1px solid #d5dbe3;border-radius:16px;padding:18px 16px;margin:24px 0;">
 
-## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧩</span>Task 2: Deploy the Dashboard to Amplify and Connect It to Cognito
+## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧩</span>Task 2: Publish to AWS Amplify Hosting and Sign In
 
-🎯 **Goal:** Host the build on Amplify, add an SPA rewrite rule, and allow the Amplify URL in Cognito so sign-in returns to your dashboard.
+1. In the AWS Management Console search bar, type **Amplify** and select **AWS Amplify**.
 
-### <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🚀</span>Deploy without Git
+1. Click **Create new app**.
 
-1. In the AWS console search bar, type **Amplify** and open **AWS Amplify**.
+1. On the **Start building with Amplify** page, select **Deploy without Git** and click **Next**.
 
-1. Select **Create new app**.
+   > **Note:** Amplify's usual flow connects to GitHub, GitLab or Bitbucket and rebuilds on every push. That is the right choice for a real project. Here you are using manual deploy because it removes an OAuth authorisation against a personal Git account from the lab, and because it is the fastest path to a running site. The "what you would do next" section at the end of this lab covers the Git flow.
 
-1. Under **Start building with Amplify**, choose **Deploy without Git**, then select **Next**.
+1. On the **Manual deployment** page:
 
-1. Enter the following settings:
-
-   | Setting | Value |
+   | Field | Value |
    |---|---|
-   | **App name** | psb-lab-dashboard |
-   | **Branch name** | main |
-   | **Method** | Drag and drop |
+   | App name | **psb-lab-dashboard** |
+   | Branch name | **main** |
+   | Method | **Drag and drop** |
 
-1. Drag **dashboard-build.zip** into the drop area (or select **Choose .zip folder** and browse to it).
+1. Click **Choose files** and select **C:\psb-lab-assets\dashboard\dashboard-build.zip**.
 
-1. Select **Save and deploy**. Wait until the deployment status shows **Deployed** (about 1 minute).
+1. Click **Save and deploy**.
 
-### <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🔁</span>Add the SPA rewrite rule
+1. The deployment takes about 30 seconds. Wait for the status to show **Deployed**.
 
-1. In the app's left menu, select **Hosting** > **Rewrites and redirects**.
+1. Copy the **Domain** URL shown on the app page. It looks like:
 
-1. Select **Manage redirects** (or **Add rewrite**) and add this rule:
+   ```text
+   https://main.d1a2b3c4e5f6g7.amplifyapp.com
+   ```
 
-   | Setting | Value |
+   Paste it into your notepad.
+
+1. Configure SPA routing. Amplify serves static files, so a deep link such as `/dashboard` would return a 404 unless you tell it to fall back to `index.html`. In the left-hand navigation pane, under **Hosting**, click **Rewrites and redirects**, then click **Manage redirects** and **Add rewrite**:
+
+   | Field | Value |
    |---|---|
-   | **Source address** | `/<*>` |
-   | **Target address** | /index.html |
-   | **Type** | 404 (Rewrite) |
+   | Source address | **/&lt;\*&gt;** |
+   | Target address | **/index.html** |
+   | Type | **404 (Rewrite)** |
 
-1. Select **Save**.
+   Click **Save**.
 
-   > ℹ️ **Info:** This rule (stored as **404-200**) serves **index.html** for any path, so the single-page app loads correctly after the Cognito redirect.
+1. Now add your Amplify domain to Cognito's allowed callback URLs. Return to the Amazon Cognito console and open **psb-lab-users**.
 
-1. Go to the app **Overview** and copy the **Domain** of the **main** branch. It looks like **https://main.&lt;appid&gt;.amplifyapp.com**.
+1. In the left-hand navigation pane, under **Applications**, click **App clients**, then click **psb-lab-dashboard**.
 
-### <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🔐</span>Allow the Amplify URL in Cognito
+1. Scroll to **Login pages** and click **Edit**.
 
-1. Open **Amazon Cognito** > **User pools** > **psb-lab-users**.
+1. Under **Allowed callback URLs**, click **Add another URL** and enter your Amplify domain with a trailing slash (keep the **http://localhost:5173/** entry from Lab 04):
 
-1. In the left menu, select **Applications** > **App clients** > **psb-lab-dashboard**.
+   ```text
+   https://main.d1a2b3c4e5f6g7.amplifyapp.com/
+   ```
 
-1. Open the **Login pages** tab and, under **Managed login pages configuration**, select **Edit**.
+1. Under **Allowed sign-out URLs**, add the same URL.
 
-1. Add your Amplify domain **with a trailing slash**:
+1. Confirm that **Implicit grant** is still selected under **OAuth 2.0 grant types**, and that **email**, **openid** and **profile** are still selected under **OpenID Connect scopes**; you enabled these in Lab 04.
 
-   | Setting | Values (keep the existing localhost entry) |
-   |---|---|
-   | **Allowed callback URLs** | http://localhost:5173/ and https://main.&lt;appid&gt;.amplifyapp.com/ |
-   | **Allowed sign-out URLs** | https://main.&lt;appid&gt;.amplifyapp.com/ |
+1. Click **Save changes**.
 
-   > ⚠️ **Note:** Leave **Implicit grant**, **Authorization code grant** and the scopes **email**, **openid**, **profile** as configured in Lab 04.
+1. Open your Amplify domain in a new browser tab.
 
-1. Select **Save changes**.
+1. Click **Sign in**. You will be redirected to the Cognito hosted UI.
 
-### <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🌐</span>Open the dashboard
+1. Sign in as **student@psb.lab** with the password you set in Lab 04 (**PsbLab#2026!New**).
 
-1. Open your Amplify URL in a new browser tab. You are redirected to the Cognito sign-in page.
+1. You will be redirected back to the dashboard, which should now show:
 
-1. Sign in with:
+   - a summary strip with the latest, minimum, maximum and mean values;
+   - a line chart of temperature over the last 60 minutes, one line per location;
+   - a metric selector letting you switch between temperature, humidity, CO₂ and vibration;
+   - a window selector for 15 minutes, 1 hour, 6 hours or 24 hours.
 
-   | Detail | Value |
-   |---|---|
-   | **Email** | student@psb.lab |
-   | **Password** | PsbLab#2026!New |
+1. Switch the metric to **co2_ppm** and the window to **6 hours**. You should see the injected anomaly spikes clearly.
 
-1. Explore the dashboard:
+   > **Troubleshooting:** A blank chart with a 401 in the browser console means the callback URL in Cognito does not exactly match your Amplify domain, including the trailing slash. A CORS error means the API Gateway CORS configuration from Lab 03 Task 2 was not saved. Open the browser developer tools with **F12** and check the **Console** and **Network** tabs; the error message is almost always specific enough to act on.
 
-   | Element | What you see |
-   |---|---|
-   | **Chart** | Time series per location (north-lab, south-lab, server-room) |
-   | **Summary strip** | latest, min, max, mean |
-   | **Metric selector** | Temperature, Humidity, CO₂, Vibration |
-   | **Window selector** | 15m / 1h / 6h / 24h |
-
-   | Problem | Likely cause and fix |
-   |---|---|
-   | **redirect_mismatch** on sign-in | The Amplify URL with trailing slash is missing from **Allowed callback URLs**. |
-   | Blank page after sign-in | The rewrite rule `/<*>` to **/index.html** (404-200) is missing. |
-   | **401** errors / empty charts | Wrong **userPoolClientId** or the authorizer audience does not match the client ID. |
-   | CORS or network error | **apiBaseUrl** has a trailing slash or the wrong Invoke URL. |
-
-   ✅ **Expected result:** The dashboard loads from Amplify, signs you in as **student@psb.lab**, and shows live charts with the summary strip.
+   > **What you would do next: Git-based CI/CD.** In a real project you would push this dashboard to a Git repository and connect it to Amplify with **Create new app** → **GitHub**. Amplify would then detect the framework, generate an `amplify.yml` build spec, and rebuild and redeploy automatically on every push to `main`, with preview deployments for pull requests. The trade-off you accepted here is that manual deploys are not reproducible: nobody can tell from the Amplify console which commit produced the running site.
 
    > **Congratulations** on completing the task! Now, it's time to validate it. Here are the steps:
    >
@@ -314,14 +359,16 @@ Browser ──► Amplify (https://main.<appid>.amplifyapp.com/)
 
 ## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">📝</span>Summary
 
-In this lab, you:
+In this lab, you have completed the following:
 
-- Configured the React dashboard with your Cognito user pool, app client, domain and API URL.
-- Built the app with **npm** and packaged it as a zip.
-- Hosted it on **AWS Amplify** (Deploy without Git, branch **main**) with an SPA rewrite rule.
-- Added the Amplify URL to the Cognito callback and sign-out URLs and signed in to live charts.
+- Configured a React single-page application with your own Cognito and API endpoints.
+- Built a production bundle on the Lab VM.
+- Published it to AWS Amplify Hosting with a manual deployment and configured SPA rewrite rules.
+- Registered the Amplify domain as a Cognito callback URL and signed in end to end.
 
-Click **Next** to continue.
+Phase I is complete. You have a working IoT pipeline: a device with a cryptographic identity, secure ingestion, a time-series store, an object store, a serverless API, managed authentication, and a hosted dashboard.
+
+You have successfully completed the lab. Click **Next** to continue to the next lab.
 
 </div>
 

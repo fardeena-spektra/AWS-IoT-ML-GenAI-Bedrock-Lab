@@ -1,15 +1,20 @@
-// PSB lab dashboard settings. Replace the <...> placeholders in Lab 05 Task 1.
-//  - cognitoDomain: https://... with NO trailing slash
-//  - apiBaseUrl:    the HTTP API invoke URL with NO trailing slash
-//  - assistantEnabled: set to true in Lab 08 to show the chat panel
-// At runtime, values in /config.json (if present, e.g. from dist.zip) override these.
-const config = {
-  region: 'ap-southeast-1',
-  userPoolId: '<USER-POOL-ID>',
-  userPoolClientId: '<CLIENT-ID>',
-  cognitoDomain: 'https://<COGNITO-DOMAIN>',
-  apiBaseUrl: 'https://<API-ID>.execute-api.ap-southeast-1.amazonaws.com',
-  assistantEnabled: false,
-};
+// PSB Academy CloudLab - dashboard configuration.
+// Replace every <PLACEHOLDER> with the value from your own lab environment.
 
-export default config;
+export const config = {
+  region: "ap-southeast-1",
+
+  // From Lab 04, Task 1
+  userPoolId:        "<USER-POOL-ID>",
+  userPoolClientId:  "<CLIENT-ID>",
+  cognitoDomain:     "<COGNITO-DOMAIN>",
+
+  // From Lab 03, Task 2
+  apiBaseUrl:        "<INVOKE-URL>",
+
+  // Leave as-is
+  redirectUri:       window.location.origin + "/",
+  defaultMetric:     "temperature_c",
+  defaultWindowMins: 60,
+  refreshSeconds:    30,
+};

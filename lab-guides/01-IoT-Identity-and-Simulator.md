@@ -85,13 +85,34 @@
 .psbgs .psb-panel{padding:14px 12px!important;margin:14px 0!important}
 .psbgs .psb-shot{margin:6px 0 10px!important;padding:3px!important}
 .psbgs .psb-ico{width:1.7em!important;height:1.7em!important;margin-right:6px!important}
+/* v7: vibrant highlights instead of plain bold, icons sized to the text, tight spacing */
+.psbgs strong,.psbgs b{color:#0e7490!important;font-weight:600!important}
+.psbgs th strong,.psbgs th b,.psbgs .psb-hero b{color:inherit!important}
+.psbgs h1 strong,.psbgs h2 strong,.psbgs h3 strong{color:inherit!important}
+.psbgs .psb-ico{width:1.3em!important;height:1.3em!important;margin-right:.35em!important;vertical-align:-0.22em!important;border-radius:7px!important;font-size:1em!important;line-height:1!important}
+.psbgs .psb-ico img{width:.95em!important;height:.95em!important}
+.psbgs h2 .psb-ico,.psbgs h3 .psb-ico{font-size:1em!important}
+.psbgs td .psb-ico{font-size:.95em!important}
+.psbgs .psb-panel{padding:10px 10px!important;margin:10px 0!important}
+.psbgs ol{padding-left:1.75em!important;margin:2px 0 6px!important}
+.psbgs ul{padding-left:1.15em!important;margin:2px 0 6px!important}
+.psbgs img{max-width:100%!important;height:auto!important}
+.psbgs li{margin:0 0 4px!important;padding-left:0!important}
+.psbgs li>p,.psbgs p{margin:0 0 6px!important}
+.psbgs table{display:table!important;width:100%!important;max-width:100%!important;margin:4px 0 8px!important}
+.psbgs th,.psbgs td{padding:6px 8px!important}
+.psbgs blockquote{margin:4px 0 8px!important;padding:6px 10px!important}
+.psbgs pre{margin:4px 0 8px!important}
+.psbgs .psb-shot{margin:4px 0 8px!important;padding:2px!important}
+.psbgs h2{margin:0 0 8px!important;padding-bottom:8px!important}
+.psbgs h3{margin:10px 0 4px!important}
 @media (prefers-reduced-motion:reduce){.psbgs *,.psbgs *::before,.psbgs *::after{animation:none!important;transition:none!important}}
 </style>
 
 <div class="psbgs">
 
 <div class="psb-hero" style="position:relative;overflow:hidden;border-radius:16px;padding:28px 20px 24px;margin:0 0 6px;text-align:center;color:#ffffff;background:linear-gradient(120deg,#070b1a,#121a3a,#0d2b36,#16123a);">
-<div class="psb-title" style="color:#ffffff;font-size:1.6em;font-weight:700;line-height:1.3;text-align:center;">Lab 01: IoT Identity and Device Simulator</div>
+<div class="psb-title" style="color:#ffffff;font-size:1.6em;font-weight:700;line-height:1.3;text-align:center;">Lab 01: Provision the IoT Device Identity and Connect the Simulated Raspberry Pi</div>
 <div class="psb-line" style="width:90px;height:3px;margin:14px auto 12px;border-radius:3px;background:linear-gradient(90deg,#e9b949,#14b8a6);"></div>
 <div class="psb-meta" style="color:#d5dbe3;margin-top:6px;text-align:center;">45 Minutes&nbsp;&nbsp;|&nbsp;&nbsp;10 Points</div>
 </div>
@@ -100,134 +121,102 @@
 
 ## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🎯</span>Overview
 
-Every IoT solution starts with a trusted device identity. In this lab, you register a sensor in **AWS IoT Core**, download its X.509 certificate, lock it down with a least-privilege IoT policy, and run a Python simulator on the lab VM that publishes telemetry over MQTT (TLS on port 8883).
+In this lab you will give your sensor gateway an identity that AWS IoT Core will trust. You will register the device as a Thing, generate an X.509 certificate and private key, attach a least-privilege IoT policy that permits exactly one client ID and one topic, and then start the Raspberry Pi simulator on your Lab VM so that it connects over MQTT with mutual TLS and begins publishing telemetry.
+
+This is the foundation of everything that follows. Certificate-based mutual TLS is how production IoT fleets authenticate: the device proves who it is with a private key it never transmits, and AWS proves who it is with a server certificate the device validates against the Amazon Root CA. By the end of this lab you will be watching live sensor readings arrive in the AWS IoT Core MQTT test client.
 
 </div>
 
 <div class="psb-panel" style="background:#ffffff;border:1px solid #d5dbe3;border-radius:16px;padding:18px 16px;margin:24px 0;">
 
-## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">📋</span>Objectives
+## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">📋</span>Lab Objectives
 
-- **Task 1:** Register the device with the **Connect one device** wizard and download the connection kit.
-- **Task 2:** Create a least-privilege device policy and make it the only policy on the certificate.
-- **Task 3:** Run the simulator and watch the messages arrive in the MQTT test client.
+You will be able to complete the following tasks:
 
-</div>
-
-<div class="psb-panel" style="background:#ffffff;border:1px solid #d5dbe3;border-radius:16px;padding:18px 16px;margin:24px 0;">
-
-## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🏗️</span>What you build
-
-```text
-simulate_pi.py (lab VM) ──MQTT/TLS 8883──> AWS IoT Core ──> topic psb/lab/psb-lab-sensor-01/telemetry
-        (X.509 certificate + psb-lab-device-policy)
-```
-
-### <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">📦</span>Device data contract
-
-| Item | Value |
-|---|---|
-| Thing / client ID | **psb-lab-sensor-01** |
-| Telemetry topic | **psb/lab/psb-lab-sensor-01/telemetry** |
-| Command topic | **psb/lab/psb-lab-sensor-01/commands** |
-| Locations (cycled) | **north-lab**, **south-lab**, **server-room** |
-| Fields | **temperature_c**, **humidity_pct**, **co2_ppm**, **vibration_g**, **injected_anomaly** |
-
-Sample telemetry message:
-
-```json
-{"device":"psb-lab-sensor-01","location":"north-lab","timestamp":1760520000000,
- "temperature_c":22.41,"humidity_pct":45.2,"co2_ppm":612.0,"vibration_g":0.021,"injected_anomaly":false}
-```
-
-> ℹ️ **Info:** **timestamp** is epoch milliseconds. About 2% of readings are injected anomalies (spikes in one or more fields) with **injected_anomaly** set to **true**. You use these labels in Lab 06 to measure the model.
+- Task 1: Register the device and generate its certificate
+- Task 2: Author and attach a least-privilege IoT policy
+- Task 3: Run the Raspberry Pi simulator and verify telemetry
 
 </div>
 
 <div class="psb-panel" style="background:#ffffff;border:1px solid #d5dbe3;border-radius:16px;padding:18px 16px;margin:24px 0;">
 
-## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧩</span>Task 1: Register the Device with "Connect one device"
+## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧩</span>Task 1: Register the Device and Generate Its Certificate
 
-🎯 **Goal:** Create the thing **psb-lab-sensor-01**, its certificate, and download the connection kit.
+In this task you will create an AWS IoT Core Thing to represent your sensor gateway and generate the X.509 key pair it will use to authenticate.
 
-1. In the AWS console search bar, type **IoT Core** and open **IoT Core**. Confirm the Region is **<inject key="LabRegion" enableCopy="false"/>**.
+1. In the AWS Management Console search bar, type **IoT Core** and select **AWS IoT Core** from the results.
 
-1. On the IoT Core home page, under **Connect**, select **Connect one device** (or from the left menu choose **Connect** > **Connect one device**).
+1. In the left-hand navigation pane, expand **Connect** and click **Connect one device**.
 
-1. On **Step 1: Prepare your device**, review the information (the page shows a ping test to your device data endpoint) and click **Next**.
+1. On the **Prepare your device** page, click **Next**.
 
-1. On **Step 2: Register and secure your device**, enter:
+1. On the **Register and secure your device** page, select **Create a new thing**. For **Thing name**, enter the following, then click **Next**:
 
-   | Setting | Value |
-   |---|---|
-   | Thing | **Create a new thing** |
-   | Thing name | **psb-lab-sensor-01** |
+   - **Thing name:** **psb-lab-sensor-01**
 
-   Leave the other options as default and click **Next**.
+   > **Note:** The Thing name must be exactly **psb-lab-sensor-01**. The simulator, the IoT policy and the validation all refer to it by this name.
 
-1. On **Step 3: Choose a platform and SDK**, select:
+1. On the **Choose platform and SDK** page, select **Linux / macOS** as the device platform and **Python** as the AWS IoT Device SDK, then click **Next**.
 
-   | Setting | Value |
-   |---|---|
-   | Device platform operating system | **Linux / macOS** |
-   | AWS IoT Device SDK | **Python** |
+   > **Note:** You are selecting Linux/Python because that is what a Raspberry Pi runs, and the simulator uses the same Python MQTT client. The certificate AWS generates is platform-independent.
 
-   Click **Next**.
+1. On the **Download connection kit** page, click **Download connection kit**. A file named **connect_device_package.zip** will download.
 
-1. On **Step 4: Download connection kit**, click **Download connection kit**. The file **connect_device_package.zip** is saved to your **Downloads** folder. Click **Next**.
+1. Click **Next**, then click **Continue** to leave the wizard. You do not need to run the wizard's own start script; you will use the lab's simulator instead.
 
-1. On **Step 5: Run connection kit**, you do not need to run the Linux commands. Click **Continue** (or **View thing**) to finish the wizard.
-
-   > ℹ️ **Info:** The wizard creates the thing, an X.509 certificate (already **Active**) and a broad starter policy named **psb-lab-sensor-01-Policy**. You replace that policy with a least-privilege one in Task 2.
-
-1. On the lab VM, open **File Explorer**, right-click **Downloads\connect_device_package.zip** and select **Extract All**. Extract the files to:
+1. On the Lab VM, open **File Explorer**, navigate to your **Downloads** folder, right-click **connect_device_package.zip** and select **Extract All**. Extract it to:
 
    ```text
    C:\psb-lab-assets\simulator\certs
    ```
 
-1. Confirm the **certs** folder contains these files:
+1. Confirm that the **certs** folder now contains the following four files. The exact filenames begin with your certificate ID, which will differ from the example:
 
    | File | Purpose |
    |---|---|
-   | **psb-lab-sensor-01.cert.pem** | Device certificate |
-   | **psb-lab-sensor-01.private.key** | Device private key (keep secret) |
-   | **psb-lab-sensor-01.public.key** | Device public key |
-   | **root-CA.crt** | Amazon Root CA 1 |
+   | psb-lab-sensor-01.cert.pem | The device's public certificate |
+   | psb-lab-sensor-01.private.key | The device's private key (never leaves the device) |
+   | psb-lab-sensor-01.public.key | The device's public key |
+   | root-CA.crt | The Amazon Root CA the device uses to verify AWS |
 
-   > ⚠️ **Note:** If **root-CA.crt** is missing (the Linux start script normally downloads it), open this URL in the browser and save the file as **root-CA.crt** in the **certs** folder:
-   >
-   > https://www.amazontrust.com/repository/AmazonRootCA1.pem
-   >
-   > Make sure Windows does not add **.pem** or **.txt** to the file name.
+   > **Note:** If the extracted files have long certificate-ID prefixes such as **a1b2c3d4-certificate.pem.crt**, rename them to the names in the table above. The simulator expects those exact names.
 
-1. Back in IoT Core, in the left menu select **Settings**. Under **Device data endpoint**, copy the **Endpoint** value and save it in Notepad as **IOT-ENDPOINT**. It looks like:
+1. Return to the AWS IoT Core console. In the left-hand navigation pane, expand **Manage**, expand **All devices**, and click **Things**.
+
+1. Confirm that **psb-lab-sensor-01** appears in the list with a status of **Active**.
+
+1. Click **psb-lab-sensor-01**, then open the **Certificates** tab. Confirm that one certificate is listed and that its status is **Active**. If it shows **Inactive**, select it, click **Actions** and choose **Activate**.
+
+1. You will also need your account's IoT data endpoint. In the left-hand navigation pane, scroll down and click **Settings**.
+
+1. Under **Device data endpoint**, copy the **Endpoint** value. It looks like:
 
    ```text
-   xxxxxxxxxxxxxx-ats.iot.ap-southeast-1.amazonaws.com
+   a1b2c3d4e5f6g7-ats.iot.ap-southeast-1.amazonaws.com
    ```
 
-✅ **Expected result:** The thing **psb-lab-sensor-01** exists, the certificate files are in **C:\psb-lab-assets\simulator\certs**, and you have the device data endpoint ending with **-ats.iot.ap-southeast-1.amazonaws.com**.
+   Paste it into a notepad; you will need it in Task 3 and again in Lab 02.
 
 </div>
 
 <div class="psb-panel" style="background:#ffffff;border:1px solid #d5dbe3;border-radius:16px;padding:18px 16px;margin:24px 0;">
 
-## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧩</span>Task 2: Create a Least-Privilege Device Policy
+## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧩</span>Task 2: Author and Attach a Least-Privilege IoT Policy
 
-🎯 **Goal:** Allow the device to connect only as itself, publish only to its own telemetry topic, and subscribe/receive only on its own command topic.
+A certificate proves who the device is. An IoT policy decides what it may do. In this task you will write a policy that permits your device to connect under exactly one client ID and publish to exactly one topic, and nothing else.
 
-1. Find your **AWS account ID**: click your user name in the top-right corner of the console and copy the 12-digit **Account ID**.
+1. In the AWS IoT Core console, in the left-hand navigation pane, expand **Security** and click **Policies**.
 
-1. In IoT Core, from the left menu select **Security** > **Policies**, then click **Create policy**.
+1. Click **Create policy**.
 
-1. Enter the policy name:
+1. For **Policy name**, enter:
 
-   | Setting | Value |
-   |---|---|
-   | Policy name | **psb-lab-device-policy** |
+   - **Policy name:** **psb-lab-device-policy**
 
-1. Under **Policy document**, select the **JSON** tab, delete the existing content and paste the policy below (also available in **C:\psb-lab-assets\policies\psb-lab-device-policy.json**). Replace **&lt;AWS-REGION&gt;** with **ap-southeast-1** and **&lt;AWS-ACCOUNT-ID&gt;** with your account ID.
+1. Under **Policy document**, click the **JSON** tab.
+
+1. Replace the entire contents of the editor with the policy below. Replace `<AWS-REGION>` with **<inject key="LabRegion" enableCopy="false"/>** and `<AWS-ACCOUNT-ID>` with your account ID from the **Environment** tab (**<inject key="AWSAccountId" enableCopy="true"/>**).
 
    ```json
    {
@@ -261,80 +250,200 @@ Sample telemetry message:
    }
    ```
 
-   **What this policy does:**
-
-   | Statement | Effect |
-   |---|---|
-   | **iot:Connect** on **client/psb-lab-sensor-01** | The certificate can only connect with client ID **psb-lab-sensor-01**. |
-   | **iot:Publish** on **topic/.../telemetry** | The device can publish only to its own telemetry topic. |
-   | **iot:Subscribe** on **topicfilter/.../commands** | The device can subscribe only to its own command topic. |
-   | **iot:Receive** on **topic/.../commands** | The device can receive messages only from its own command topic. |
+   > **Note:** This policy is the opposite of the `"Resource": "*"` policy the quick-start wizard suggests. Notice that Subscribe uses a `topicfilter/` ARN while Receive uses a `topic/` ARN: this is a genuine and frequently-missed distinction in AWS IoT policy authoring. A compromised device holding this certificate cannot read another device's data, cannot publish to another device's topic, and cannot impersonate a different client ID.
 
 1. Click **Create**.
 
-1. From the left menu select **Security** > **Certificates**, and open the certificate attached to **psb-lab-sensor-01** (you can also open **All devices** > **Things** > **psb-lab-sensor-01** > **Certificates** tab). Confirm **Status** is **Active**.
+1. In the left-hand navigation pane, expand **Security** and click **Certificates**.
 
-1. On the certificate page, open the **Policies** tab and click **Attach policies**. Select **psb-lab-device-policy** and click **Attach policies**.
+1. Click the certificate ID of the certificate you created in Task 1.
 
-1. Still on the **Policies** tab, select the wizard-created policy **psb-lab-sensor-01-Policy** and click **Detach**, then confirm **Detach**.
+1. On the certificate detail page, open the **Policies** tab. If a policy from the connection-kit wizard is already attached, select it, click **Actions** and choose **Detach**, then confirm.
 
-   > ⚠️ **Note:** **psb-lab-device-policy** must be the **only** policy attached to the certificate. The validation fails if the broad wizard policy is still attached.
+1. Click **Attach policies**.
 
-✅ **Expected result:** The certificate is **Active** and has exactly one policy attached: **psb-lab-device-policy**.
+1. Select the checkbox next to **psb-lab-device-policy** and click **Attach policies**.
+
+1. Confirm that the **Policies** tab now lists **psb-lab-device-policy** and nothing else.
 
 </div>
 
 <div class="psb-panel" style="background:#ffffff;border:1px solid #d5dbe3;border-radius:16px;padding:18px 16px;margin:24px 0;">
 
-## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧩</span>Task 3: Run the Simulator and Watch the Telemetry
+## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧩</span>Task 3: Run the Raspberry Pi Simulator and Verify Telemetry
 
-🎯 **Goal:** Publish live telemetry from the lab VM and see it in the MQTT test client.
+In this task you will start the device simulator, watch it establish a mutual-TLS MQTT connection, and confirm in the AWS IoT Core MQTT test client that readings are arriving.
 
-1. On the lab VM, open **PowerShell** and install the simulator dependency (**paho-mqtt**):
+1. On the Lab VM, open the **Start** menu, type **PowerShell**, and select **Windows PowerShell**.
+
+1. Navigate to the simulator folder and install its one dependency:
 
    ```powershell
    cd C:\psb-lab-assets\simulator
    pip install -r requirements.txt
    ```
 
-1. Start the simulator. Replace **&lt;IOT-ENDPOINT&gt;** with the device data endpoint from Task 1:
+   > **Note:** **requirements.txt** contains a single line, **paho-mqtt**. This is the same MQTT client library a Raspberry Pi deployment would use.
+
+1. Open **simulate_pi.py** in VS Code to see what it does. The core of the file is reproduced below; you do not need to change it, but read the highlighted parts:
+
+   ```python
+   #!/usr/bin/env python3
+   """
+   PSB Academy CloudLab - Raspberry Pi sensor gateway simulator.
+
+   Publishes JSON telemetry to AWS IoT Core over MQTT with mutual TLS,
+   using the same X.509 certificate a physical Raspberry Pi would use.
+   """
+   import argparse, json, math, random, signal, ssl, sys, time
+   import paho.mqtt.client as mqtt
+
+   TOPIC_TEMPLATE = "psb/lab/{device_id}/telemetry"
+   SENSORS = ["north-lab", "south-lab", "server-room"]
+
+   def build_client(device_id, endpoint, certs_dir):
+       client = mqtt.Client(client_id=device_id, protocol=mqtt.MQTTv311)
+       client.tls_set(
+           ca_certs=f"{certs_dir}/root-CA.crt",
+           certfile=f"{certs_dir}/{device_id}.cert.pem",
+           keyfile=f"{certs_dir}/{device_id}.private.key",
+           tls_version=ssl.PROTOCOL_TLSv1_2,
+       )
+       client.on_connect = lambda c, u, f, rc: print(
+           f"[mqtt] connect rc={rc} ({mqtt.connack_string(rc)})"
+       )
+       client.connect(endpoint, 8883, keepalive=60)
+       return client
+
+   def reading(location, t, anomaly_rate):
+       """Diurnal baseline + noise, with occasional injected anomalies."""
+       phase = (t % 86400) / 86400 * 2 * math.pi
+       temp = 22.0 + 3.0 * math.sin(phase) + random.gauss(0, 0.35)
+       hum = 55.0 - 6.0 * math.sin(phase) + random.gauss(0, 1.2)
+       co2 = 480.0 + 120.0 * max(0.0, math.sin(phase)) + random.gauss(0, 25)
+       vib = abs(random.gauss(0.02, 0.006))
+
+       is_anomaly = random.random() < anomaly_rate
+       if is_anomaly:
+           kind = random.choice(["heat", "co2", "vibration"])
+           if kind == "heat":
+               temp += random.uniform(8, 14)
+           elif kind == "co2":
+               co2 += random.uniform(600, 1200)
+           else:
+               vib += random.uniform(0.12, 0.30)
+
+       return {
+           "device_id": "psb-lab-sensor-01",
+           "location": location,
+           "ts": int(t),
+           "temperature_c": round(temp, 2),
+           "humidity_pct": round(hum, 2),
+           "co2_ppm": round(co2, 1),
+           "vibration_g": round(vib, 4),
+           "injected_anomaly": is_anomaly,
+       }
+
+   def main():
+       p = argparse.ArgumentParser()
+       p.add_argument("--endpoint", required=True)
+       p.add_argument("--device-id", default="psb-lab-sensor-01")
+       p.add_argument("--certs-dir", default="certs")
+       p.add_argument("--interval", type=float, default=10.0)
+       p.add_argument("--anomaly-rate", type=float, default=0.02)
+       p.add_argument("--backfill-hours", type=float, default=0.0,
+                      help="Publish this many hours of synthetic history, then stop.")
+       a = p.parse_args()
+
+       client = build_client(a.device_id, a.endpoint, a.certs_dir)
+       topic = TOPIC_TEMPLATE.format(device_id=a.device_id)
+       client.loop_start()
+
+       running = {"go": True}
+       signal.signal(signal.SIGINT, lambda *_: running.update(go=False))
+
+       if a.backfill_hours > 0:
+           now, step = time.time(), a.interval
+           n = int(a.backfill_hours * 3600 / step)
+           print(f"[sim] back-filling {n} readings over {a.backfill_hours} h ...")
+           for i in range(n):
+               t = now - (n - i) * step
+               msg = reading(SENSORS[i % len(SENSORS)], t, a.anomaly_rate)
+               client.publish(topic, json.dumps(msg), qos=1)
+               if i % 100 == 0:
+                   print(f"[sim] {i}/{n}")
+               time.sleep(0.02)
+           print("[sim] back-fill complete.")
+           client.loop_stop(); client.disconnect(); return
+
+       print(f"[sim] publishing to {topic} every {a.interval}s. Ctrl+C to stop.")
+       i = 0
+       while running["go"]:
+           msg = reading(SENSORS[i % len(SENSORS)], time.time(), a.anomaly_rate)
+           client.publish(topic, json.dumps(msg), qos=1)
+           print(f"[sim] {msg['location']:>12}  "
+                 f"{msg['temperature_c']:>6.2f} C  {msg['co2_ppm']:>7.1f} ppm"
+                 f"{'   <-- ANOMALY' if msg['injected_anomaly'] else ''}")
+           i += 1
+           time.sleep(a.interval)
+
+       client.loop_stop(); client.disconnect()
+
+   if __name__ == "__main__":
+       main()
+   ```
+
+   The three things to notice:
+
+   - `client.tls_set(...)` is the mutual-TLS handshake. The device presents `certfile` and proves possession of `keyfile`; it validates AWS against `ca_certs`.
+   - `client_id=device_id` must match the `client/psb-lab-sensor-01` ARN in your policy, or the broker will refuse the connection.
+   - `injected_anomaly` is present only so you can sanity-check Phase II later. Your model never sees this field; it is stripped before training.
+
+1. Start the simulator. Replace `<IOT-ENDPOINT>` with the device data endpoint you copied in Task 1:
 
    ```powershell
    python simulate_pi.py --endpoint <IOT-ENDPOINT> --certs-dir certs --interval 10
    ```
 
-   **What this script does:** it finds the **\*.cert.pem**, **\*.private.key** and **root-CA.crt** files in the **certs** folder, connects to AWS IoT Core over MQTT/TLS with client ID **psb-lab-sensor-01**, and publishes one reading every 10 seconds, cycling through **north-lab**, **south-lab** and **server-room**. About 2% of readings are injected anomalies.
-
-1. Confirm the output shows a successful connection:
+1. Within a few seconds you should see:
 
    ```text
-   rc=0 (Connection Accepted.)
+   [mqtt] connect rc=0 (Connection Accepted.)
+   [sim] publishing to psb/lab/psb-lab-sensor-01/telemetry every 10.0s. Ctrl+C to stop.
+   [sim]    north-lab   22.84 C   531.2 ppm
+   [sim]    south-lab   23.11 C   548.9 ppm
    ```
 
-   | Return code | Meaning / fix |
-   |---|---|
-   | **rc=0** | Connection accepted. All good. |
-   | **rc=5** | Not authorised: the certificate is **inactive** or the **policy is missing** from the certificate. Recheck Task 2. |
+   > **Troubleshooting:** If you see **rc=5 (Connection Refused: not authorised)**, the certificate is inactive or the policy is not attached; revisit Task 2. If the connection hangs, check that you used the device data endpoint (ending `-ats.iot.ap-southeast-1.amazonaws.com`) and not the credentials endpoint.
 
-1. Leave the PowerShell window running. In the IoT Core console, from the left menu select **Test** > **MQTT test client**.
+1. Leave this PowerShell window running. Open a second PowerShell window for the rest of the lab.
 
-1. On the **Subscribe to a topic** tab, enter the topic filter below and click **Subscribe**:
+1. Return to the AWS IoT Core console. In the left-hand navigation pane, click **MQTT test client**.
 
-   | Setting | Value |
-   |---|---|
-   | Topic filter | **psb/lab/+/telemetry** |
+1. On the **Subscribe to a topic** tab, in the **Topic filter** box, enter the following and click **Subscribe**:
 
-1. Confirm new JSON messages appear every 10 seconds under **Subscriptions**.
+   - **Topic filter:** **psb/lab/+/telemetry**
 
-   > 💡 **Tip:** The **+** wildcard matches a single topic level, so this filter would match every sensor that follows the **psb/lab/&lt;device&gt;/telemetry** pattern.
+   > **Note:** The `+` is a single-level MQTT wildcard. It matches any device ID at that position, which is how a real fleet subscription is written.
 
-1. Keep the simulator running for **at least 2 minutes** so the IoT metric **PublishIn.Success** has data. You can view it from the left menu under **Monitor**.
+1. Within ten seconds you should see messages appearing, each expandable to show a JSON payload like:
 
-   > ℹ️ **Info:** **Concept note: AWS IoT Greengrass.** In production, a gateway at the edge can run **AWS IoT Greengrass** to filter, buffer and process data locally before sending it to the cloud. This lab uses a direct MQTT connection instead (concept only, no Greengrass setup).
+   ```json
+   {
+     "device_id": "psb-lab-sensor-01",
+     "location": "north-lab",
+     "ts": 1789012345,
+     "temperature_c": 22.84,
+     "humidity_pct": 53.11,
+     "co2_ppm": 531.2,
+     "vibration_g": 0.0213,
+     "injected_anomaly": false
+   }
+   ```
 
-   > ⚠️ **Note:** Keep the simulator running for the rest of the lab. If you close PowerShell, rerun the two commands above.
+1. Let the simulator run for at least two minutes before validating, so that the AWS IoT Core **PublishIn.Success** metric has data points.
 
-   ✅ **Expected result:** The simulator shows **rc=0 (Connection Accepted.)**, messages appear in the MQTT test client, and **PublishIn.Success** has data points.
+   > **Concept note: where AWS IoT Greengrass would fit.** If this device needed to keep working during a network outage, run local inference, or aggregate several downstream sensors before publishing, you would install AWS IoT Greengrass on the Raspberry Pi. Greengrass gives the device a local Lambda runtime, a local message broker and a local ML inference engine, then syncs with AWS IoT Core when connectivity returns. It is out of scope for this lab because it requires managed edge hardware, but the certificate and policy you just created are exactly what a Greengrass core device uses to register.
 
    > **Congratulations** on completing the task! Now, it's time to validate it. Here are the steps:
    >
@@ -350,14 +459,13 @@ Sample telemetry message:
 
 ## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">📝</span>Summary
 
-In this lab, you:
+In this lab, you have completed the following:
 
-- Registered the thing **psb-lab-sensor-01** with an active X.509 certificate.
-- Created **psb-lab-device-policy**, a least-privilege policy scoped to the device's own client ID and topics, and made it the only policy on the certificate.
-- Ran the Python simulator from the lab VM and watched live telemetry in the MQTT test client.
-- Generated **PublishIn.Success** metrics in IoT Core.
+- Registered an AWS IoT Core Thing and generated an X.509 device certificate.
+- Authored a least-privilege IoT policy scoped to a single client ID and a single topic, and attached it to the certificate.
+- Connected the Raspberry Pi simulator over MQTT with mutual TLS and verified live telemetry in the MQTT test client.
 
-Click **Next** to continue.
+You have successfully completed the lab. Click **Next** to continue to the next lab.
 
 </div>
 

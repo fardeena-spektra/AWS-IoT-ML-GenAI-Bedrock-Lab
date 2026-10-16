@@ -1,207 +1,194 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AuthError, askAssistant, getAnomalies, getTelemetry } from './api.js';
+// PSB Academy CloudLab - React dashboard.
+// Settings come from src/config.js (the pre-built dist.zip also reads /config.json).
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { config } from "./config.js";
 
-const TOKEN_KEY = 'psb_id_token';
-const RELOGIN_KEY = 'psb_relogin_at';
-const REFRESH_MS = 30000;
-let redirecting = false; // avoids a double redirect (React StrictMode runs effects twice in dev)
-
-const METRICS = [
-  { id: 'temperature_c', label: 'Temperature', unit: '°C', digits: 2 },
-  { id: 'humidity_pct', label: 'Humidity', unit: '%', digits: 1 },
-  { id: 'co2_ppm', label: 'CO₂', unit: 'ppm', digits: 0 },
-  { id: 'vibration_g', label: 'Vibration', unit: 'g', digits: 3 },
-  { id: 'anomaly_score', label: 'Anomaly score', unit: '', digits: 3 },
-];
-const WINDOWS = [
-  { minutes: 15, label: '15m' },
-  { minutes: 60, label: '1h' },
-  { minutes: 360, label: '6h' },
-  { minutes: 1440, label: '24h' },
-];
-const LOCATIONS = ['north-lab', 'south-lab', 'server-room'];
-const LOCATION_COLORS = { 'north-lab': '#2563eb', 'south-lab': '#0d9488', 'server-room': '#9333ea' };
-
-// ------------------------------------------------------------------ auth
-function decodeJwt(token) {
-  try {
-    const part = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-    const json = decodeURIComponent(
-      atob(part.padEnd(part.length + ((4 - (part.length % 4)) % 4), '='))
-        .split('')
-        .map((c) => '%' + c.charCodeAt(0).toString(16).padStart(2, '0'))
-        .join('')
-    );
-    return JSON.parse(json);
-  } catch {
-    return null;
-  }
-}
-
-function tokenValid(token) {
-  const claims = token && decodeJwt(token);
-  return !!claims && typeof claims.exp === 'number' && claims.exp * 1000 > Date.now() + 30000;
-}
-
-function isConfigured(config) {
-  return ![config.cognitoDomain, config.userPoolClientId, config.apiBaseUrl].some((v) => !v || v.includes('<'));
-}
-
-/**
- * useAuth: after the Cognito Hosted UI redirect, reads id_token from location.hash,
- * stores it in sessionStorage 'psb_id_token', checks exp, and redirects to the
- * Hosted UI login page when the token is missing or expired.
- */
-function useAuth(config) {
-  const redirectUri = `${window.location.origin}/`;
-  const [token, setToken] = useState(() => {
-    const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''));
-    const fromHash = hash.get('id_token');
-    if (fromHash) {
-      sessionStorage.setItem(TOKEN_KEY, fromHash);
-      window.history.replaceState(null, '', window.location.pathname + window.location.search);
-    }
-    const stored = sessionStorage.getItem(TOKEN_KEY);
-    return tokenValid(stored) ? stored : null;
-  });
-  const [loopError, setLoopError] = useState(false);
-
-  const login = useCallback(() => {
-    if (redirecting) return;
-    // Guard against a redirect loop (e.g. wrong authorizer audience returns 401 for every token).
-    const last = Number(sessionStorage.getItem(RELOGIN_KEY) || 0);
-    if (Date.now() - last < 20000) {
-      setLoopError(true);
-      return;
-    }
-    sessionStorage.setItem(RELOGIN_KEY, String(Date.now()));
-    redirecting = true;
-    const qs =
-      `client_id=${encodeURIComponent(config.userPoolClientId)}` +
-      `&response_type=token&scope=email+openid+profile&redirect_uri=${encodeURIComponent(redirectUri)}`;
-    window.location.assign(`${config.cognitoDomain}/login?${qs}`);
-  }, [config, redirectUri]);
-
-  const logout = useCallback(() => {
-    sessionStorage.removeItem(TOKEN_KEY);
-    sessionStorage.removeItem(RELOGIN_KEY);
-    const qs = `client_id=${encodeURIComponent(config.userPoolClientId)}&logout_uri=${encodeURIComponent(redirectUri)}`;
-    window.location.assign(`${config.cognitoDomain}/logout?${qs}`);
-  }, [config, redirectUri]);
-
-  const reLogin = useCallback(() => {
-    sessionStorage.removeItem(TOKEN_KEY);
-    setToken(null);
-  }, []);
+// 1. Auth: exchange the Cognito redirect for a token, or send the user to sign in.
+function useAuth() {
+  const [idToken, setIdToken] = useState(
+    () => sessionStorage.getItem("psb_id_token") || "");
 
   useEffect(() => {
-    if (!token && isConfigured(config)) login();
-  }, [token, config, login]);
+    const hash = new URLSearchParams(window.location.hash.slice(1));
+    const token = hash.get("id_token");
+    if (token) {
+      sessionStorage.setItem("psb_id_token", token);
+      setIdToken(token);
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+  }, []);
 
-  const claims = token ? decodeJwt(token) : null;
-  return { token, email: claims?.email || claims?.['cognito:username'] || '', login, logout, reLogin, loopError };
-}
-
-// ------------------------------------------------------------------ helpers
-function fmt(v, digits) {
-  return v === null || v === undefined || Number.isNaN(v) ? '–' : Number(v).toFixed(digits);
-}
-
-function summarize(values) {
-  if (!values.length) return { count: 0, min: null, max: null, mean: null, latest: null };
-  const sum = values.reduce((a, b) => a + b, 0);
-  return { count: values.length, min: Math.min(...values), max: Math.max(...values), mean: sum / values.length, latest: values[values.length - 1] };
-}
-
-function timeLabel(ms, windowMinutes) {
-  const d = new Date(ms);
-  const hm = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  return windowMinutes > 720 ? `${d.toLocaleDateString([], { month: 'short', day: 'numeric' })} ${hm}` : hm;
-}
-
-// ------------------------------------------------------------------ chart (inline SVG)
-function LineChart({ points, color, metric, windowMinutes }) {
-  const [hover, setHover] = useState(null);
-  const W = 640, H = 220, P = { l: 52, r: 16, t: 14, b: 28 };
-  const data = points.map((p) => ({ ...p, t: Date.parse(p.time) })).filter((p) => !Number.isNaN(p.t));
-
-  if (data.length === 0) {
-    return <div className="chart-empty">No data in this window yet.</div>;
-  }
-  const tMin = Math.min(...data.map((d) => d.t));
-  const tMax = Math.max(...data.map((d) => d.t));
-  let vMin = Math.min(...data.map((d) => d.value));
-  let vMax = Math.max(...data.map((d) => d.value));
-  if (vMin === vMax) { vMin -= 1; vMax += 1; }
-  const pad = (vMax - vMin) * 0.1;
-  vMin -= pad; vMax += pad;
-  const x = (t) => P.l + (tMax === tMin ? (W - P.l - P.r) / 2 : ((t - tMin) / (tMax - tMin)) * (W - P.l - P.r));
-  const y = (v) => P.t + (1 - (v - vMin) / (vMax - vMin)) * (H - P.t - P.b);
-  const path = data.map((d, i) => `${i ? 'L' : 'M'}${x(d.t).toFixed(1)},${y(d.value).toFixed(1)}`).join(' ');
-  const yTicks = [0, 1, 2, 3].map((i) => vMin + ((vMax - vMin) * i) / 3);
-  const xTicks = [0, 1, 2, 3].map((i) => tMin + ((tMax - tMin) * i) / 3);
-
-  const onMove = (e) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const mx = ((e.clientX - rect.left) / rect.width) * W;
-    let best = data[0];
-    for (const d of data) if (Math.abs(x(d.t) - mx) < Math.abs(x(best.t) - mx)) best = d;
-    setHover(best);
+  const signIn = () => {
+    const u = new URL(config.cognitoDomain + "/login");
+    u.searchParams.set("client_id", config.userPoolClientId);
+    u.searchParams.set("response_type", "token");
+    u.searchParams.set("scope", "email openid");
+    u.searchParams.set("redirect_uri", config.redirectUri);
+    window.location.href = u.toString();
   };
 
+  return { idToken, signIn };
+}
+
+// 2. Data: every API call carries the bearer token.
+async function fetchSeries(idToken, path, params) {
+  const url = new URL(config.apiBaseUrl + path);
+  Object.entries(params).forEach(([k, v]) =>
+    v != null && url.searchParams.set(k, v));
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${idToken}` },
+  });
+  if (res.status === 401) throw new Error("Session expired - sign in again.");
+  if (!res.ok) throw new Error(`API returned ${res.status}`);
+  return res.json();
+}
+
+// 3. Render: a metric selector, a summary strip, a chart, and (from Lab 08)
+//    the assistant chat panel.
+
+const METRICS = [
+  { id: "temperature_c", label: "Temperature", unit: "°C" },
+  { id: "humidity_pct", label: "Humidity", unit: "%" },
+  { id: "co2_ppm", label: "CO₂", unit: "ppm" },
+  { id: "vibration_g", label: "Vibration", unit: "g" },
+  { id: "anomaly_score", label: "Anomaly score", unit: "" },
+];
+const WINDOWS = [
+  { mins: 15, label: "15 minutes" },
+  { mins: 60, label: "1 hour" },
+  { mins: 360, label: "6 hours" },
+  { mins: 1440, label: "24 hours" },
+];
+const COLORS = { "north-lab": "#2563eb", "south-lab": "#0d9488", "server-room": "#c2410c", all: "#6d28d9" };
+const EXTRA_COLORS = ["#7c3aed", "#db2777", "#65a30d"];
+
+function isConfigured() {
+  return ![config.cognitoDomain, config.userPoolClientId, config.apiBaseUrl]
+    .some((v) => !v || String(v).includes("<"));
+}
+
+// About 120 points per location, whatever the window.
+function bucketSeconds(windowMins) {
+  return Math.max(60, Math.round((windowMins * 60) / 120));
+}
+
+function fmt(v) {
+  if (v === null || v === undefined || Number.isNaN(Number(v))) return "-";
+  const n = Number(v);
+  return Math.abs(n) >= 100 ? n.toFixed(1) : Math.abs(n) >= 1 ? n.toFixed(2) : n.toFixed(4);
+}
+
+function SummaryStrip({ summary, unit }) {
+  const items = [
+    ["Latest", summary?.latest],
+    ["Min", summary?.min],
+    ["Max", summary?.max],
+    ["Mean", summary?.mean],
+  ];
   return (
-    <svg className="chart" viewBox={`0 0 ${W} ${H}`} onMouseMove={onMove} onMouseLeave={() => setHover(null)} role="img">
-      {yTicks.map((v, i) => (
-        <g key={`y${i}`}>
-          <line x1={P.l} x2={W - P.r} y1={y(v)} y2={y(v)} className="grid" />
-          <text x={P.l - 8} y={y(v) + 4} className="axis" textAnchor="end">{fmt(v, metric.digits)}</text>
-        </g>
+    <section className="summary">
+      {items.map(([k, v]) => (
+        <div className="stat card" key={k}>
+          <span className="k">{k}</span>
+          <span className="v">{fmt(v)}<small>{unit}</small></span>
+        </div>
       ))}
-      {xTicks.map((t, i) => (
-        <text key={`x${i}`} x={x(t)} y={H - 8} className="axis" textAnchor={i === 0 ? 'start' : i === 3 ? 'end' : 'middle'}>
-          {timeLabel(t, windowMinutes)}
-        </text>
-      ))}
-      <path d={path} fill="none" stroke={color} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
-      {data.filter((d) => d.flagged).map((d, i) => (
-        <circle key={`f${i}`} cx={x(d.t)} cy={y(d.value)} r="4" className="flag-dot" />
-      ))}
-      {hover && (
-        <g>
-          <line x1={x(hover.t)} x2={x(hover.t)} y1={P.t} y2={H - P.b} className="hover-line" />
-          <circle cx={x(hover.t)} cy={y(hover.value)} r="4" fill={color} />
-          <text x={Math.min(x(hover.t) + 8, W - 150)} y={P.t + 12} className="hover-text">
-            {timeLabel(hover.t, 0)}  {fmt(hover.value, metric.digits)} {metric.unit}
-          </text>
-        </g>
-      )}
-    </svg>
+      <div className="stat card">
+        <span className="k">Points</span>
+        <span className="v">{summary?.point_count ?? 0}</span>
+      </div>
+    </section>
   );
 }
 
-// ------------------------------------------------------------------ chat
-function ChatPanel({ token, onAuthError }) {
-  const [messages, setMessages] = useState([
-    { role: 'assistant', text: 'Ask me about north-lab, south-lab or server-room, for example: "What was the average temperature in the server-room over the last hour?"' },
-  ]);
-  const [input, setInput] = useState('');
-  const [busy, setBusy] = useState(false);
-  const endRef = useRef(null);
-  useEffect(() => endRef.current?.scrollIntoView({ behavior: 'smooth' }), [messages]);
+// Inline SVG line chart: one line per location.
+function LineChart({ points, unit, windowMins }) {
+  const W = 900, H = 320, P = { l: 64, r: 16, t: 16, b: 34 };
+  const series = useMemo(() => {
+    const groups = {};
+    for (const p of points || []) {
+      const t = Date.parse(p.time);
+      if (Number.isNaN(t) || typeof p.value !== "number") continue;
+      (groups[p.location] = groups[p.location] || []).push({ t, v: p.value });
+    }
+    Object.values(groups).forEach((g) => g.sort((a, b) => a.t - b.t));
+    return groups;
+  }, [points]);
 
-  const send = async (e) => {
+  const all = Object.values(series).flat();
+  if (all.length === 0) return <div className="card chart-empty">No data in this window yet.</div>;
+
+  const tMin = Math.min(...all.map((d) => d.t));
+  const tMax = Math.max(...all.map((d) => d.t));
+  let vMin = Math.min(...all.map((d) => d.v));
+  let vMax = Math.max(...all.map((d) => d.v));
+  if (vMin === vMax) { vMin -= 1; vMax += 1; }
+  const pad = (vMax - vMin) * 0.08;
+  vMin -= pad; vMax += pad;
+  const x = (t) => P.l + (tMax === tMin ? 0.5 : (t - tMin) / (tMax - tMin)) * (W - P.l - P.r);
+  const y = (v) => P.t + (1 - (v - vMin) / (vMax - vMin)) * (H - P.t - P.b);
+  const yTicks = [0, 1, 2, 3, 4].map((i) => vMin + ((vMax - vMin) * i) / 4);
+  const xTicks = [0, 1, 2, 3, 4].map((i) => tMin + ((tMax - tMin) * i) / 4);
+  const timeLabel = (ms) => {
+    const d = new Date(ms);
+    const hm = d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    return windowMins > 720 ? `${d.toLocaleDateString([], { month: "short", day: "numeric" })} ${hm}` : hm;
+  };
+  const names = Object.keys(series).sort();
+  const color = (name, i) => COLORS[name] || EXTRA_COLORS[i % EXTRA_COLORS.length];
+
+  return (
+    <section className="card chart-card">
+      <div className="legend">
+        {names.map((name, i) => (
+          <span key={name}><i style={{ background: color(name, i) }} />{name} ({series[name].length})</span>
+        ))}
+      </div>
+      <svg className="chart" viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Telemetry chart">
+        {yTicks.map((v, i) => (
+          <g key={`y${i}`}>
+            <line x1={P.l} x2={W - P.r} y1={y(v)} y2={y(v)} className="grid" />
+            <text x={P.l - 8} y={y(v) + 4} className="axis" textAnchor="end">{fmt(v)}</text>
+          </g>
+        ))}
+        {xTicks.map((t, i) => (
+          <text key={`x${i}`} x={x(t)} y={H - 10} className="axis"
+            textAnchor={i === 0 ? "start" : i === 4 ? "end" : "middle"}>{timeLabel(t)}</text>
+        ))}
+        <text x={14} y={P.t + 4} className="axis" transform={`rotate(-90 14 ${P.t + 4})`} textAnchor="end">{unit}</text>
+        {names.map((name, i) => (
+          <path key={name} fill="none" stroke={color(name, i)} strokeWidth="2" strokeLinejoin="round"
+            d={series[name].map((d, j) => `${j ? "L" : "M"}${x(d.t).toFixed(1)},${y(d.v).toFixed(1)}`).join(" ")} />
+        ))}
+      </svg>
+    </section>
+  );
+}
+
+// Lab 08: chat panel (shown only when config.assistantEnabled is true).
+function ChatPanel({ idToken, onExpired }) {
+  const [question, setQuestion] = useState("");
+  const [history, setHistory] = useState([]);
+  const [busy, setBusy] = useState(false);
+
+  const ask = async (e) => {
     e.preventDefault();
-    const q = input.trim();
+    const q = question.trim();
     if (!q || busy) return;
-    setInput('');
-    setMessages((m) => [...m, { role: 'user', text: q }]);
     setBusy(true);
+    setQuestion("");
     try {
-      const res = await askAssistant(token, q);
-      setMessages((m) => [...m, { role: 'assistant', text: res.answer, meta: `${res.tool_calls} tool call(s)` }]);
+      const res = await fetch(config.apiBaseUrl + "/assistant", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${idToken}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ question: q }),
+      });
+      if (res.status === 401) { onExpired(); throw new Error("Session expired - sign in again."); }
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(body.error || `API returned ${res.status}`);
+      setHistory((h) => [...h, { q, answer: body.answer, trace: body.trace || [] }]);
     } catch (err) {
-      if (err instanceof AuthError) return onAuthError();
-      setMessages((m) => [...m, { role: 'assistant', text: `Error: ${err.message}`, error: true }]);
+      setHistory((h) => [...h, { q, error: err.message }]);
     } finally {
       setBusy(false);
     }
@@ -209,214 +196,136 @@ function ChatPanel({ token, onAuthError }) {
 
   return (
     <section className="card chat">
-      <h2>Sensor assistant</h2>
+      <h2>Ask the assistant</h2>
       <div className="chat-log">
-        {messages.map((m, i) => (
-          <div key={i} className={`bubble ${m.role}${m.error ? ' error' : ''}`}>
-            {m.text}
-            {m.meta && <span className="meta">{m.meta}</span>}
+        {history.length === 0 && (
+          <p className="muted">Example: What is the average CO2 in the server room over the last two hours?</p>
+        )}
+        {history.map((m, i) => (
+          <div key={i} className="turn">
+            <div className="bubble user">{m.q}</div>
+            {m.error ? (
+              <div className="bubble error">{m.error}</div>
+            ) : (
+              <div className="bubble assistant">
+                {m.answer}
+                {m.trace.length > 0 && (
+                  <ul className="trace">
+                    {m.trace.map((t, j) => (
+                      <li key={j}>{t.tool}({Object.entries(t.input || {}).map(([k, v]) => `${k}=${v}`).join(", ")})</li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
           </div>
         ))}
-        {busy && <div className="bubble assistant typing">Thinking…</div>}
-        <div ref={endRef} />
+        {busy && <div className="bubble assistant muted">Thinking...</div>}
       </div>
-      <form className="chat-input" onSubmit={send}>
-        <input value={input} onChange={(e) => setInput(e.target.value)} placeholder="Ask a question about the lab sensors" maxLength={1000} />
-        <button type="submit" disabled={busy || !input.trim()}>Send</button>
+      <form className="chat-input" onSubmit={ask}>
+        <input value={question} onChange={(e) => setQuestion(e.target.value)} maxLength={500}
+          placeholder="Ask a question about the lab sensors" />
+        <button type="submit" disabled={busy || !question.trim()}>Ask</button>
       </form>
     </section>
   );
 }
 
-// ------------------------------------------------------------------ app
-export default function App({ config }) {
-  const auth = useAuth(config);
-  const [metricId, setMetricId] = useState('temperature_c');
-  const [windowMinutes, setWindowMinutes] = useState(60);
-  const [location, setLocation] = useState('');
-  const [points, setPoints] = useState([]);
-  const [anomalies, setAnomalies] = useState({ points: [], flagged_count: 0 });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+export default function App() {
+  const { idToken, signIn } = useAuth();
+  const [expired, setExpired] = useState(false);
+  const [metric, setMetric] = useState(config.defaultMetric || "temperature_c");
+  const [windowMins, setWindowMins] = useState(Number(config.defaultWindowMins) || 60);
+  const [data, setData] = useState(null);
+  const [error, setError] = useState("");
   const [updated, setUpdated] = useState(null);
-  const metric = METRICS.find((m) => m.id === metricId);
+  const signedIn = Boolean(idToken) && !expired;
+  const meta = METRICS.find((m) => m.id === metric) || METRICS[0];
+
+  const onExpired = useCallback(() => {
+    sessionStorage.removeItem("psb_id_token");
+    setExpired(true);
+  }, []);
 
   const load = useCallback(async () => {
-    if (!auth.token) return;
-    setLoading(true);
+    if (!signedIn) return;
     try {
-      const params = { metric: metricId, windowMinutes, location };
-      const anomalyRes = await getAnomalies(auth.token, params).catch((e) => {
-        if (e instanceof AuthError) throw e;
-        return { points: [], flagged_count: 0, error: e.message };
+      const path = metric === "anomaly_score" ? "/anomalies" : "/telemetry";
+      const result = await fetchSeries(idToken, path, {
+        metric: metric === "anomaly_score" ? null : metric,
+        window_minutes: windowMins,
+        bucket_seconds: bucketSeconds(windowMins),
       });
-      if (metricId === 'anomaly_score') {
-        if (anomalyRes.error) throw new Error(anomalyRes.error);
-        setPoints(anomalyRes.points.map((p) => ({ time: p.time, location: p.location, value: p.anomaly_score, flagged: p.flagged })));
-      } else {
-        const tel = await getTelemetry(auth.token, params);
-        setPoints(tel.points || []);
-      }
-      setAnomalies(anomalyRes);
-      setError('');
+      setData(result);
+      setError("");
       setUpdated(new Date());
     } catch (err) {
-      if (err instanceof AuthError) {
-        auth.reLogin();
-        return;
-      }
-      setError(err.message || String(err));
-    } finally {
-      setLoading(false);
+      if (String(err.message).startsWith("Session expired")) onExpired();
+      setError(err.message);
     }
-  }, [auth.token, auth.reLogin, metricId, windowMinutes, location]);
+  }, [signedIn, idToken, metric, windowMins, onExpired]);
 
   useEffect(() => {
     load();
-    const id = setInterval(load, REFRESH_MS);
+    const id = setInterval(load, (Number(config.refreshSeconds) || 30) * 1000);
     return () => clearInterval(id);
   }, [load]);
 
-  const byLocation = useMemo(() => {
-    const groups = {};
-    for (const loc of location ? [location] : LOCATIONS) groups[loc] = [];
-    for (const p of points) if (groups[p.location]) groups[p.location].push(p);
-    for (const loc of Object.keys(groups)) groups[loc].sort((a, b) => Date.parse(a.time) - Date.parse(b.time));
-    return groups;
-  }, [points, location]);
-
-  const summary = useMemo(() => {
-    const sorted = [...points].sort((a, b) => Date.parse(a.time) - Date.parse(b.time));
-    return summarize(sorted.map((p) => p.value));
-  }, [points]);
-
-  if (!isConfigured(config)) {
+  if (!isConfigured()) {
     return (
-      <div className="center-msg card">
+      <div className="center card">
         <h1>PSB Lab Dashboard</h1>
-        <p>Settings are not filled in yet. Edit <code>src/config.js</code> (or <code>config.json</code> in dist.zip) with your Cognito and API values, then rebuild.</p>
+        <p>Replace the placeholders in <code>src/config.js</code> (or <code>config.json</code> for the pre-built dist.zip) with your own values, then build and deploy again.</p>
       </div>
     );
   }
-  if (auth.loopError) {
-    return (
-      <div className="center-msg card">
-        <h1>Sign-in problem</h1>
-        <p>The API keeps rejecting the sign-in token (HTTP 401). Check the JWT authorizer issuer and audience (client ID), then try again.</p>
-        <button onClick={() => { sessionStorage.removeItem(RELOGIN_KEY); auth.login(); }}>Sign in again</button>
-      </div>
-    );
-  }
-  if (!auth.token) return <div className="center-msg">Redirecting to sign in…</div>;
 
-  const flaggedRows = [...(anomalies.points || [])].filter((p) => p.flagged).reverse().slice(0, 50);
+  if (!signedIn) {
+    return (
+      <div className="center card">
+        <h1>PSB Lab Dashboard</h1>
+        {expired && <p className="error-text">Session expired - sign in again.</p>}
+        <p className="muted">Sign in with your Cognito user to view the sensor telemetry.</p>
+        <button onClick={signIn}>Sign in</button>
+      </div>
+    );
+  }
 
   return (
     <div className="app">
       <header className="topbar">
-        <div className="brand">
-          <span className="logo">◉</span>
-          <div>
-            <h1>PSB Lab Sensors</h1>
-            <span className="sub">psb-lab-sensor-01 · {config.region}</span>
-          </div>
+        <div>
+          <h1>PSB Lab Sensors</h1>
+          <span className="muted">psb-lab-sensor-01 | {config.region}</span>
         </div>
-        <div className="user">
-          <span className="email">{auth.email}</span>
-          <button className="ghost" onClick={auth.logout}>Sign out</button>
-        </div>
+        <div className="muted">{updated ? `Updated ${updated.toLocaleTimeString()}` : "Loading..."}</div>
       </header>
 
       <main>
         <section className="controls card">
           <label>
             Metric
-            <select value={metricId} onChange={(e) => setMetricId(e.target.value)}>
-              {METRICS.map((m) => (
-                <option key={m.id} value={m.id}>{m.label}{m.unit ? ` (${m.unit})` : ''}</option>
-              ))}
+            <select value={metric} onChange={(e) => setMetric(e.target.value)}>
+              {METRICS.map((m) => <option key={m.id} value={m.id}>{m.id}</option>)}
             </select>
           </label>
-          <div className="seg" role="group" aria-label="Time window">
-            {WINDOWS.map((w) => (
-              <button key={w.minutes} className={w.minutes === windowMinutes ? 'active' : ''} onClick={() => setWindowMinutes(w.minutes)}>
-                {w.label}
-              </button>
-            ))}
-          </div>
           <label>
-            Location
-            <select value={location} onChange={(e) => setLocation(e.target.value)}>
-              <option value="">All</option>
-              {LOCATIONS.map((l) => <option key={l} value={l}>{l}</option>)}
+            Window
+            <select value={windowMins} onChange={(e) => setWindowMins(Number(e.target.value))}>
+              {WINDOWS.map((w) => <option key={w.mins} value={w.mins}>{w.label}</option>)}
             </select>
           </label>
-          <div className="status">
-            {loading ? 'Refreshing…' : updated ? `Updated ${updated.toLocaleTimeString()}` : ''}
-            <button className="ghost" onClick={load} disabled={loading}>Refresh</button>
-          </div>
+          <button className="ghost" onClick={load}>Refresh</button>
+          <span className="muted">Auto refresh every {Number(config.refreshSeconds) || 30} s</span>
         </section>
 
-        {error && <div className="alert">⚠ {error}</div>}
+        {error && <div className="alert">{error}</div>}
 
-        <section className="summary">
-          {[['Latest', summary.latest], ['Min', summary.min], ['Max', summary.max], ['Mean', summary.mean]].map(([k, v]) => (
-            <div className="stat card" key={k}>
-              <span className="k">{k}</span>
-              <span className="v">{fmt(v, metric.digits)}<small>{metric.unit}</small></span>
-            </div>
-          ))}
-          <div className="stat card">
-            <span className="k">Flagged anomalies</span>
-            <span className="v warn">{anomalies.flagged_count ?? 0}</span>
-          </div>
-        </section>
+        <SummaryStrip summary={data?.summary} unit={meta.unit} />
+        <LineChart points={data?.points} unit={meta.unit} windowMins={windowMins} />
 
-        <section className="charts">
-          {Object.entries(byLocation).map(([loc, pts]) => (
-            <div className="card chart-card" key={loc}>
-              <div className="chart-head">
-                <span className="dot" style={{ background: LOCATION_COLORS[loc] }} />
-                <h3>{loc}</h3>
-                <span className="muted">{metric.label} · {pts.length} points</span>
-              </div>
-              <LineChart points={pts} color={LOCATION_COLORS[loc]} metric={metric} windowMinutes={windowMinutes} />
-            </div>
-          ))}
-        </section>
-
-        <div className={config.assistantEnabled ? 'bottom two' : 'bottom'}>
-          <section className="card">
-            <h2>Anomalies <span className="muted">(flagged by the SageMaker model, last {WINDOWS.find((w) => w.minutes === windowMinutes)?.label})</span></h2>
-            {flaggedRows.length === 0 ? (
-              <p className="muted">No flagged readings in this window.</p>
-            ) : (
-              <div className="table-wrap">
-                <table>
-                  <thead>
-                    <tr><th>Time</th><th>Location</th><th>Score</th><th>Temp °C</th><th>Hum %</th><th>CO₂ ppm</th><th>Vib g</th></tr>
-                  </thead>
-                  <tbody>
-                    {flaggedRows.map((p, i) => (
-                      <tr key={i}>
-                        <td>{new Date(p.time).toLocaleString()}</td>
-                        <td>{p.location}</td>
-                        <td className="warn">{fmt(p.anomaly_score, 3)}</td>
-                        <td>{fmt(p.temperature_c, 2)}</td>
-                        <td>{fmt(p.humidity_pct, 1)}</td>
-                        <td>{fmt(p.co2_ppm, 0)}</td>
-                        <td>{fmt(p.vibration_g, 3)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </section>
-          {config.assistantEnabled && <ChatPanel token={auth.token} onAuthError={auth.reLogin} />}
-        </div>
+        {config.assistantEnabled === true && <ChatPanel idToken={idToken} onExpired={onExpired} />}
       </main>
-      <footer>Auto refresh every 30 s · AWS Demo || Bedrock with Claude</footer>
     </div>
   );
 }

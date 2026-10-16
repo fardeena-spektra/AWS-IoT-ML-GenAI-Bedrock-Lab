@@ -8,7 +8,8 @@
 
  Passes when:
    - Lambda psb-assistant is configured (py3.13, 512 MB, 90 s, MODEL_ID, QUERY_FUNCTION_NAME, MAX_TOOL_TURNS)
-   - inline psb-lab-assistant-policy grants bedrock:InvokeModel on the model and lambda:InvokeFunction on psb-query-telemetry
+   - inline psb-lab-assistant-policy grants bedrock:InvokeModel on the foundation model of MODEL_ID (amazon.nova-lite-v1:0 in the guide;
+     an apac.* inference profile also needs its inference-profile ARN) and lambda:InvokeFunction on psb-query-telemetry
    - route POST /assistant on psb-lab-api uses psb-lab-cognito-authorizer and integrates psb-assistant (payload 2.0)
    - psb-assistant was invoked in the last 24 hours
    - Amplify branch main has at least 2 successful deployments (redeployed with assistantEnabled true)
@@ -308,10 +309,12 @@ function Invoke-LabChecks {
         if ($msg) { return $msg }
         $pol = $ctx["policy:psb-lab-assistant-policy"]
         $model = "$($ctx["env:$fn"]["MODEL_ID"])"
-        if (-not $model) { $model = "apac.amazon.nova-lite-v1:0" }
+        if (-not $model) { $model = "amazon.nova-lite-v1:0" }
         $base = $model -replace '^(us|eu|apac|global)\.', ''
         $out = @()
-        if (-not (Test-PolicyAllows $pol "bedrock:InvokeModel" "arn:aws:bedrock:*:*foundation-model/$base")) { $out += "psb-lab-assistant-policy must allow bedrock:InvokeModel on arn:aws:bedrock:*::foundation-model/$base." }
+        # Foundation-model ARNs have an EMPTY account field (two colons); an account ID there gives AccessDenied
+        $fmOk = @(Get-PolicyResources $pol "bedrock:InvokeModel" | Where-Object { $_ -match ('^arn:aws:bedrock:[^:]*::foundation-model/' + [regex]::Escape($base) + '$') }).Count -gt 0
+        if (-not $fmOk) { $out += "psb-lab-assistant-policy must allow bedrock:InvokeModel on arn:aws:bedrock:${Region}::foundation-model/$base (empty account field, two colons). Use the JSON from Lab 08 Task 2." }
         if ($model -ne $base -and -not (Test-PolicyAllows $pol "bedrock:InvokeModel" "arn:aws:bedrock:*:*inference-profile/$model")) { $out += "psb-lab-assistant-policy must allow bedrock:InvokeModel on arn:aws:bedrock:${Region}:<account>:inference-profile/$model (the profile in MODEL_ID)." }
         if (-not (Test-PolicyAllows $pol "lambda:InvokeFunction" "arn:aws:lambda:${Region}:*:function:psb-query-telemetry*")) { $out += "psb-lab-assistant-policy must allow lambda:InvokeFunction on arn:aws:lambda:${Region}:<account>:function:psb-query-telemetry." }
         return $out

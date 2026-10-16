@@ -724,6 +724,12 @@
     "SageMakerUserProfile": {
       "Description": "Pre-created SageMaker user profile",
       "Value": "psb-lab-user"
+    },
+    "AWSAccountId": {
+      "Description": "AWS account ID used on the console sign-in page",
+      "Value": {
+        "Ref": "AWS::AccountId"
+      }
     }
   }
 }

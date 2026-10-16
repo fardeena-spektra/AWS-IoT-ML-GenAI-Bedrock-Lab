@@ -85,13 +85,34 @@
 .psbgs .psb-panel{padding:14px 12px!important;margin:14px 0!important}
 .psbgs .psb-shot{margin:6px 0 10px!important;padding:3px!important}
 .psbgs .psb-ico{width:1.7em!important;height:1.7em!important;margin-right:6px!important}
+/* v7: vibrant highlights instead of plain bold, icons sized to the text, tight spacing */
+.psbgs strong,.psbgs b{color:#0e7490!important;font-weight:600!important}
+.psbgs th strong,.psbgs th b,.psbgs .psb-hero b{color:inherit!important}
+.psbgs h1 strong,.psbgs h2 strong,.psbgs h3 strong{color:inherit!important}
+.psbgs .psb-ico{width:1.3em!important;height:1.3em!important;margin-right:.35em!important;vertical-align:-0.22em!important;border-radius:7px!important;font-size:1em!important;line-height:1!important}
+.psbgs .psb-ico img{width:.95em!important;height:.95em!important}
+.psbgs h2 .psb-ico,.psbgs h3 .psb-ico{font-size:1em!important}
+.psbgs td .psb-ico{font-size:.95em!important}
+.psbgs .psb-panel{padding:10px 10px!important;margin:10px 0!important}
+.psbgs ol{padding-left:1.75em!important;margin:2px 0 6px!important}
+.psbgs ul{padding-left:1.15em!important;margin:2px 0 6px!important}
+.psbgs img{max-width:100%!important;height:auto!important}
+.psbgs li{margin:0 0 4px!important;padding-left:0!important}
+.psbgs li>p,.psbgs p{margin:0 0 6px!important}
+.psbgs table{display:table!important;width:100%!important;max-width:100%!important;margin:4px 0 8px!important}
+.psbgs th,.psbgs td{padding:6px 8px!important}
+.psbgs blockquote{margin:4px 0 8px!important;padding:6px 10px!important}
+.psbgs pre{margin:4px 0 8px!important}
+.psbgs .psb-shot{margin:4px 0 8px!important;padding:2px!important}
+.psbgs h2{margin:0 0 8px!important;padding-bottom:8px!important}
+.psbgs h3{margin:10px 0 4px!important}
 @media (prefers-reduced-motion:reduce){.psbgs *,.psbgs *::before,.psbgs *::after{animation:none!important;transition:none!important}}
 </style>
 
 <div class="psbgs">
 
 <div class="psb-hero" style="position:relative;overflow:hidden;border-radius:16px;padding:28px 20px 24px;margin:0 0 6px;text-align:center;color:#ffffff;background:linear-gradient(120deg,#070b1a,#121a3a,#0d2b36,#16123a);">
-<div class="psb-title" style="color:#ffffff;font-size:1.6em;font-weight:700;line-height:1.3;text-align:center;">Lab 07: Automated Scoring Pipeline</div>
+<div class="psb-title" style="color:#ffffff;font-size:1.6em;font-weight:700;line-height:1.3;text-align:center;">Lab 07: Serve Predictions and Close the Loop</div>
 <div class="psb-line" style="width:90px;height:3px;margin:14px auto 12px;border-radius:3px;background:linear-gradient(90deg,#e9b949,#14b8a6);"></div>
 <div class="psb-meta" style="color:#d5dbe3;margin-top:6px;text-align:center;">50 Minutes&nbsp;&nbsp;|&nbsp;&nbsp;12 Points</div>
 </div>
@@ -100,93 +121,239 @@
 
 ## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🎯</span>Overview
 
-Your model is live behind a serverless endpoint. In this lab, you automate scoring: a Lambda function reads the latest telemetry from InfluxDB every 5 minutes, sends it to **psb-anomaly-endpoint**, writes anomaly scores back to InfluxDB and a CSV to S3. Your API and dashboard then show the **anomaly_score** metric.
+A model in a notebook is an experiment. A model wired into the pipeline is a system.
+
+In this lab you will build a scheduled Lambda function that pulls the most recent readings from Timestream for InfluxDB, sends them to your SageMaker serverless endpoint, and writes the resulting anomaly scores back into the same InfluxDB bucket as a new field. Your existing dashboard will then be able to plot them with no code change at all, because **anomaly_score** was already in the query Lambda's allow-list.
 
 </div>
 
 <div class="psb-panel" style="background:#ffffff;border:1px solid #d5dbe3;border-radius:16px;padding:18px 16px;margin:24px 0;">
 
-## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">📋</span>Objectives
+## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">📋</span>Lab Objectives
 
-In this lab, you will complete the following tasks:
+You will be able to complete the following tasks:
 
-1. 🧮 **Task 1:** Create the psb-score-telemetry Lambda function.
-1. ⏰ **Task 2:** Schedule it every 5 minutes with Amazon EventBridge.
-1. 🔍 **Task 3:** Verify anomalies in the API, the dashboard and S3.
-
-</div>
-
-<div class="psb-panel" style="background:#ffffff;border:1px solid #d5dbe3;border-radius:16px;padding:18px 16px;margin:24px 0;">
-
-## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🏗️</span>What you build
-
-```text
-EventBridge rate(5 minutes) ──► psb-score-telemetry
-                                  ├─► InfluxDB (read last 6 min of telemetry)
-                                  ├─► SageMaker psb-anomaly-endpoint (text/csv)
-                                  ├─► InfluxDB measurement "anomaly" (anomaly_score, flagged)
-                                  └─► S3 curated/scored/YYYY/MM/DD/HHMMSS.csv
-```
-
-> ⚠️ **Note:** Have your **ANOMALY_CUTOFF** value from Lab 06 and the InfluxDB endpoint and secret ARN from Lab 02 ready.
+- Task 1: Build the scoring Lambda function
+- Task 2: Schedule it with Amazon EventBridge
+- Task 3: Verify the closed loop in the dashboard
 
 </div>
 
 <div class="psb-panel" style="background:#ffffff;border:1px solid #d5dbe3;border-radius:16px;padding:18px 16px;margin:24px 0;">
 
-## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧩</span>Task 1: Create the psb-score-telemetry Lambda Function
+## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧩</span>Task 1: Build the Scoring Lambda Function
 
-🎯 **Goal:** Deploy the scoring function with the right settings, environment variables and least-privilege permissions.
+1. In the Lambda console, click **Create function**.
 
-1. Open **AWS Lambda** > **Functions** and select **Create function**.
+1. Configure:
 
-1. Choose **Author from scratch** and enter:
-
-   | Setting | Value |
+   | Field | Value |
    |---|---|
-   | **Function name** | psb-score-telemetry |
-   | **Runtime** | Python 3.13 |
-   | **Architecture** | x86_64 |
-   | **Execution role** | Create a new role with basic Lambda permissions |
+   | Option | **Author from scratch** |
+   | Function name | **psb-score-telemetry** |
+   | Runtime | **Python 3.13** |
+   | Architecture | **x86_64** |
+   | Execution role | **Create a new role with basic Lambda permissions** |
 
-1. Select **Create function**.
+   Click **Create function**.
 
-1. On the lab VM, open **C:\psb-lab-assets\lambdas\psb-score-telemetry\lambda_function.py** in **VS Code**, copy all of it, paste it into the Lambda console editor (replacing the sample code), and select **Deploy**.
+1. Replace the contents of **lambda_function.py** with:
 
-   > ℹ️ **Info:** The function:
-   > - Reads the last **WINDOW_MINUTES** of telemetry from InfluxDB and pivots the 4 fields into rows.
-   > - Sends rows to the endpoint as **text/csv** (temperature_c,humidity_pct,co2_ppm,vibration_g).
-   > - Reads the RCF response **{"scores":[{"score":x},...]}** and sets **flagged** when score > **ANOMALY_CUTOFF**.
-   > - Writes points to the InfluxDB measurement **anomaly** and a CSV to **curated/scored/YYYY/MM/DD/HHMMSS.csv**.
-   > - Prints **[ok] scored=&lt;n&gt; flagged=&lt;m&gt;** (also when n=0) and returns **{"scored":n,"flagged":m}**.
+   ```python
+   """
+   PSB Academy CloudLab - scheduled anomaly scoring.
 
-1. Select **Configuration** > **General configuration** > **Edit** and set:
+   Every 5 minutes:
+     1. read the most recent readings from Timestream for InfluxDB
+     2. score them against the SageMaker serverless endpoint
+     3. write the anomaly_score back into the same InfluxDB bucket
+     4. append the scored rows to s3://<bucket>/curated/scored/
+   """
+   import csv
+   import io
+   import json
+   import os
+   import time
+   import urllib.request
+   from collections import defaultdict
 
-   | Setting | Value |
+   import boto3
+
+   INFLUX_URL = os.environ["INFLUX_URL"]
+   INFLUX_ORG = os.environ["INFLUX_ORG"]
+   INFLUX_BUCKET = os.environ["INFLUX_BUCKET"]
+   SECRET_ID = os.environ["INFLUX_SECRET_ID"]
+   ENDPOINT_NAME = os.environ["SAGEMAKER_ENDPOINT"]
+   S3_BUCKET = os.environ["S3_BUCKET"]
+   CUTOFF = float(os.environ.get("ANOMALY_CUTOFF", "1.5"))
+   WINDOW_MINUTES = int(os.environ.get("WINDOW_MINUTES", "6"))
+
+   FEATURES = ["temperature_c", "humidity_pct", "co2_ppm", "vibration_g"]
+
+   _sm = boto3.client("secretsmanager")
+   _runtime = boto3.client("sagemaker-runtime")
+   _s3 = boto3.client("s3")
+   _token_cache = None
+
+   def _token():
+       global _token_cache
+       if _token_cache is None:
+           secret = _sm.get_secret_value(SecretId=SECRET_ID)["SecretString"]
+           _token_cache = json.loads(secret)["token"]
+       return _token_cache
+
+   def _parse_annotated_csv(body):
+       """InfluxDB returns annotated CSV: skip #comment lines, take each
+       table's own header row. See Lab 03 for the full explanation."""
+       rows, header = [], None
+       for line in body.splitlines():
+           if not line.strip() or line.lstrip().startswith("#"):
+               continue
+           fields = next(csv.reader([line]))
+           if "_time" in fields or "result" in fields:
+               header = fields
+               continue
+           if header:
+               rows.append(dict(zip(header, fields)))
+       return rows
+
+   def _influx(path, body, content_type, accept=None):
+       headers = {"Authorization": f"Token {_token()}",
+                  "Content-Type": content_type}
+       if accept:
+           headers["Accept"] = accept
+       request = urllib.request.Request(
+           url=f"{INFLUX_URL}{path}", data=body.encode("utf-8"),
+           method="POST", headers=headers)
+       with urllib.request.urlopen(request, timeout=15) as response:
+           return response.read().decode("utf-8"), response.status
+
+   def read_recent():
+       """Pivot the last WINDOW_MINUTES of readings into feature rows."""
+       flux = f'''
+   from(bucket: "{INFLUX_BUCKET}")
+     |> range(start: -{WINDOW_MINUTES}m)
+     |> filter(fn: (r) => r["_measurement"] == "reading")
+     |> filter(fn: (r) => contains(value: r["_field"],
+                                   set: {json.dumps(FEATURES)}))
+     |> pivot(rowKey: ["_time"], columnKey: ["_field"], valueColumn: "_value")
+     |> keep(columns: ["_time", "device_id", "location"] + {json.dumps(FEATURES)})
+     |> sort(columns: ["_time"])
+   '''.strip()
+       body, _ = _influx(f"/api/v2/query?org={INFLUX_ORG}", flux,
+                         "application/vnd.flux", "application/csv")
+
+       rows = []
+       for row in _parse_annotated_csv(body):
+           if not row.get("_time"):
+               continue
+           try:
+               features = [float(row[f]) for f in FEATURES]
+           except (KeyError, TypeError, ValueError):
+               continue          # incomplete pivot row - skip it
+           rows.append({
+               "time": row["_time"],
+               "device_id": row.get("device_id", "unknown"),
+               "location": row.get("location", "unspecified"),
+               "features": features,
+           })
+       return rows
+
+   def score(rows):
+       payload = "\n".join(",".join(f"{v:.6f}" for v in r["features"])
+                           for r in rows)
+       response = _runtime.invoke_endpoint(
+           EndpointName=ENDPOINT_NAME,
+           ContentType="text/csv",
+           Accept="application/json",
+           Body=payload.encode("utf-8"),
+       )
+       body = json.loads(response["Body"].read())
+       return [float(s["score"]) for s in body["scores"]]
+
+   def write_back(rows, scores):
+       """One line-protocol point per reading, same tags, new field."""
+       lines = []
+       for row, value in zip(rows, scores):
+           ts = int(time.mktime(time.strptime(
+               row["time"][:19], "%Y-%m-%dT%H:%M:%S")))
+           device = row["device_id"].replace(" ", "\\ ")
+           location = row["location"].replace(" ", "\\ ")
+           lines.append(
+               f"reading,device_id={device},location={location} "
+               f"anomaly_score={value:.6f} {ts}")
+       body = "\n".join(lines)
+       _, status = _influx(
+           f"/api/v2/write?org={INFLUX_ORG}&bucket={INFLUX_BUCKET}&precision=s",
+           body, "text/plain; charset=utf-8")
+       return status
+
+   def archive(rows, scores):
+       buf = io.StringIO()
+       writer = csv.writer(buf)
+       writer.writerow(["time", "device_id", "location"] + FEATURES
+                       + ["anomaly_score", "is_anomaly"])
+       for row, value in zip(rows, scores):
+           writer.writerow([row["time"], row["device_id"], row["location"]]
+                           + [f"{v:.4f}" for v in row["features"]]
+                           + [f"{value:.6f}", int(value > CUTOFF)])
+       key = time.strftime("curated/scored/%Y/%m/%d/%H%M%S.csv", time.gmtime())
+       _s3.put_object(Bucket=S3_BUCKET, Key=key,
+                      Body=buf.getvalue().encode("utf-8"))
+       return key
+
+   def lambda_handler(event, context):
+       rows = read_recent()
+       if not rows:
+           print("[skip] no complete readings in window")
+           return {"scored": 0}
+
+       scores = score(rows)
+       status = write_back(rows, scores)
+       key = archive(rows, scores)
+
+       flagged = sum(1 for s in scores if s > CUTOFF)
+       by_location = defaultdict(int)
+       for row, value in zip(rows, scores):
+           if value > CUTOFF:
+               by_location[row["location"]] += 1
+
+       print(f"[ok] scored={len(rows)} flagged={flagged} "
+             f"influx={status} s3={key} by_location={dict(by_location)}")
+       return {"scored": len(rows), "flagged": flagged, "archive": key}
+   ```
+
+1. Click **Deploy**.
+
+1. Open **Configuration** → **General configuration** → **Edit**:
+
+   | Field | Value |
    |---|---|
-   | **Memory** | 512 MB |
-   | **Timeout** | 1 min 0 sec |
+   | Memory | **512 MB** |
+   | Timeout | **1 min 0 sec** |
 
-   Select **Save**.
+   Click **Save**.
 
-1. Select **Configuration** > **Environment variables** > **Edit**, add the following 8 variables, and select **Save**:
+   > **Note:** The timeout is a minute rather than 30 seconds because a serverless SageMaker endpoint can take one to three seconds to cold-start, and this function makes three network calls in sequence.
+
+1. Open **Configuration** → **Environment variables** → **Edit** and add:
 
    | Key | Value |
    |---|---|
-   | **INFLUX_URL** | https://&lt;INFLUX-ENDPOINT&gt;:8086 |
-   | **INFLUX_ORG** | psb |
-   | **INFLUX_BUCKET** | telemetry |
-   | **INFLUX_SECRET_ID** | psb/influxdb/admin-token |
-   | **SAGEMAKER_ENDPOINT** | psb-anomaly-endpoint |
-   | **S3_BUCKET** | <inject key="LabBucketName" enableCopy="true"/> |
-   | **ANOMALY_CUTOFF** | your value from Lab 06 (for example 2.8471) |
-   | **WINDOW_MINUTES** | 6 |
+   | INFLUX_URL | **https://&lt;INFLUX-ENDPOINT&gt;:8086** |
+   | INFLUX_ORG | **psb** |
+   | INFLUX_BUCKET | **telemetry** |
+   | INFLUX_SECRET_ID | **psb/influxdb/admin-token** |
+   | SAGEMAKER_ENDPOINT | **psb-anomaly-endpoint** |
+   | S3_BUCKET | **psb-lab-<inject key="DeploymentID" enableCopy="false"/>** |
+   | ANOMALY_CUTOFF | The value you copied from Lab 06 Cell 10 |
+   | WINDOW_MINUTES | **6** |
 
-   > 💡 **Tip:** **WINDOW_MINUTES** is 6 so each 5 minute run overlaps the previous one slightly and no reading is missed.
+   Click **Save**.
 
-1. Select **Configuration** > **Permissions** and select the execution role name to open it in IAM.
+   > **Note:** **WINDOW_MINUTES** is 6 while the schedule is every 5 minutes. The one-minute overlap means a reading that arrives right on a boundary is scored rather than skipped. Writing the same point twice in InfluxDB is harmless: a point with the same measurement, tag set and timestamp is overwritten, not duplicated.
 
-1. Select **Add permissions** > **Create inline policy**, switch to **JSON**, and paste this policy. Replace **&lt;SECRET-ARN&gt;**, **&lt;AWS-REGION&gt;** (ap-southeast-1), **&lt;AWS-ACCOUNT-ID&gt;** and **&lt;DEPLOYMENT-ID&gt;**:
+1. Open **Configuration** → **Permissions**, click the **Role name** link, and add an inline policy. Click **Add permissions** → **Create inline policy** → **JSON**, and paste the following, replacing the three placeholders (`<SECRET-ARN>`, `<AWS-ACCOUNT-ID>` with **<inject key="AWSAccountId" enableCopy="true"/>**, and `<S3-BUCKET>` with **<inject key="LabBucketName" enableCopy="true"/>**):
 
    ```json
    {
@@ -202,94 +369,91 @@ EventBridge rate(5 minutes) ──► psb-score-telemetry
          "Sid": "AllowInvokeAnomalyEndpoint",
          "Effect": "Allow",
          "Action": "sagemaker:InvokeEndpoint",
-         "Resource": "arn:aws:sagemaker:<AWS-REGION>:<AWS-ACCOUNT-ID>:endpoint/psb-anomaly-endpoint"
+         "Resource": "arn:aws:sagemaker:ap-southeast-1:<AWS-ACCOUNT-ID>:endpoint/psb-anomaly-endpoint"
        },
        {
-         "Sid": "AllowWriteCuratedOnly",
+         "Sid": "AllowWriteCuratedScores",
          "Effect": "Allow",
          "Action": "s3:PutObject",
-         "Resource": "arn:aws:s3:::psb-lab-<DEPLOYMENT-ID>/curated/*"
+         "Resource": "arn:aws:s3:::<S3-BUCKET>/curated/*"
        }
      ]
    }
    ```
 
-   The file is also at **C:\psb-lab-assets\policies\psb-lab-score-telemetry-policy.json**. Your Deployment ID is <inject key="DeploymentID" enableCopy="true"/>.
+1. Click **Next**, name it **psb-lab-score-telemetry-policy**, and click **Create policy**.
 
-1. Select **Next**, name the policy **psb-lab-score-telemetry-policy**, and select **Create policy**.
+1. Return to the function, open the **Test** tab, create a test event named **manual-run** with the body `{}`, and click **Test**.
 
-1. Back in Lambda, open the **Test** tab, create a new event named **manual-run** with this body, and select **Test**:
+1. Confirm the response looks like:
 
    ```json
-   {}
+   { "scored": 108, "flagged": 3, "archive": "curated/scored/2026/09/10/143005.csv" }
    ```
 
-   | Problem | Likely cause and fix |
-   |---|---|
-   | AccessDenied on InvokeEndpoint | Endpoint ARN in the inline policy has the wrong region or account ID. |
-   | AccessDenied on PutObject | **S3_BUCKET** or the bucket name in the policy is wrong. |
-   | 403 from InfluxDB | Wrong secret ID or the secret ARN is missing from the policy. |
-   | Timeout | Port 8086 not reachable (psb-lab-influx-sg) or the endpoint is cold; run the test again. |
-
-✅ **Expected result:** The test succeeds and the log output shows **[ok] scored=&lt;n&gt; flagged=&lt;m&gt;**.
+   > **Troubleshooting:** `"scored": 0` means the pivot returned no complete rows; check that your simulator is still publishing. A **ModelError** from SageMaker usually means the CSV column count does not match what the model was trained on; confirm **FEATURES** is the same four fields, in the same order, as Lab 06 Cell 3. An **AccessDeniedException** means the inline policy above was not saved.
 
 </div>
 
 <div class="psb-panel" style="background:#ffffff;border:1px solid #d5dbe3;border-radius:16px;padding:18px 16px;margin:24px 0;">
 
-## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧩</span>Task 2: Schedule It Every 5 Minutes with Amazon EventBridge
+## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧩</span>Task 2: Schedule It with Amazon EventBridge
 
-🎯 **Goal:** Run the scoring function automatically on a fixed schedule.
+1. Still on the **psb-score-telemetry** function page, select the **Configuration** tab and click **Triggers** in the left pane.
 
-1. On the **psb-score-telemetry** function page, in **Function overview**, select **Add trigger**.
+1. Click **Add trigger**.
 
-1. Configure the trigger:
+1. From the source dropdown, select **EventBridge (CloudWatch Events)**.
 
-   | Setting | Value |
+1. Configure:
+
+   | Field | Value |
    |---|---|
-   | **Trigger source** | EventBridge (CloudWatch Events) |
-   | **Rule** | Create a new rule |
-   | **Rule name** | psb-lab-score-every-5-min |
-   | **Rule type** | Schedule expression |
-   | **Schedule expression** | rate(5 minutes) |
+   | Rule | **Create a new rule** |
+   | Rule name | **psb-lab-score-every-5-min** |
+   | Rule description | **Score recent telemetry for anomalies** |
+   | Rule type | **Schedule expression** |
+   | Schedule expression | **rate(5 minutes)** |
 
-1. Select **Add**.
+1. Click **Add**.
 
-1. Wait 5 to 10 minutes, then select **Monitor** > **View CloudWatch logs** and open the newest log stream.
+1. Confirm the trigger appears with state **Enabled**.
 
-   ```text
-   [ok] scored=36 flagged=1
-   ```
+1. Wait five minutes, then open the **Monitor** tab and click **View CloudWatch logs**.
 
-✅ **Expected result:** A new **[ok] scored=... flagged=...** line appears in the log about every 5 minutes.
+1. Open the most recent log stream and confirm you see an **[ok] scored=... flagged=...** line from the scheduled invocation.
+
+   > **Note:** `rate(5 minutes)` is a rate expression, the simplest form EventBridge offers. For anything time-of-day dependent you would use a `cron()` expression, which in EventBridge is evaluated in UTC, a frequent source of confusion for teams in UTC+8.
 
 </div>
 
 <div class="psb-panel" style="background:#ffffff;border:1px solid #d5dbe3;border-radius:16px;padding:18px 16px;margin:24px 0;">
 
-## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧩</span>Task 3: Verify Anomalies in the API, the Dashboard and S3
+## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧩</span>Task 3: Verify the Closed Loop in the Dashboard
 
-🎯 **Goal:** See the anomaly scores end to end.
-
-1. Your ID token from Lab 04 expires after 1 hour. If needed, sign in again through the Hosted UI login URL from Lab 04, copy the new **id_token**, and set it in PowerShell:
+1. Confirm the scores are reachable through your API. In PowerShell, using a fresh token if yours has expired:
 
    ```powershell
-   $env:ID_TOKEN = "<ID-TOKEN>"
+   curl.exe -H "Authorization: Bearer <ID-TOKEN>" "<INVOKE-URL>/anomalies?window_minutes=60"
    ```
 
-1. Call the anomalies route (replace **&lt;API-URL&gt;** with your Invoke URL):
+1. You should receive a **summary** and **points** array for the **anomaly_score** metric.
 
-   ```powershell
-   curl.exe -H "Authorization: Bearer $env:ID_TOKEN" "<API-URL>/anomalies?window_minutes=60"
-   ```
+   > **Note:** You did not change a single line of the query Lambda to make this work. **anomaly_score** was in **ALLOWED_METRICS** from the start, and the scoring function writes it into the same measurement with the same tags. That is the payoff of keeping one measurement with many fields rather than a separate table per signal.
 
-   You see JSON with **window_minutes**, a **points** list (time, location, anomaly_score, flagged, ...) and **flagged_count**.
+1. Open your Amplify dashboard URL in a browser and sign in if prompted.
 
-1. Open your Amplify dashboard, sign in if prompted, and choose **Anomaly score** in the metric selector. Scores are plotted per location.
+1. In the metric selector, choose **anomaly_score**.
 
-1. In the S3 console, open <inject key="LabBucketName" enableCopy="false"/> > **curated/scored/** and confirm new CSV files in the **YYYY/MM/DD/** folders.
+1. Set the window to **6 hours**. You should see the score series, low most of the time with sharp peaks.
 
-   ✅ **Expected result:** The API returns anomaly points, the dashboard plots **anomaly_score**, and new CSV files appear in **curated/scored/** every 5 minutes.
+1. Switch back to **co2_ppm** over the same window and compare the two charts. The score peaks should line up with the CO₂ spikes.
+
+1. Finally, confirm the S3 archive. In the S3 console, open your bucket and navigate to **curated/scored/**. You should see one CSV object every five minutes, in a date-partitioned path.
+
+1. Download the most recent one and open it. Each row has the four features, the anomaly score, and a binary **is_anomaly** flag.
+
+   > **Why archive to S3 as well as InfluxDB?** InfluxDB is your operational store: fast reads, short retention. S3 is your analytical store: cheap, durable, unlimited retention, and directly queryable by Amazon Athena or readable by the next model you train. Writing to both is the standard pattern, and it is what lets you retrain on six months of history later without keeping six months of hot time-series storage.
 
    > **Congratulations** on completing the task! Now, it's time to validate it. Here are the steps:
    >
@@ -305,14 +469,16 @@ EventBridge rate(5 minutes) ──► psb-score-telemetry
 
 ## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">📝</span>Summary
 
-In this lab, you:
+In this lab, you have completed the following:
 
-- Created **psb-score-telemetry** (Python 3.13, 512 MB, 1 minute) with 8 environment variables.
-- Granted least-privilege access with **psb-lab-score-telemetry-policy** (secret, endpoint, curated/*).
-- Scheduled it with the EventBridge rule **psb-lab-score-every-5-min** (rate(5 minutes)).
-- Verified anomaly scores through **GET /anomalies**, the dashboard and **curated/scored/** CSV files.
+- Built a Lambda function that reads recent telemetry, scores it against a SageMaker serverless endpoint, and writes the results back.
+- Scheduled it with Amazon EventBridge to run every five minutes.
+- Verified the anomaly scores flow through the existing API and appear in the dashboard with no frontend change.
+- Archived scored output to Amazon S3 for future retraining and analysis.
 
-Click **Next** to continue.
+Phase II is complete. Your solution now detects anomalies continuously, not just in a notebook.
+
+You have successfully completed the lab. Click **Next** to continue to the next lab.
 
 </div>
 

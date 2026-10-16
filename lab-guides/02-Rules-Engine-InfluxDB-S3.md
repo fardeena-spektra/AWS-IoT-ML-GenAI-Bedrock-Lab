@@ -85,13 +85,34 @@
 .psbgs .psb-panel{padding:14px 12px!important;margin:14px 0!important}
 .psbgs .psb-shot{margin:6px 0 10px!important;padding:3px!important}
 .psbgs .psb-ico{width:1.7em!important;height:1.7em!important;margin-right:6px!important}
+/* v7: vibrant highlights instead of plain bold, icons sized to the text, tight spacing */
+.psbgs strong,.psbgs b{color:#0e7490!important;font-weight:600!important}
+.psbgs th strong,.psbgs th b,.psbgs .psb-hero b{color:inherit!important}
+.psbgs h1 strong,.psbgs h2 strong,.psbgs h3 strong{color:inherit!important}
+.psbgs .psb-ico{width:1.3em!important;height:1.3em!important;margin-right:.35em!important;vertical-align:-0.22em!important;border-radius:7px!important;font-size:1em!important;line-height:1!important}
+.psbgs .psb-ico img{width:.95em!important;height:.95em!important}
+.psbgs h2 .psb-ico,.psbgs h3 .psb-ico{font-size:1em!important}
+.psbgs td .psb-ico{font-size:.95em!important}
+.psbgs .psb-panel{padding:10px 10px!important;margin:10px 0!important}
+.psbgs ol{padding-left:1.75em!important;margin:2px 0 6px!important}
+.psbgs ul{padding-left:1.15em!important;margin:2px 0 6px!important}
+.psbgs img{max-width:100%!important;height:auto!important}
+.psbgs li{margin:0 0 4px!important;padding-left:0!important}
+.psbgs li>p,.psbgs p{margin:0 0 6px!important}
+.psbgs table{display:table!important;width:100%!important;max-width:100%!important;margin:4px 0 8px!important}
+.psbgs th,.psbgs td{padding:6px 8px!important}
+.psbgs blockquote{margin:4px 0 8px!important;padding:6px 10px!important}
+.psbgs pre{margin:4px 0 8px!important}
+.psbgs .psb-shot{margin:4px 0 8px!important;padding:2px!important}
+.psbgs h2{margin:0 0 8px!important;padding-bottom:8px!important}
+.psbgs h3{margin:10px 0 4px!important}
 @media (prefers-reduced-motion:reduce){.psbgs *,.psbgs *::before,.psbgs *::after{animation:none!important;transition:none!important}}
 </style>
 
 <div class="psbgs">
 
 <div class="psb-hero" style="position:relative;overflow:hidden;border-radius:16px;padding:28px 20px 24px;margin:0 0 6px;text-align:center;color:#ffffff;background:linear-gradient(120deg,#070b1a,#121a3a,#0d2b36,#16123a);">
-<div class="psb-title" style="color:#ffffff;font-size:1.6em;font-weight:700;line-height:1.3;text-align:center;">Lab 02: Rules Engine to InfluxDB and Amazon S3</div>
+<div class="psb-title" style="color:#ffffff;font-size:1.6em;font-weight:700;line-height:1.3;text-align:center;">Lab 02: Route Telemetry with the IoT Rules Engine to Timestream for InfluxDB and Amazon S3</div>
 <div class="psb-line" style="width:90px;height:3px;margin:14px auto 12px;border-radius:3px;background:linear-gradient(90deg,#e9b949,#14b8a6);"></div>
 <div class="psb-meta" style="color:#d5dbe3;margin-top:6px;text-align:center;">65 Minutes&nbsp;&nbsp;|&nbsp;&nbsp;16 Points</div>
 </div>
@@ -100,237 +121,362 @@
 
 ## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🎯</span>Overview
 
-Your sensor is now publishing to AWS IoT Core. In this lab, you route every message to two destinations with the **IoT Rules Engine**: a time-series database (**Amazon Timestream for InfluxDB**) for fast dashboards and queries, and an **Amazon S3** data lake for machine learning. A **Lambda** function converts each JSON message to InfluxDB line protocol, using an API token stored in **AWS Secrets Manager**.
+Your device is publishing, but the messages currently go nowhere: the MQTT broker delivers them to whoever is subscribed and then forgets them. In this lab you will make them durable and queryable.
+
+You will provision Amazon Timestream for InfluxDB, a managed InfluxDB 2.7 instance purpose-built for time-series data. You will store its admin token in AWS Secrets Manager. You will write an AWS Lambda function that converts your JSON payload into InfluxDB line protocol and writes it over the HTTP write API. Then you will create a single AWS IoT rule that fans every inbound message out to two actions: the Lambda function, and a direct write to Amazon S3 that builds your machine-learning training corpus.
+
+> **Important: start Task 1 immediately.** Provisioning a Timestream for InfluxDB instance takes 15 to 20 minutes. Task 1 starts it; Tasks 2 and 3 give you productive work to do while it builds. Do not wait and watch it.
 
 </div>
 
 <div class="psb-panel" style="background:#ffffff;border:1px solid #d5dbe3;border-radius:16px;padding:18px 16px;margin:24px 0;">
 
-## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">📋</span>Objectives
+## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">📋</span>Lab Objectives
 
-- **Task 1:** Create the InfluxDB instance **psb-lab-influx** and get its API token.
-- **Task 2:** Prepare the S3 bucket folders and the IoT rule IAM role.
-- **Task 3:** Create the ingest Lambda function **psb-ingest-telemetry**.
-- **Task 4:** Store the token in Secrets Manager, configure and test the Lambda.
-- **Task 5:** Create the IoT rule **psb_telemetry_rule** and verify end-to-end ingestion.
+You will be able to complete the following tasks:
 
-</div>
-
-<div class="psb-panel" style="background:#ffffff;border:1px solid #d5dbe3;border-radius:16px;padding:18px 16px;margin:24px 0;">
-
-## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🏗️</span>What you build
-
-```text
-IoT Core topic psb/lab/+/telemetry ──> Rule psb_telemetry_rule ─┬─> Lambda psb-ingest-telemetry ──> InfluxDB psb-lab-influx (bucket telemetry)
-                                                                └─> S3 psb-lab-<id>/raw/yyyy/MM/dd/HH/<uuid>.json
-```
+- Task 1: Provision the Timestream for InfluxDB instance
+- Task 2: Create the S3 prefixes and the IoT rule's IAM role
+- Task 3: Build the ingestion Lambda function
+- Task 4: Store the InfluxDB token in AWS Secrets Manager and wire up the Lambda
+- Task 5: Create the IoT rule with two actions and verify the data path
 
 </div>
 
 <div class="psb-panel" style="background:#ffffff;border:1px solid #d5dbe3;border-radius:16px;padding:18px 16px;margin:24px 0;">
 
-## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧩</span>Task 1: Create the InfluxDB Instance
+## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧩</span>Task 1: Provision the Timestream for InfluxDB Instance
 
-🎯 **Goal:** Launch a Timestream for InfluxDB instance that the Lambda function can reach on port **8086**.
+1. In the AWS Management Console search bar, type **Timestream** and select **Amazon Timestream**.
 
-1. First, create the security group. In the console search bar, open **EC2**, then select **Network & Security** > **Security Groups** > **Create security group**:
+1. In the left-hand navigation pane, under **InfluxDB databases**, click **InfluxDB instances**.
 
-   | Setting | Value |
-   |---|---|
-   | Security group name | **psb-lab-influx-sg** |
-   | Description | **InfluxDB access for psb lab** |
-   | VPC | The **default** VPC |
-   | Inbound rule | Type **Custom TCP**, Port range **8086**, Source **Anywhere-IPv4 (0.0.0.0/0)** |
+1. Click **Create Influx database**.
 
-   Click **Create security group**.
+1. Under **DB instance identifier**, enter:
 
-   > ⚠️ **Note:** Opening port 8086 to the internet is acceptable only for this short-lived lab. You review this risk in Lab 09.
+   - **DB instance identifier:** **psb-lab-influx**
 
-1. In the console search bar, open **Amazon Timestream**. In the left menu select **InfluxDB databases**, then click **Create InfluxDB database**.
+1. Under **Credential settings**, provide the following. Write these down now: the admin token is displayed only once, when the instance finishes creating.
 
-1. Enter the following settings:
-
-   | Setting | Value |
-   |---|---|
-   | Deployment settings | **Single-AZ** (single DB instance) |
-   | DB instance name | **psb-lab-influx** |
-   | Initial username | **psbadmin** |
-   | Initial organization name | **psb** |
-   | Initial bucket name | **telemetry** |
-   | Password / Confirm password | **PsbLab#2026!Influx** |
-   | DB instance class | **db.influx.medium** |
-   | Storage type | **Influx IO Included (3000 IOPS)** |
-   | Allocated storage | **20 GiB** |
-   | Virtual Private Cloud (VPC) | **Default VPC** |
-   | Subnets | Leave the default subnets |
-   | Public access | **Publicly accessible** |
-   | VPC security groups | **psb-lab-influx-sg** (remove **default** if it is selected) |
-   | Database port | **8086** |
-   | Deletion protection (if shown) | **Not selected (off)** |
-
-   Leave all other settings as default and click **Create InfluxDB database**.
-
-   > ⏳ **Note:** The instance takes **15 to 20 minutes** to become **Available**. Continue with **Task 2** and **Task 3** while it is created, then come back for the token.
-
-1. When the status is **Available**, open **psb-lab-influx** and copy the **Endpoint** value into Notepad as **INFLUX-ENDPOINT** (for example **xxxxxxxx-xxxxxx.ap-southeast-1.timestream-influxdb.amazonaws.com**).
-
-1. Click **InfluxDB UI** (or open **https://&lt;INFLUX-ENDPOINT&gt;:8086** in the browser) and sign in:
-
-   | Setting | Value |
+   | Field | Value |
    |---|---|
    | Username | **psbadmin** |
    | Password | **PsbLab#2026!Influx** |
+   | Organization | **psb** |
+   | Bucket | **telemetry** |
 
-1. In the InfluxDB UI, select **Load Data** (arrow icon) > **API Tokens** > **Generate API Token** > **All Access API Token**. Enter the description **psb-lab-admin** and click **Save**.
+1. Under **Instance configuration**, select:
 
-1. Copy the token and save it in Notepad as **INFLUX-TOKEN**.
+   | Field | Value |
+   |---|---|
+   | DB instance class | **Burstable classes** → **db.influx.medium** |
+   | Deployment option | **Single-AZ** |
 
-   > ⚠️ **Note:** The token is shown **only once**. If you lose it, generate a new one. The instance **operator token** also works if you already have it.
+   > **Note:** **db.influx.medium** (2 vCPU, 8 GiB) is more than sufficient for a lab publishing one reading every ten seconds. Single-AZ halves the cost and is appropriate for non-production. A production deployment would use Multi-AZ.
 
-✅ **Expected result:** **psb-lab-influx** is **Available**, you can sign in to the InfluxDB UI, and you have the endpoint and an all-access API token.
+1. Under **Storage**, select:
+
+   | Field | Value |
+   |---|---|
+   | Storage type | **Influx IO Included 3000 IOPS** |
+   | Allocated storage | **20 GiB** |
+
+1. Under **Connectivity**:
+
+   | Field | Value |
+   |---|---|
+   | Virtual private cloud (VPC) | Select the **default** VPC |
+   | DB subnet group | Leave as default |
+   | Public access | **Publicly accessible** |
+   | VPC security group | **Create new** → name it **psb-lab-influx-sg** |
+   | Network type | **IPv4** |
+   | Port | **8086** |
+
+   > **Important: why public access, and what you would do in production.** Selecting **Publicly accessible** lets your Lambda function reach the database without being attached to a VPC, which removes about fifteen minutes of VPC, subnet and NAT-gateway configuration from this lab. In production you would make the instance private, place the Lambda inside the VPC, and reach the database through a security group rule rather than the internet. Lab 09 revisits this.
+
+1. Under **Additional configuration**, expand the section and confirm:
+
+   | Field | Value |
+   |---|---|
+   | Log delivery | Leave unchecked |
+   | Deletion protection | **Disabled** |
+
+   > **Note:** Deletion protection must be disabled so the lab teardown can remove the instance. An instance left running is the single largest source of unexpected cost in this lab.
+
+1. Click **Create Influx database**.
+
+1. The instance status will show **Creating**. Do not wait here. Leave this browser tab open and move on to Task 2. You will come back in Task 4.
+
+   > **Note:** The InfluxDB instance is checked by the validation at the end of the lab, once it has finished provisioning.
 
 </div>
 
 <div class="psb-panel" style="background:#ffffff;border:1px solid #d5dbe3;border-radius:16px;padding:18px 16px;margin:24px 0;">
 
-## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧩</span>Task 2: Prepare the S3 Folders and the IoT Rule Role
+## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧩</span>Task 2: Create the S3 Prefixes and the IoT Rule's IAM Role
 
-🎯 **Goal:** Create the data lake folders and an IAM role that lets IoT Core write only to **raw/**.
+While the database provisions, you will prepare the second destination for your telemetry: an Amazon S3 bucket that will become your machine-learning training corpus.
 
-1. Open **S3** and select the pre-created bucket **psb-lab-<inject key="DeploymentID" enableCopy="false"/>**.
+1. In the AWS Management Console search bar, type **S3** and select **S3**.
 
-1. Click **Create folder** three times to create these folders:
+1. In the bucket list, click your lab bucket **psb-lab-<inject key="DeploymentID" enableCopy="false"/>**.
 
-   | Folder | Used for |
+   > **Note:** This bucket was created for you by the lab deployment. Its exact name is on the **Environment** tab.
+
+1. Click **Create folder**. For **Folder name**, enter **raw** and click **Create folder**.
+
+1. Repeat step 3 twice more to create folders named **curated** and **model**.
+
+   Your bucket should now contain three prefixes:
+
+   | Prefix | Purpose |
    |---|---|
-   | **raw/** | Raw telemetry written by the IoT rule (this lab) |
-   | **curated/** | Scored data written by SageMaker and the score Lambda (Labs 06 and 07) |
-   | **model/** | Trained model artifacts (Lab 06) |
+   | raw/ | Every telemetry message, exactly as published. Your ML training corpus. |
+   | curated/ | Anomaly scores written back by Phase II. |
+   | model/ | SageMaker training artifacts. |
 
-1. Open **IAM** > **Roles** > **Create role**. For **Trusted entity type** select **Custom trust policy** and paste this trust policy (also in **C:\psb-lab-assets\policies\psb-lab-iot-rule-trust.json**):
+1. Now create the IAM role that the IoT rule will assume to write to S3. In the console search bar, type **IAM** and select **IAM**.
 
-   ```json
-   {
-     "Version": "2012-10-17",
-     "Statement": [
-       {
-         "Sid": "AllowIoTRulesEngine",
-         "Effect": "Allow",
-         "Principal": { "Service": "iot.amazonaws.com" },
-         "Action": "sts:AssumeRole"
-       }
-     ]
-   }
-   ```
+1. In the left-hand navigation pane, click **Roles**, then click **Create role**.
+
+1. On the **Select trusted entity** page:
+
+   | Field | Value |
+   |---|---|
+   | Trusted entity type | **AWS service** |
+   | Service or use case | **IoT** |
+   | Use case | **IoT** |
 
    Click **Next**.
 
-1. On **Add permissions**, do **not** select any managed policy. Click **Next**.
+1. On the **Add permissions** page, the AWS-managed IoT policies are pre-selected. Clear every checkbox; you will attach a least-privilege inline policy instead. Click **Next**.
 
-1. Enter the role name **psb-lab-iot-rule-role** and click **Create role**.
+1. For **Role name**, enter the following, then click **Create role**:
 
-1. Open the role **psb-lab-iot-rule-role**. Select **Add permissions** > **Create inline policy**, switch to the **JSON** editor and paste the policy below (also in **psb-lab-iot-rule-s3-write.json**). Replace **&lt;DEPLOYMENT-ID&gt;** with **<inject key="DeploymentID" enableCopy="false"/>**:
+   - **Role name:** **psb-lab-iot-rule-role**
+
+1. In the role list, click **psb-lab-iot-rule-role**.
+
+1. On the **Permissions** tab, click **Add permissions** and select **Create inline policy**.
+
+1. Click the **JSON** tab and replace the editor contents with the following. Replace `<S3-BUCKET>` with your bucket name, **<inject key="LabBucketName" enableCopy="true"/>**:
 
    ```json
    {
      "Version": "2012-10-17",
      "Statement": [
        {
-         "Sid": "AllowWriteRawTelemetryOnly",
+         "Sid": "AllowRuleToLandRawTelemetry",
          "Effect": "Allow",
          "Action": "s3:PutObject",
-         "Resource": "arn:aws:s3:::psb-lab-<DEPLOYMENT-ID>/raw/*"
+         "Resource": "arn:aws:s3:::<S3-BUCKET>/raw/*"
        }
      ]
    }
    ```
 
-1. Click **Next**, enter the policy name **psb-lab-iot-rule-s3-write** and click **Create policy**.
+   > **Note:** The rule needs `s3:PutObject` on the `raw/` prefix and nothing else. It cannot read, cannot delete, and cannot touch `curated/` or `model/`.
 
-✅ **Expected result:** The bucket has **raw/**, **curated/** and **model/** folders, and **psb-lab-iot-rule-role** trusts **iot.amazonaws.com** with only the inline policy **psb-lab-iot-rule-s3-write** (no managed policies).
+1. Click **Next**. For **Policy name**, enter **psb-lab-iot-rule-s3-write** and click **Create policy**.
 
 </div>
 
 <div class="psb-panel" style="background:#ffffff;border:1px solid #d5dbe3;border-radius:16px;padding:18px 16px;margin:24px 0;">
 
-## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧩</span>Task 3: Create the Ingest Lambda Function
+## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧩</span>Task 3: Build the Ingestion Lambda Function
 
-🎯 **Goal:** Create **psb-ingest-telemetry**, which writes each IoT message to InfluxDB.
+The AWS IoT Rules Engine has native actions for many AWS services, but not for Timestream for InfluxDB. In this task you will write the small adapter that bridges the gap: a Lambda function that converts JSON to InfluxDB line protocol and writes it over the HTTP API. This adapter pattern is how you connect the Rules Engine to any destination it does not natively support.
 
-1. Open **Lambda** > **Functions** > **Create function**. Select **Author from scratch** and enter:
+1. In the AWS Management Console search bar, type **Lambda** and select **Lambda**.
 
-   | Setting | Value |
+1. Click **Create function**.
+
+1. On the **Create function** page:
+
+   | Field | Value |
    |---|---|
+   | Option | **Author from scratch** |
    | Function name | **psb-ingest-telemetry** |
    | Runtime | **Python 3.13** |
    | Architecture | **x86_64** |
-   | Execution role | **Create a new role with basic Lambda permissions** |
 
-   Click **Create function**.
+1. Expand **Change default execution role**, select **Create a new role with basic Lambda permissions**, and click **Create function**.
 
-1. On the lab VM, open **C:\psb-lab-assets\lambdas\psb-ingest-telemetry\lambda_function.py** in **VS Code**, select all and copy.
+1. On the function page, scroll to the **Code source** editor. Delete everything in **lambda_function.py** and paste the following:
 
-1. In the Lambda console **Code** tab, open **lambda_function.py**, replace all content with the copied code and click **Deploy**.
+   ```python
+   """
+   PSB Academy CloudLab - IoT telemetry ingestion.
 
-   **What this code does:**
+   Invoked by the AWS IoT rule `psb_telemetry_rule` for every inbound
+   MQTT message. Converts the JSON payload into InfluxDB line protocol
+   and writes it to Amazon Timestream for InfluxDB.
+   """
+   import json
+   import os
+   import time
+   import urllib.error
+   import urllib.request
 
-   | Step | Behaviour |
-   |---|---|
-   | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🔄</span>Convert | Takes the rule payload (one JSON object) and builds InfluxDB **line protocol**: measurement **telemetry**, tags **device** and **location**, fields **temperature_c**, **humidity_pct**, **co2_ppm**, **vibration_g**, timestamp in **ms**. **injected_anomaly** is not written to InfluxDB. |
-   | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">📤</span>Write | Sends **POST /api/v2/write?org=psb&bucket=telemetry&precision=ms** with the header **Authorization: Token &lt;token&gt;**. |
-   | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🔐</span>Token cache | Reads the token from Secrets Manager once and caches it across warm invocations. |
-   | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">❗</span>Errors | On an HTTP error it prints the status and body, then **re-raises** the error so failures are visible. |
-   | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">✅</span>Success | Prints **[ok] wrote 1 point (204)** and returns **{"written":1,"status":204}**. |
+   import boto3
 
-1. Select **Configuration** > **General configuration** > **Edit** and set:
+   INFLUX_URL = os.environ["INFLUX_URL"]          # https://<endpoint>:8086
+   INFLUX_ORG = os.environ["INFLUX_ORG"]          # psb
+   INFLUX_BUCKET = os.environ["INFLUX_BUCKET"]    # telemetry
+   SECRET_ID = os.environ["INFLUX_SECRET_ID"]     # psb/influxdb/admin-token
 
-   | Setting | Value |
+   FIELDS = ("temperature_c", "humidity_pct", "co2_ppm", "vibration_g")
+
+   _sm = boto3.client("secretsmanager")
+   _token_cache = None
+
+   def _token():
+       """Fetch the InfluxDB token once per execution environment."""
+       global _token_cache
+       if _token_cache is None:
+           secret = _sm.get_secret_value(SecretId=SECRET_ID)["SecretString"]
+           _token_cache = json.loads(secret)["token"]
+       return _token_cache
+
+   def _escape_tag(value):
+       """Line protocol tag values escape spaces, commas and equals signs."""
+       return (str(value).replace("\\", "\\\\")
+                         .replace(" ", "\\ ")
+                         .replace(",", "\\,")
+                         .replace("=", "\\="))
+
+   def _to_line_protocol(msg):
+       """
+       reading,device_id=psb-lab-sensor-01,location=north-lab
+               temperature_c=22.84,humidity_pct=53.11 1789012345
+       """
+       tags = [
+           f"device_id={_escape_tag(msg.get('device_id', 'unknown'))}",
+           f"location={_escape_tag(msg.get('location', 'unspecified'))}",
+       ]
+       fields = []
+       for name in FIELDS:
+           value = msg.get(name)
+           if value is not None:
+               fields.append(f"{name}={float(value)}")
+       if not fields:
+           return None
+       ts = int(msg.get("ts") or time.time())
+       return f"reading,{','.join(tags)} {','.join(fields)} {ts}"
+
+   def lambda_handler(event, context):
+       line = _to_line_protocol(event)
+       if line is None:
+           print(f"[skip] no numeric fields in payload: {json.dumps(event)[:200]}")
+           return {"written": 0, "reason": "no-fields"}
+
+       url = (f"{INFLUX_URL}/api/v2/write"
+              f"?org={INFLUX_ORG}&bucket={INFLUX_BUCKET}&precision=s")
+       request = urllib.request.Request(
+           url=url,
+           data=line.encode("utf-8"),
+           method="POST",
+           headers={
+               "Authorization": f"Token {_token()}",
+               "Content-Type": "text/plain; charset=utf-8",
+           },
+       )
+       try:
+           with urllib.request.urlopen(request, timeout=8) as response:
+               status = response.status
+       except urllib.error.HTTPError as err:
+           body = err.read().decode("utf-8", "replace")[:300]
+           print(f"[error] InfluxDB returned {err.code}: {body}")
+           raise
+
+       print(f"[ok] wrote 1 point ({status}): {line}")
+       return {"written": 1, "status": status}
+   ```
+
+   Read the three points that matter:
+
+   - `_to_line_protocol` builds the InfluxDB write format: `measurement,tag=value field=value timestamp`. Tags are indexed and used for filtering; fields hold the numeric values. Putting `device_id` and `location` in tags is what makes `WHERE location = 'north-lab'` fast later.
+   - `_token_cache` is a module-level global. Lambda reuses the execution environment between invocations, so the Secrets Manager call happens once per cold start rather than on every message. At 8,640 messages a day that is the difference between $0.04 and negligible.
+   - `raise` on an HTTP error is deliberate. Letting the function fail tells the IoT rule the action failed, which surfaces in CloudWatch instead of silently dropping data.
+
+1. Click **Deploy**.
+
+1. Now increase the timeout. Open the **Configuration** tab, select **General configuration** in the left pane, and click **Edit**.
+
+1. Set the following, then click **Save**:
+
+   | Field | Value |
    |---|---|
    | Memory | **256 MB** |
    | Timeout | **0 min 15 sec** |
 
-   Click **Save**.
-
-✅ **Expected result:** **psb-ingest-telemetry** is deployed with Python 3.13, 256 MB and a 15 second timeout.
-
 </div>
 
 <div class="psb-panel" style="background:#ffffff;border:1px solid #d5dbe3;border-radius:16px;padding:18px 16px;margin:24px 0;">
 
-## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧩</span>Task 4: Store the Token, Configure and Test the Lambda
+## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧩</span>Task 4: Store the InfluxDB Token in AWS Secrets Manager and Wire Up the Lambda
 
-🎯 **Goal:** Give the Lambda the InfluxDB connection details and a least-privilege way to read the token.
+1. Return to the browser tab showing **Amazon Timestream** → **InfluxDB instances**. Refresh the page.
 
-1. Open **Secrets Manager** > **Store a new secret** and enter:
+1. Wait until **psb-lab-influx** shows a status of **Available**. If it still shows **Creating**, wait a few more minutes.
 
-   | Setting | Value |
-   |---|---|
-   | Secret type | **Other type of secret** |
-   | Key/value pair | Key **token**, Value **&lt;INFLUX-TOKEN&gt;** (paste your token) |
-   | Encryption key | **aws/secretsmanager** (default) |
+1. Click **psb-lab-influx**.
 
-   Click **Next**.
+1. A banner at the top of the page displays the InfluxDB admin token, which begins with a long random string. Copy it now and paste it into a notepad. This banner appears only once; if you navigate away without copying it you will have to delete and recreate the instance.
 
-1. Enter the secret name **psb/influxdb/admin-token** and click **Next**. Leave **Automatic rotation** off, click **Next**, then **Store**.
+1. On the same page, under **Connectivity & security**, copy the **Endpoint** value. It looks like:
 
-   > ℹ️ **Info:** The secret value is stored as **{"token":"&lt;admin token&gt;"}**.
+   ```text
+   psb-lab-influx-a1b2c3.timestream-influxdb.ap-southeast-1.on.aws
+   ```
 
-1. Open the secret and copy the **Secret ARN** into Notepad as **SECRET-ARN**.
+   Paste it into your notepad as well.
 
-1. Back in Lambda **psb-ingest-telemetry**, select **Configuration** > **Environment variables** > **Edit** and add these 4 variables. Replace **&lt;INFLUX-ENDPOINT&gt;** with your endpoint:
+1. Now store the token securely. In the AWS Management Console search bar, type **Secrets Manager** and select **AWS Secrets Manager**.
+
+1. Click **Store a new secret**.
+
+1. On the **Choose secret type** page, select **Other type of secret**.
+
+1. Under **Key/value pairs**, click the **Plaintext** tab and replace the contents with the following, pasting your token in place of `<INFLUX-ADMIN-TOKEN>`:
+
+   ```json
+   { "token": "<INFLUX-ADMIN-TOKEN>" }
+   ```
+
+1. Leave the encryption key as **aws/secretsmanager** and click **Next**.
+
+1. For **Secret name**, enter the following, then click **Next**:
+
+   - **Secret name:** **psb/influxdb/admin-token**
+
+1. On the **Configure rotation** page, leave automatic rotation disabled and click **Next**.
+
+1. Review and click **Store**.
+
+1. Click the secret **psb/influxdb/admin-token** and copy its **Secret ARN** into your notepad.
+
+1. Return to the Lambda console and open **psb-ingest-telemetry**.
+
+1. Open the **Configuration** tab and select **Environment variables** in the left pane. Click **Edit**, then **Add environment variable** four times and enter:
 
    | Key | Value |
    |---|---|
-   | **INFLUX_URL** | **https://&lt;INFLUX-ENDPOINT&gt;:8086** |
-   | **INFLUX_ORG** | **psb** |
-   | **INFLUX_BUCKET** | **telemetry** |
-   | **INFLUX_SECRET_ID** | **psb/influxdb/admin-token** |
+   | INFLUX_URL | **https://&lt;INFLUX-ENDPOINT&gt;:8086** |
+   | INFLUX_ORG | **psb** |
+   | INFLUX_BUCKET | **telemetry** |
+   | INFLUX_SECRET_ID | **psb/influxdb/admin-token** |
 
-   Click **Save**.
+   > **Note:** **INFLUX_URL** must include the `https://` scheme and the `:8086` port, with no trailing slash.
 
-1. Select **Configuration** > **Permissions** and click the **Role name** link to open the execution role in IAM.
+1. Click **Save**.
 
-1. Select **Add permissions** > **Create inline policy** > **JSON**, and paste the policy below (also in **psb-lab-read-influx-token.json**). Replace **&lt;SECRET-ARN&gt;** with your secret ARN:
+1. Now grant the function permission to read the secret. Still on the **Configuration** tab, select **Permissions** in the left pane and click the **Role name** link; it opens the execution role in IAM.
+
+1. On the role page, click **Add permissions** → **Create inline policy**.
+
+1. Click the **JSON** tab and replace the contents with the following. Replace `<SECRET-ARN>` with the ARN you copied in step 14:
 
    ```json
    {
@@ -346,90 +492,121 @@ IoT Core topic psb/lab/+/telemetry ──> Rule psb_telemetry_rule ─┬─> La
    }
    ```
 
-   Click **Next**, name it **psb-lab-read-influx-token** and click **Create policy**.
+1. Click **Next**, name the policy **psb-lab-read-influx-token**, and click **Create policy**.
 
-1. Back in Lambda, open the **Test** tab, select **Create new event** and enter the event name **sample-reading**. Paste the content of **C:\psb-lab-assets\test-events\sample-reading.json**, for example:
+1. Return to the **psb-ingest-telemetry** function and open the **Test** tab.
 
-   ```json
-   {"device":"psb-lab-sensor-01","location":"north-lab","timestamp":1760520000000,
-    "temperature_c":22.41,"humidity_pct":45.2,"co2_ppm":612.0,"vibration_g":0.021,"injected_anomaly":false}
-   ```
+1. Create a new test event:
 
-1. Click **Save**, then **Test**. Confirm the result:
-
-   ```json
-   {"written": 1, "status": 204}
-   ```
-
-   **🛠️ Troubleshooting**
-
-   | Symptom | Likely cause and fix |
+   | Field | Value |
    |---|---|
-   | **403** | Wrong token or wrong secret content. Check the secret key is **token** and the value is a valid all-access token. |
-   | **Timeout** | Port **8086** is not open in **psb-lab-influx-sg**, or the instance is not **Publicly accessible**. |
-   | **404** | Bucket **telemetry** or org **psb** is wrong in the environment variables or on the instance. |
+   | Event name | **sample-reading** |
 
-✅ **Expected result:** The test returns **written: 1** with status **204**.
+   Replace the event JSON with:
+
+   ```json
+   {
+     "device_id": "psb-lab-sensor-01",
+     "location": "north-lab",
+     "ts": 1789012345,
+     "temperature_c": 22.84,
+     "humidity_pct": 53.11,
+     "co2_ppm": 531.2,
+     "vibration_g": 0.0213
+   }
+   ```
+
+1. Click **Save**, then click **Test**.
+
+1. Confirm the execution result is **succeeded** and that the response body reads:
+
+   ```json
+   { "written": 1, "status": 204 }
+   ```
+
+   > **Troubleshooting:** A **403** from InfluxDB means the token is wrong; recheck the secret's plaintext. A timeout means the security group is not allowing inbound traffic on port 8086; open the security group **psb-lab-influx-sg** in the EC2 console and confirm it has an inbound rule for TCP 8086 from 0.0.0.0/0. A **404** usually means the bucket name in **INFLUX_BUCKET** does not match the bucket you created in Task 1.
 
 </div>
 
 <div class="psb-panel" style="background:#ffffff;border:1px solid #d5dbe3;border-radius:16px;padding:18px 16px;margin:24px 0;">
 
-## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧩</span>Task 5: Create the IoT Rule and Verify Ingestion
+## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧩</span>Task 5: Create the IoT Rule with Two Actions and Verify the Data Path
 
-🎯 **Goal:** Route every telemetry message to both the Lambda function and S3.
+In this task you will create a single rule that fans every inbound message out to two destinations. This is the pattern that lets one telemetry stream serve both an operational dashboard and a machine-learning corpus without the device knowing or caring.
 
-1. Open **IoT Core** > **Message routing** > **Rules** > **Create rule**.
+1. Return to the AWS IoT Core console. In the left-hand navigation pane, expand **Message routing** and click **Rules**.
 
-1. On **Specify rule properties**, enter the rule name **psb_telemetry_rule** and click **Next**.
+1. Click **Create rule**.
 
-1. On **Configure SQL statement**, set **SQL version** to **2016-03-23** and paste the SQL statement:
+1. On the **Specify rule properties** page:
+
+   | Field | Value |
+   |---|---|
+   | Rule name | **psb_telemetry_rule** |
+   | Description | **Fan telemetry out to Timestream for InfluxDB and Amazon S3** |
+
+   Click **Next**.
+
+   > **Note:** IoT rule names permit letters, numbers and underscores, but not hyphens. This is why the rule uses underscores while everything else in the lab uses hyphens.
+
+1. On the **Configure SQL statement** page, set **SQL version** to **2016-03-23** and replace the SQL statement with:
 
    ```sql
-   SELECT device, location, timestamp, temperature_c, humidity_pct, co2_ppm, vibration_g, injected_anomaly, timestamp() AS ingested_at FROM 'psb/lab/+/telemetry'
+   SELECT
+     device_id,
+     location,
+     ts,
+     temperature_c,
+     humidity_pct,
+     co2_ppm,
+     vibration_g,
+     timestamp() AS ingested_at
+   FROM 'psb/lab/+/telemetry'
    ```
 
    Click **Next**.
 
-   > ℹ️ **Info:** **injected_anomaly** is kept in the S3 raw data so the notebook in Lab 06 can measure precision and recall. The ingest Lambda does not write it to InfluxDB.
+   > **Note:** Two things are happening here. The `+` wildcard in the FROM clause means this one rule serves an entire fleet, not just your single device. And `timestamp() AS ingested_at` adds a server-side ingestion timestamp, useful for measuring device clock drift, and a good habit in any IoT pipeline. Notice that `injected_anomaly` is not selected: it is deliberately dropped so it never reaches your training data.
 
-1. On **Attach rule actions**, configure **Action 1**:
+1. On the **Attach rule actions** page, under **Rule actions**, for **Action 1** select **Lambda** from the dropdown.
 
-   | Setting | Value |
+1. Under **Lambda function**, select **psb-ingest-telemetry**.
+
+1. Click **Add rule action** to add a second action.
+
+1. For **Action 2**, select **S3** from the dropdown.
+
+1. Configure the S3 action:
+
+   | Field | Value |
    |---|---|
-   | Action | **Lambda** (Send a message to a Lambda function) |
-   | Lambda function | **psb-ingest-telemetry** |
+   | S3 bucket | Click **Browse S3** and select **psb-lab-<inject key="DeploymentID" enableCopy="false"/>** |
+   | Key | **raw/${parse_time("yyyy/MM/dd/HH", timestamp())}/${newuuid()}.json** |
+   | Canned ACL | Leave as **None** |
 
-1. Click **Add rule action** and configure **Action 2**:
+   > **Note:** The key expression uses two IoT SQL functions. `parse_time` formats the ingestion timestamp into a Hive-style date partition, which lets SageMaker and Athena prune by date later. `newuuid()` guarantees a unique object name so concurrent messages never overwrite one another. Getting this key design right at ingestion time is far cheaper than reorganising a bucket with millions of objects later.
 
-   | Setting | Value |
-   |---|---|
-   | Action | **S3 bucket** (Store a message in an Amazon S3 bucket) |
-   | S3 URI / bucket | **psb-lab-<inject key="DeploymentID" enableCopy="false"/>** |
-   | Key | see below |
-   | IAM role | **psb-lab-iot-rule-role** |
+1. Under **IAM role**, click **Select** and choose **psb-lab-iot-rule-role**.
 
-   Use this value for **Key**:
+1. Click **Next**, review the configuration, and click **Create**.
 
-   ```text
-   raw/${parse_time("yyyy/MM/dd/HH", timestamp())}/${newuuid()}.json
-   ```
+1. Confirm that **psb_telemetry_rule** appears in the rules list with status **Enabled**.
 
-1. Click **Next**, review and click **Create**.
+1. Now verify the whole path. Your simulator should still be running in the first PowerShell window. Wait two minutes, then return to the S3 console.
 
-   > 💡 **Tip:** The console automatically adds a resource-based permission so IoT Core can invoke the Lambda function.
+1. Open your bucket and navigate into **raw/**. You should see a date-partitioned folder structure such as **raw/2026/09/10/14/**, containing one JSON object per telemetry message.
 
-1. Make sure the simulator from Lab 01 is still running. Wait 1 to 2 minutes.
+1. Click into the newest folder and open one of the objects. Click **Open** to view it. Confirm it contains your telemetry fields plus the **ingested_at** value the rule added.
 
-1. Open **CloudWatch** > **Log groups** > **/aws/lambda/psb-ingest-telemetry** (or Lambda **Monitor** > **View CloudWatch logs**) and open the latest log stream. Confirm lines like:
+1. Finally, verify the InfluxDB write path. Return to the Lambda console, open **psb-ingest-telemetry**, and select the **Monitor** tab.
 
-   ```text
-   [ok] wrote 1 point (204)
-   ```
+1. Click **View CloudWatch logs**. Open the most recent log stream.
 
-1. Open **S3** > **psb-lab-<inject key="DeploymentID" enableCopy="false"/>** > **raw/** and confirm new JSON objects appear under the **yyyy/MM/dd/HH/** folders.
+1. Confirm you see repeated **[ok] wrote 1 point (204)** entries, one per telemetry message.
 
-   ✅ **Expected result:** The rule **psb_telemetry_rule** is enabled, the ingest logs show **[ok] wrote 1 point (204)**, and raw JSON objects are arriving in S3.
+   > **Troubleshooting:** If the log group is empty, the rule's Lambda action is not firing; check that the rule is **Enabled** and that the SQL FROM clause exactly matches your topic. If you see errors, they are the same three causes listed in Task 4 step 25.
+
+1. Your Timestream for InfluxDB instance has had time to finish provisioning, so validate the lab now.
 
    > **Congratulations** on completing the task! Now, it's time to validate it. Here are the steps:
    >
@@ -445,14 +622,14 @@ IoT Core topic psb/lab/+/telemetry ──> Rule psb_telemetry_rule ─┬─> La
 
 ## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">📝</span>Summary
 
-In this lab, you:
+In this lab, you have completed the following:
 
-- Created the Timestream for InfluxDB instance **psb-lab-influx** (org **psb**, bucket **telemetry**) and an all-access API token.
-- Stored the token in Secrets Manager as **psb/influxdb/admin-token** and granted read access with a least-privilege inline policy.
-- Built the **psb-ingest-telemetry** Lambda that converts JSON to InfluxDB line protocol.
-- Created **psb_telemetry_rule** to fan out every message to InfluxDB (via Lambda) and the S3 **raw/** data lake.
+- Provisioned an Amazon Timestream for InfluxDB instance and stored its admin token in AWS Secrets Manager.
+- Built an AWS Lambda function that converts JSON telemetry into InfluxDB line protocol and writes it over the HTTP API.
+- Created three S3 prefixes and a least-privilege IAM role for the IoT rule.
+- Created a single AWS IoT rule that fans every message out to two actions, and verified that data is landing in both destinations.
 
-Click **Next** to continue.
+You have successfully completed the lab. Click **Next** to continue to the next lab.
 
 </div>
 

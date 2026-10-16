@@ -40,19 +40,23 @@ function JsonFile([string]$Name, $Object) {
     ConvertTo-Json -InputObject $Object -Depth 20 | Set-Content -Path $path -Encoding ascii
     return "file://" + ($path -replace '\\', '/')
 }
-# Copy a policy file from the assets folder with the placeholders filled in
+# Copy a policy file from assets\policies with the placeholders filled in
+# (iot-device-policy, iot-rule-role-policy, lambda-execution-policy)
 function PolicyFile([string]$Name) {
     $text = Get-Content "$Assets\policies\$Name.json" -Raw
-    $text = $text.Replace("<AWS-REGION>", $Region).Replace("<AWS-ACCOUNT-ID>", $AccountId).Replace("<DEPLOYMENT-ID>", $DeploymentId)
+    $text = $text.Replace("<AWS-REGION>", $Region).Replace("<AWS-ACCOUNT-ID>", $AccountId).Replace("<S3-BUCKET>", $Bucket)
     if ($SecretArn) { $text = $text.Replace("<SECRET-ARN>", $SecretArn) }
     $path = "$Work\$Name.json"
     Set-Content -Path $path -Value $text -Encoding ascii
     return "file://" + ($path -replace '\\', '/')
 }
-# Zip one Lambda folder from the assets
+# Zip assets\lambda\<name>.py as lambda_function.py (same as pasting it into the console editor)
 function LambdaZip([string]$Name) {
+    $dir = "$Work\pkg-$Name"
+    New-Item -ItemType Directory -Force -Path $dir | Out-Null
+    Copy-Item "$Assets\lambda\$Name.py" "$dir\lambda_function.py" -Force
     $zip = "$Work\$Name.zip"
-    Compress-Archive -Path "$Assets\lambdas\$Name\lambda_function.py" -DestinationPath $zip -Force
+    Compress-Archive -Path "$dir\lambda_function.py" -DestinationPath $zip -Force
     return "fileb://" + ($zip -replace '\\', '/')
 }
 # Create a Lambda execution role with basic logging permissions (returns the role ARN)
@@ -96,7 +100,7 @@ $Cert = AwsJson iot create-keys-and-certificate --set-as-active `
 Invoke-WebRequest -UseBasicParsing -Uri "https://www.amazontrust.com/repository/AmazonRootCA1.pem" -OutFile "$Certs\root-CA.crt"
 
 # Least-privilege policy (only policy on the certificate)
-aws iot create-policy --policy-name psb-lab-device-policy --policy-document (PolicyFile "psb-lab-device-policy")
+aws iot create-policy --policy-name psb-lab-device-policy --policy-document (PolicyFile "iot-device-policy")
 aws iot attach-policy --policy-name psb-lab-device-policy --target $Cert.certificateArn
 aws iot attach-thing-principal --thing-name psb-lab-sensor-01 --principal $Cert.certificateArn
 
@@ -191,8 +195,10 @@ $InfluxToken.Substring(0, 8) + "..."
 foreach ($f in "raw/", "curated/", "model/") { aws s3api put-object --bucket $Bucket --key $f | Out-Null }
 aws s3 ls "s3://$Bucket/"
 
-aws iam create-role --role-name psb-lab-iot-rule-role --assume-role-policy-document (PolicyFile "psb-lab-iot-rule-trust")
-aws iam put-role-policy --role-name psb-lab-iot-rule-role --policy-name psb-lab-iot-rule-s3-write --policy-document (PolicyFile "psb-lab-iot-rule-s3-write")
+# Trust = AWS service IoT (what the console creates); no managed policies, one inline policy
+$IotTrust = JsonFile "iot-rule-trust.json" @{ Version = "2012-10-17"; Statement = @(@{ Effect = "Allow"; Principal = @{ Service = "iot.amazonaws.com" }; Action = "sts:AssumeRole" }) }
+aws iam create-role --role-name psb-lab-iot-rule-role --assume-role-policy-document $IotTrust | Out-Null
+aws iam put-role-policy --role-name psb-lab-iot-rule-role --policy-name psb-lab-iot-rule-s3-write --policy-document (PolicyFile "iot-rule-role-policy")
 $IotRuleRoleArn = aws iam get-role --role-name psb-lab-iot-rule-role --query Role.Arn --output text
 ```
 
@@ -204,7 +210,7 @@ $SecretArn = aws secretsmanager create-secret --name psb/influxdb/admin-token `
 
 $InfluxEnv = @{ INFLUX_URL = $InfluxUrl; INFLUX_ORG = "psb"; INFLUX_BUCKET = "telemetry"; INFLUX_SECRET_ID = "psb/influxdb/admin-token" }
 $IngestRole = LambdaRole "psb-ingest-telemetry-role"
-aws iam put-role-policy --role-name psb-ingest-telemetry-role --policy-name psb-lab-read-influx-token --policy-document (PolicyFile "psb-lab-read-influx-token")
+aws iam put-role-policy --role-name psb-ingest-telemetry-role --policy-name psb-lab-read-influx-token --policy-document (PolicyFile "lambda-execution-policy")
 Start-Sleep 10   # IAM propagation
 
 aws lambda create-function --function-name psb-ingest-telemetry --runtime python3.13 --architectures x86_64 `
@@ -212,8 +218,11 @@ aws lambda create-function --function-name psb-ingest-telemetry --runtime python
     --memory-size 256 --timeout 15 --environment (JsonFile "ingest-env.json" @{ Variables = $InfluxEnv }) | Out-Null
 aws lambda wait function-active-v2 --function-name psb-ingest-telemetry
 
+# Test event sample-reading (from the lab guide)
+$sample = JsonFile "sample-reading.json" @{ device_id = "psb-lab-sensor-01"; location = "north-lab"; ts = 1789012345
+    temperature_c = 22.84; humidity_pct = 53.11; co2_ppm = 531.2; vibration_g = 0.0213 }
 aws lambda invoke --function-name psb-ingest-telemetry --cli-binary-format raw-in-base64-out `
-    --payload "file://$($Assets -replace '\\','/')/test-events/sample-reading.json" "$Work\ingest-out.json" | Out-Null
+    --payload $sample "$Work\ingest-out.json" | Out-Null
 Get-Content "$Work\ingest-out.json"    # {"written": 1, "status": 204}
 ```
 
@@ -228,7 +237,8 @@ Get-Content "$Work\ingest-out.json"    # {"written": 1, "status": 204}
 ```powershell
 $IngestArn = aws lambda get-function --function-name psb-ingest-telemetry --query Configuration.FunctionArn --output text
 $rule = @{
-    sql = "SELECT device, location, timestamp, temperature_c, humidity_pct, co2_ppm, vibration_g, injected_anomaly, timestamp() AS ingested_at FROM 'psb/lab/+/telemetry'"
+    # Original SQL: injected_anomaly is deliberately NOT selected
+    sql = "SELECT device_id, location, ts, temperature_c, humidity_pct, co2_ppm, vibration_g, timestamp() AS ingested_at FROM 'psb/lab/+/telemetry'"
     awsIotSqlVersion = "2016-03-23"
     ruleDisabled = $false
     actions = @(
@@ -242,7 +252,7 @@ aws lambda add-permission --function-name psb-ingest-telemetry --statement-id io
     --source-arn "arn:aws:iot:${Region}:${AccountId}:rule/psb_telemetry_rule" --source-account $AccountId | Out-Null
 
 Start-Sleep 60
-aws logs tail /aws/lambda/psb-ingest-telemetry --since 5m | Select-String "\[ok\] wrote" | Select-Object -Last 3
+aws logs tail /aws/lambda/psb-ingest-telemetry --since 5m | Select-String "\[ok\] wrote 1 point \(204\)" | Select-Object -Last 3
 aws s3 ls "s3://$Bucket/raw/" --recursive | Select-Object -Last 3
 ```
 
@@ -268,16 +278,18 @@ aws s3 ls "s3://$Bucket/raw/" --recursive | Select-Object -Last 3
 
 ```powershell
 $QueryRole = LambdaRole "psb-query-telemetry-role"
-aws iam put-role-policy --role-name psb-query-telemetry-role --policy-name psb-lab-read-influx-token --policy-document (PolicyFile "psb-lab-read-influx-token")
+aws iam put-role-policy --role-name psb-query-telemetry-role --policy-name psb-lab-read-influx-token --policy-document (PolicyFile "lambda-execution-policy")
 Start-Sleep 10
 aws lambda create-function --function-name psb-query-telemetry --runtime python3.13 --architectures x86_64 `
     --handler lambda_function.lambda_handler --role $QueryRole --zip-file (LambdaZip "psb-query-telemetry") `
     --memory-size 256 --timeout 30 --environment (JsonFile "query-env.json" @{ Variables = $InfluxEnv }) | Out-Null
 aws lambda wait function-active-v2 --function-name psb-query-telemetry
 
+# Test event direct-query (from the lab guide)
+$dq = JsonFile "direct-query.json" @{ metric = "temperature_c"; window_minutes = 30; bucket_seconds = 60 }
 aws lambda invoke --function-name psb-query-telemetry --cli-binary-format raw-in-base64-out `
-    --payload "file://$($Assets -replace '\\','/')/test-events/direct-query.json" "$Work\query-out.json" | Out-Null
-(Get-Content "$Work\query-out.json" -Raw | ConvertFrom-Json).summary
+    --payload $dq "$Work\query-out.json" | Out-Null
+(Get-Content "$Work\query-out.json" -Raw | ConvertFrom-Json).summary    # point_count > 0 (0 = no data, try window_minutes 240)
 ```
 
 > ⚠️ **Note:** In a new window, set `$InfluxEnv` again: `$InfluxEnv = @{ INFLUX_URL = $InfluxUrl; INFLUX_ORG = "psb"; INFLUX_BUCKET = "telemetry"; INFLUX_SECRET_ID = "psb/influxdb/admin-token" }`.
@@ -306,13 +318,17 @@ $ApiUrl
 ```powershell
 curl.exe "$ApiUrl/telemetry?metric=temperature_c&window_minutes=30"
 curl.exe "$ApiUrl/telemetry?metric=co2_ppm&window_minutes=60&location=north-lab"
-curl.exe -i "$ApiUrl/telemetry?metric=DROP_TABLE"     # HTTP/1.1 400
+curl.exe -i "$ApiUrl/telemetry?metric=DROP_TABLE"     # 400 {"error": "metric must be one of [...]"}
 ```
 
 InfluxDB UI (**Data Explorer > Script Editor**):
 
 ```text
-from(bucket: "telemetry") |> range(start: -30m) |> filter(fn: (r) => r._measurement == "telemetry" and r._field == "temperature_c") |> aggregateWindow(every: 1m, fn: mean)
+from(bucket: "telemetry")
+  |> range(start: -1h)
+  |> filter(fn: (r) => r["_measurement"] == "reading")
+  |> filter(fn: (r) => r["_field"] == "temperature_c")
+  |> aggregateWindow(every: 1m, fn: mean, createEmpty: false)
 ```
 
 ### ✅ Expected validator result
@@ -362,7 +378,7 @@ $env:ID_TOKEN.Substring(0, 20) + "..."
 **Console way (as in the lab guide):** open the Hosted UI URL below in Chrome, sign in with `PsbLab#2026!`, set `PsbLab#2026!New`, then copy `id_token` from the address bar (the localhost page will not load, that is expected) into `$env:ID_TOKEN`.
 
 ```powershell
-"https://$CognitoDomain/login?client_id=$ClientId&response_type=token&scope=email+openid+profile&redirect_uri=http://localhost:5173/"
+"https://$CognitoDomain/login?client_id=$ClientId&response_type=token&scope=email+openid&redirect_uri=http://localhost:5173/"
 ```
 
 ### Task 2: JWT authorizer on both routes
@@ -395,7 +411,7 @@ $p = $env:ID_TOKEN.Split('.')[1].Replace('-', '+').Replace('_', '/'); while ($p.
 |---|---|
 | User pool psb-lab-users exists | PASS |
 | App client psb-lab-dashboard OAuth settings | PASS |
-| Cognito domain psb-lab-&lt;id&gt; | PASS |
+| Cognito domain on psb-lab-users | PASS (any prefix) |
 | User student@psb.lab is confirmed | PASS |
 | JWT authorizer psb-lab-cognito-authorizer | PASS |
 | Authorizer attached to both GET routes | PASS |
@@ -409,10 +425,11 @@ $p = $env:ID_TOKEN.Split('.')[1].Replace('-', '+').Replace('_', '/'); while ($p.
 ```powershell
 $cfgPath = "$Assets\dashboard\src\config.js"
 $cfg = Get-Content $cfgPath -Raw
-$cfg = $cfg.Replace("<USER-POOL-ID>", $PoolId).Replace("<CLIENT-ID>", $ClientId).Replace("https://<COGNITO-DOMAIN>", "https://psb-lab-$DeploymentId.auth.$Region.amazoncognito.com")
-$cfg = $cfg -replace "apiBaseUrl: '[^']*'", "apiBaseUrl: '$ApiUrl'"
+# Cognito domain: https:// and no trailing slash. Invoke URL: no trailing slash.
+$cfg = $cfg.Replace("<USER-POOL-ID>", $PoolId).Replace("<CLIENT-ID>", $ClientId)
+$cfg = $cfg.Replace("<COGNITO-DOMAIN>", "https://psb-lab-$DeploymentId.auth.$Region.amazoncognito.com").Replace("<INVOKE-URL>", $ApiUrl.TrimEnd('/'))
 Set-Content $cfgPath $cfg -Encoding ascii
-Get-Content $cfgPath | Select-String "userPoolId|userPoolClientId|cognitoDomain|apiBaseUrl|assistantEnabled"
+Get-Content $cfgPath | Select-String "userPoolId|userPoolClientId|cognitoDomain|apiBaseUrl"
 
 Set-Location "$Assets\dashboard"
 npm install
@@ -420,7 +437,7 @@ npm run build
 Compress-Archive -Path dist\* -DestinationPath dashboard-build.zip -Force
 ```
 
-> 💡 **Tip:** Build fails? Use the prebuilt `dashboard\dist.zip`: extract it, edit `config.json` at its root with the same values, then zip the **contents** (index.html at the zip root) as `dashboard-build.zip`.
+> 💡 **Tip:** Build fails? Use the pre-built `dashboard\dist.zip`: extract it, put the same four values in `config.json` at its root (it is merged over `src/config.js`), then zip the **contents** (index.html at the zip root) as `dashboard-build.zip`. For Lab 08 set `"assistantEnabled": true` in that `config.json`.
 
 ### Task 2: Amplify app, deploy, rewrite, Cognito URLs
 
@@ -452,7 +469,7 @@ Start-Process chrome $AmplifyUrl
 
 Console fallback: **Amplify > Create new app > Deploy without Git**, app name `psb-lab-dashboard`, branch `main`, drag and drop `dashboard-build.zip`, **Save and deploy**; **Hosting > Rewrites and redirects**: `/<*>` to `/index.html`, type **404 (Rewrite)**.
 
-Sign in as `student@psb.lab`: charts, summary strip (latest/min/max/mean), metric and window selectors.
+Click **Sign in** and sign in as `student@psb.lab`: summary strip (latest/min/max/mean), line chart (one line per location), metric selector (temperature_c, humidity_pct, co2_ppm, vibration_g, anomaly_score) and window selector (15 minutes, 1 hour, 6 hours, 24 hours).
 
 ### ✅ Expected validator result
 
@@ -496,12 +513,14 @@ Console: **SageMaker AI > Studio**, domain `psb-lab-domain`, user `psb-lab-user`
 | Cells | What to do | Time |
 |---|---|---|
 | 1 | Set `BUCKET = "psb-lab-<id>"` | |
-| 2-3 | Load raw/ JSON, 4 features, keep `injected_anomaly` aside | 1-2 min |
-| 4 | Train RCF (ml.m5.large, 64 trees, 256 samples/tree, output `s3://<BUCKET>/model/`) | 5-8 min |
-| 5 | Deploy serverless endpoint `psb-anomaly-endpoint` (2048 MB, concurrency 5) | 3-5 min |
-| 6-10 | Score in batches of 500, cutoff = 98th percentile, precision/recall/F1, plot, write `curated/scored/backfill-scored.csv` | 2 min |
+| 2-3 | Load raw/ JSON, 4 features; `injected_anomaly` is absent (the IoT rule dropped it), the code handles that | 1-2 min |
+| 4 | Train RCF (ml.m5.large, 64 trees, 256 samples/tree, output `s3://<BUCKET>/model/`); then `print(rcf.model_data)` | about 5 min |
+| 5 | Deploy serverless endpoint `psb-anomaly-endpoint` (2048 MB, concurrency 5) | about 4 min |
+| 6-8 | Score in batches of 500, cutoff = 98th percentile, evaluation (Cell 7 prints the top 10 when there is no ground truth), plot | 2 min |
+| 9 | Write `curated/scored/backfill-scored.csv` | |
+| 10 | Prints `ANOMALY_CUTOFF for Lab 07 = <value>` | |
 
-Copy the printed `ANOMALY_CUTOFF = <value>`. Check from the VM:
+Copy the printed `ANOMALY_CUTOFF for Lab 07` value. Check from the VM:
 
 ```powershell
 aws sagemaker describe-endpoint --endpoint-name psb-anomaly-endpoint --query EndpointStatus --output text   # InService
@@ -536,15 +555,22 @@ $ScoreEnv.ANOMALY_CUTOFF = $AnomalyCutoff
 $ScoreEnv.WINDOW_MINUTES = "6"
 
 $ScoreRole = LambdaRole "psb-score-telemetry-role"
-aws iam put-role-policy --role-name psb-score-telemetry-role --policy-name psb-lab-score-telemetry-policy --policy-document (PolicyFile "psb-lab-score-telemetry-policy")
+# Inline policy from Lab 07 Task 1 (secret read, invoke one endpoint, write curated/)
+$ScorePol = JsonFile "score-policy.json" @{ Version = "2012-10-17"; Statement = @(
+    @{ Sid = "AllowReadInfluxToken"; Effect = "Allow"; Action = "secretsmanager:GetSecretValue"; Resource = $SecretArn },
+    @{ Sid = "AllowInvokeAnomalyEndpoint"; Effect = "Allow"; Action = "sagemaker:InvokeEndpoint"; Resource = "arn:aws:sagemaker:${Region}:${AccountId}:endpoint/psb-anomaly-endpoint" },
+    @{ Sid = "AllowWriteCuratedScores"; Effect = "Allow"; Action = "s3:PutObject"; Resource = "arn:aws:s3:::$Bucket/curated/*" }) }
+aws iam put-role-policy --role-name psb-score-telemetry-role --policy-name psb-lab-score-telemetry-policy --policy-document $ScorePol
 Start-Sleep 10
 aws lambda create-function --function-name psb-score-telemetry --runtime python3.13 --architectures x86_64 `
     --handler lambda_function.lambda_handler --role $ScoreRole --zip-file (LambdaZip "psb-score-telemetry") `
     --memory-size 512 --timeout 60 --environment (JsonFile "score-env.json" @{ Variables = $ScoreEnv }) | Out-Null
 aws lambda wait function-active-v2 --function-name psb-score-telemetry
+# Test event manual-run = {}
+Set-Content "$Work\manual-run.json" "{}" -Encoding ascii
 aws lambda invoke --function-name psb-score-telemetry --cli-binary-format raw-in-base64-out `
-    --payload "file://$($Assets -replace '\\','/')/test-events/manual-run.json" "$Work\score-out.json" | Out-Null
-Get-Content "$Work\score-out.json"    # {"scored": n, "flagged": m}
+    --payload "file://$($Work -replace '\\','/')/manual-run.json" "$Work\score-out.json" | Out-Null
+Get-Content "$Work\score-out.json"    # {"scored": n, "flagged": m, "archive": "curated/scored/YYYY/MM/DD/HHMMSS.csv"}
 ```
 
 ### Task 2: Every 5 minutes with EventBridge
@@ -565,7 +591,7 @@ curl.exe -H "Authorization: Bearer $env:ID_TOKEN" "$ApiUrl/anomalies?window_minu
 aws s3 ls "s3://$Bucket/curated/scored/" --recursive | Select-Object -Last 3
 ```
 
-Dashboard: select **Anomaly score** in the metric selector.
+Dashboard: select **anomaly_score** in the metric selector and the 6 hours window.
 
 ### ✅ Expected validator result
 
@@ -586,7 +612,7 @@ Dashboard: select **Anomaly score** in the metric selector.
 
 ```powershell
 $msg = JsonFile "converse-msg.json" @(@{ role = "user"; content = @(@{ text = "Reply with OK" }) })
-aws bedrock-runtime converse --model-id apac.amazon.nova-lite-v1:0 --messages $msg --query "output.message.content[0].text" --output text   # OK
+aws bedrock-runtime converse --model-id amazon.nova-lite-v1:0 --messages $msg --query "output.message.content[0].text" --output text   # OK
 ```
 
 > ℹ️ **Info:** If you get AccessDenied, open **Bedrock > Model access** and enable **Amazon Nova Lite** (if the page is not shown, models are enabled on first use).
@@ -595,20 +621,25 @@ aws bedrock-runtime converse --model-id apac.amazon.nova-lite-v1:0 --messages $m
 
 ```powershell
 $AsstRole = LambdaRole "psb-assistant-role"
-aws iam put-role-policy --role-name psb-assistant-role --policy-name psb-lab-assistant-policy --policy-document (PolicyFile "psb-lab-assistant-policy")
+# Inline policy from Lab 08 Task 2 (foundation-model ARN has an EMPTY account field)
+$AsstPol = JsonFile "assistant-policy.json" @{ Version = "2012-10-17"; Statement = @(
+    @{ Sid = "AllowInvokeNovaLite"; Effect = "Allow"; Action = @("bedrock:InvokeModel", "bedrock:Converse"); Resource = "arn:aws:bedrock:${Region}::foundation-model/amazon.nova-lite-v1:0" },
+    @{ Sid = "AllowInvokeQueryFunction"; Effect = "Allow"; Action = "lambda:InvokeFunction"; Resource = "arn:aws:lambda:${Region}:${AccountId}:function:psb-query-telemetry" }) }
+aws iam put-role-policy --role-name psb-assistant-role --policy-name psb-lab-assistant-policy --policy-document $AsstPol
 Start-Sleep 10
-$AsstEnv = @{ MODEL_ID = "apac.amazon.nova-lite-v1:0"; QUERY_FUNCTION_NAME = "psb-query-telemetry"; MAX_TOOL_TURNS = "4" }
+$AsstEnv = @{ MODEL_ID = "amazon.nova-lite-v1:0"; QUERY_FUNCTION_NAME = "psb-query-telemetry"; MAX_TOOL_TURNS = "4" }
 aws lambda create-function --function-name psb-assistant --runtime python3.13 --architectures x86_64 `
     --handler lambda_function.lambda_handler --role $AsstRole --zip-file (LambdaZip "psb-assistant") `
     --memory-size 512 --timeout 90 --environment (JsonFile "assistant-env.json" @{ Variables = $AsstEnv }) | Out-Null
 aws lambda wait function-active-v2 --function-name psb-assistant
 
-aws lambda invoke --function-name psb-assistant --cli-binary-format raw-in-base64-out `
-    --payload "file://$($Assets -replace '\\','/')/test-events/ask-question.json" "$Work\asst-out.json" | Out-Null
-Get-Content "$Work\asst-out.json"
-$q = JsonFile "ask-east-wing.json" @{ question = "What is the temperature in the east wing?" }
+# Test event ask-question: the question is a JSON string inside "body" (same as API Gateway sends it)
+$ask = JsonFile "ask-question.json" @{ body = (@{ question = "What is the average temperature in the north lab over the last hour, and was anything unusual?" } | ConvertTo-Json -Compress) }
+aws lambda invoke --function-name psb-assistant --cli-binary-format raw-in-base64-out --payload $ask "$Work\asst-out.json" | Out-Null
+(Get-Content "$Work\asst-out.json" -Raw | ConvertFrom-Json).body    # {"answer": ..., "trace": [...], "usage": {...}}
+$q = JsonFile "ask-east-wing.json" @{ body = (@{ question = "What was the temperature in the east wing last March?" } | ConvertTo-Json -Compress) }
 aws lambda invoke --function-name psb-assistant --cli-binary-format raw-in-base64-out --payload $q "$Work\asst-out2.json" | Out-Null
-Get-Content "$Work\asst-out2.json"    # polite refusal
+(Get-Content "$Work\asst-out2.json" -Raw | ConvertFrom-Json).body    # says east-wing is not an available location
 ```
 
 ### Task 3: POST /assistant route and redeploy the dashboard
@@ -625,17 +656,19 @@ aws lambda add-permission --function-name psb-assistant --statement-id apigw-psb
     --source-arn "arn:aws:execute-api:${Region}:${AccountId}:${ApiId}/*/*" | Out-Null
 
 Invoke-RestMethod -Method Post -Uri "$ApiUrl/assistant" -Headers @{ Authorization = "Bearer $env:ID_TOKEN" } `
-    -ContentType "application/json" -Body '{"question":"What was the average temperature in the server-room over the last hour?"}'
+    -ContentType "application/json" -Body '{"question":"Which location has the highest CO2 right now?"}'
 
-# Turn on the chat panel, rebuild, redeploy (Deploy-Dashboard is defined in Lab 05; define it again in a new window)
+# Turn on the chat panel: add one line inside the config object (Deploy-Dashboard is defined in Lab 05; define it again in a new window)
 $cfgPath = "$Assets\dashboard\src\config.js"
-(Get-Content $cfgPath -Raw).Replace("assistantEnabled: false", "assistantEnabled: true") | Set-Content $cfgPath -Encoding ascii
+$cfg = Get-Content $cfgPath -Raw
+if ($cfg -notmatch "assistantEnabled") { $cfg = $cfg.Replace("refreshSeconds:    30,", "refreshSeconds:    30,`n  assistantEnabled: true,") }
+Set-Content $cfgPath $cfg -Encoding ascii
 Set-Location "$Assets\dashboard"; npm run build
 Compress-Archive -Path dist\* -DestinationPath dashboard-build.zip -Force
 Deploy-Dashboard
 ```
 
-Console fallback for the redeploy: **Amplify > psb-lab-dashboard > main > Deploy updates**, drag and drop the new zip. Then ask questions in the dashboard chat panel.
+Console fallback for the redeploy: **Amplify > psb-lab-dashboard > Deploy updates**, drag and drop the new zip. The chat panel appears beneath the chart; each answer shows the tool calls (trace) under it.
 
 ### ✅ Expected validator result
 
@@ -660,12 +693,12 @@ foreach ($n in "psb-ingest-telemetry", "psb-query-telemetry", "psb-score-telemet
 # Pattern contains double quotes, so the whole request goes in a JSON file
 $mf = JsonFile "metric-filter.json" @{
     logGroupName = "/aws/lambda/psb-score-telemetry"; filterName = "psb-lab-anomaly-batches"; filterPattern = '"[ok] scored="'
-    metricTransformations = @(@{ metricName = "AnomalyBatches"; metricNamespace = "PSBLab"; metricValue = "1"; defaultValue = 0 }) }
+    metricTransformations = @(@{ metricName = "AnomalyBatches"; metricNamespace = "PSBLab"; metricValue = "1"; defaultValue = 0; unit = "Count" }) }
 aws logs put-metric-filter --cli-input-json $mf
 
 aws cloudwatch put-metric-alarm --alarm-name psb-lab-scoring-pipeline-stalled --namespace PSBLab --metric-name AnomalyBatches `
     --statistic Sum --period 300 --evaluation-periods 3 --datapoints-to-alarm 3 --threshold 0 `
-    --comparison-operator LessThanOrEqualToThreshold --treat-missing-data breaching
+    --comparison-operator LessThanOrEqualToThreshold --treat-missing-data breaching    # no actions (no SNS topic)
 
 # Logs Insights style check: recent errors in the ingest log
 aws logs tail /aws/lambda/psb-ingest-telemetry --since 1h | Select-String "ERROR|Traceback" | Select-Object -Last 5
@@ -690,20 +723,18 @@ Get-Content "$Work\sim.pid" -ErrorAction SilentlyContinue | ForEach-Object { Sto
     Where-Object { $_.Status -in @("InService", "Pending") } |
     ForEach-Object { aws sagemaker delete-app --domain-id $DomainId --space-name psb-lab-space --app-type $_.AppType --app-name $_.AppName; "stopping $($_.AppName)" }
 
-# 3) Delete the endpoint and its endpoint configuration
-$EpCfg = aws sagemaker describe-endpoint --endpoint-name psb-anomaly-endpoint --query EndpointConfigName --output text
+# 3) Delete the endpoint (the model stays in s3://<bucket>/model/)
 aws sagemaker delete-endpoint --endpoint-name psb-anomaly-endpoint
-aws sagemaker delete-endpoint-config --endpoint-config-name $EpCfg
 
-# 4) Disable the IoT rule
-aws iot disable-topic-rule --rule-name psb_telemetry_rule
+# 4) Disable the scheduled scoring rule
+aws events disable-rule --name psb-lab-score-every-5-min
 
 # 5) Delete InfluxDB (no final snapshot)
 $InfluxId = ((AwsJson timestream-influxdb list-db-instances).items | Where-Object { $_.name -eq "psb-lab-influx" }).id
 aws timestream-influxdb delete-db-instance --identifier $InfluxId --query status --output text   # DELETING
 ```
 
-Console way for InfluxDB: **Timestream > InfluxDB databases > psb-lab-influx > Delete**, type `delete me`.
+Console way: **EventBridge > Rules > psb-lab-score-every-5-min > Disable**; **Timestream > InfluxDB instances > psb-lab-influx > Actions > Delete**, clear **Create final snapshot**, type `delete me`.
 
 ### ✅ Expected validator result
 
@@ -713,7 +744,7 @@ Console way for InfluxDB: **Timestream > InfluxDB databases > psb-lab-influx > D
 | Metric filter psb-lab-anomaly-batches | PASS |
 | Alarm psb-lab-scoring-pipeline-stalled | PASS |
 | Teardown: endpoint deleted | PASS |
-| Teardown: rule disabled | PASS |
+| Teardown: EventBridge rule psb-lab-score-every-5-min disabled | PASS |
 | Teardown: InfluxDB deleted (or DELETING) | PASS |
 | Teardown: space stopped | PASS |
 

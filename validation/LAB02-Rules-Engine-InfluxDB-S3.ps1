@@ -317,13 +317,13 @@ function Invoke-LabChecks {
 
     Test-Step "IAM role psb-lab-iot-rule-role" {
         $role = Get-OrNull { Get-IAMRole -RoleName "psb-lab-iot-rule-role" }
-        if (-not $role) { return "IAM role psb-lab-iot-rule-role was not found. Create it with a custom trust policy for iot.amazonaws.com (Lab 02 Task 2)." }
+        if (-not $role) { return "IAM role psb-lab-iot-rule-role was not found. Create it in IAM > Roles > Create role with Trusted entity type AWS service and use case IoT (Lab 02 Task 2)." }
         $out = @()
         $trust = ConvertFrom-PolicyDocument ([string]$role.AssumeRolePolicyDocument)
         $svc = @(Get-PolicyStatements $trust | ForEach-Object { Get-List $_.Principal.Service })
-        if (-not ($svc -contains "iot.amazonaws.com")) { $out += "Role psb-lab-iot-rule-role does not trust iot.amazonaws.com. Edit Trust relationships and use the custom trust policy from the lab guide." }
+        if (-not ($svc -contains "iot.amazonaws.com")) { $out += "Role psb-lab-iot-rule-role does not trust iot.amazonaws.com. Recreate it with Trusted entity type AWS service and use case IoT." }
         $managed = @(Get-IAMAttachedRolePolicyList -RoleName "psb-lab-iot-rule-role")
-        if ($managed.Count -gt 0) { $out += "Role psb-lab-iot-rule-role has managed policies attached ($(($managed.PolicyName) -join ', ')). Remove them; it needs only the inline policy psb-lab-iot-rule-s3-write." }
+        if ($managed.Count -gt 0) { $out += "Role psb-lab-iot-rule-role has managed policies attached ($(($managed.PolicyName) -join ', ')). Remove them (clear every checkbox on the Add permissions page); it needs only the inline policy psb-lab-iot-rule-s3-write." }
         $msg = Test-RoleInlinePolicy "psb-lab-iot-rule-role" "psb-lab-iot-rule-s3-write" "the IoT rule"
         if ($msg) { $out += $msg }
         else {

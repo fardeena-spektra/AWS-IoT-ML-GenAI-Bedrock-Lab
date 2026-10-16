@@ -85,13 +85,34 @@
 .psbgs .psb-panel{padding:14px 12px!important;margin:14px 0!important}
 .psbgs .psb-shot{margin:6px 0 10px!important;padding:3px!important}
 .psbgs .psb-ico{width:1.7em!important;height:1.7em!important;margin-right:6px!important}
+/* v7: vibrant highlights instead of plain bold, icons sized to the text, tight spacing */
+.psbgs strong,.psbgs b{color:#0e7490!important;font-weight:600!important}
+.psbgs th strong,.psbgs th b,.psbgs .psb-hero b{color:inherit!important}
+.psbgs h1 strong,.psbgs h2 strong,.psbgs h3 strong{color:inherit!important}
+.psbgs .psb-ico{width:1.3em!important;height:1.3em!important;margin-right:.35em!important;vertical-align:-0.22em!important;border-radius:7px!important;font-size:1em!important;line-height:1!important}
+.psbgs .psb-ico img{width:.95em!important;height:.95em!important}
+.psbgs h2 .psb-ico,.psbgs h3 .psb-ico{font-size:1em!important}
+.psbgs td .psb-ico{font-size:.95em!important}
+.psbgs .psb-panel{padding:10px 10px!important;margin:10px 0!important}
+.psbgs ol{padding-left:1.75em!important;margin:2px 0 6px!important}
+.psbgs ul{padding-left:1.15em!important;margin:2px 0 6px!important}
+.psbgs img{max-width:100%!important;height:auto!important}
+.psbgs li{margin:0 0 4px!important;padding-left:0!important}
+.psbgs li>p,.psbgs p{margin:0 0 6px!important}
+.psbgs table{display:table!important;width:100%!important;max-width:100%!important;margin:4px 0 8px!important}
+.psbgs th,.psbgs td{padding:6px 8px!important}
+.psbgs blockquote{margin:4px 0 8px!important;padding:6px 10px!important}
+.psbgs pre{margin:4px 0 8px!important}
+.psbgs .psb-shot{margin:4px 0 8px!important;padding:2px!important}
+.psbgs h2{margin:0 0 8px!important;padding-bottom:8px!important}
+.psbgs h3{margin:10px 0 4px!important}
 @media (prefers-reduced-motion:reduce){.psbgs *,.psbgs *::before,.psbgs *::after{animation:none!important;transition:none!important}}
 </style>
 
 <div class="psbgs">
 
 <div class="psb-hero" style="position:relative;overflow:hidden;border-radius:16px;padding:28px 20px 24px;margin:0 0 6px;text-align:center;color:#ffffff;background:linear-gradient(120deg,#070b1a,#121a3a,#0d2b36,#16123a);">
-<div class="psb-title" style="color:#ffffff;font-size:1.6em;font-weight:700;line-height:1.3;text-align:center;">Lab 09: Observability and Teardown</div>
+<div class="psb-title" style="color:#ffffff;font-size:1.6em;font-weight:700;line-height:1.3;text-align:center;">Lab 09: Observability, Secrets Hygiene and Cost Control</div>
 <div class="psb-line" style="width:90px;height:3px;margin:14px auto 12px;border-radius:3px;background:linear-gradient(90deg,#e9b949,#14b8a6);"></div>
 <div class="psb-meta" style="color:#d5dbe3;margin-top:6px;text-align:center;">40 Minutes&nbsp;&nbsp;|&nbsp;&nbsp;5 Points</div>
 </div>
@@ -100,181 +121,211 @@
 
 ## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🎯</span>Overview
 
-Your platform is complete: devices, ingestion, API, dashboard, machine learning and a generative AI assistant. In this final lab, you make it operable and safe: set log retention, search logs, alert when the scoring pipeline stalls, review security choices, review cost drivers, and tear down the expensive resources.
+The solution works. In this final lab you will make it operable.
+
+You will set log retention so your CloudWatch bill does not grow forever, create a metric filter and alarm that fires on sustained high temperature, review what AWS Secrets Manager actually bought you, and, most importantly, delete the two resources that keep billing after the lab ends.
 
 </div>
 
 <div class="psb-panel" style="background:#ffffff;border:1px solid #d5dbe3;border-radius:16px;padding:18px 16px;margin:24px 0;">
 
-## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">📋</span>Objectives
+## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">📋</span>Lab Objectives
 
-In this lab, you will complete the following tasks:
+You will be able to complete the following tasks:
 
-1. 📈 **Task 1:** Configure log retention, search logs, and create a metric filter and alarm.
-1. 🛡️ **Task 2:** Review the security posture.
-1. 💰 **Task 3:** Review costs and tear down.
+- Task 1: Apply log retention and create an anomaly alarm
+- Task 2: Review secrets and network posture
+- Task 3: Cost review and teardown
 
 </div>
 
 <div class="psb-panel" style="background:#ffffff;border:1px solid #d5dbe3;border-radius:16px;padding:18px 16px;margin:24px 0;">
 
-## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧩</span>Task 1: Configure Log Retention, Search Logs, and Create a Metric Filter and Alarm
+## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧩</span>Task 1: Apply Log Retention and Create an Anomaly Alarm
 
-🎯 **Goal:** Keep logs for a sensible period and get alerted when scoring stops.
+1. In the AWS Management Console search bar, type **CloudWatch** and select **CloudWatch**.
 
-### <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🗂️</span>Set log retention
+1. In the left-hand navigation pane, expand **Logs** and click **Log groups**.
 
-1. Open **CloudWatch** > **Logs** > **Log groups** and filter on **/aws/lambda/psb-**.
-
-1. For each log group below, select it, select **Actions** > **Edit retention setting(s)**, choose **1 week (7 days)**, and select **Save**:
-
-   | Log group | Retention |
-   |---|---|
-   | /aws/lambda/psb-ingest-telemetry | 1 week |
-   | /aws/lambda/psb-query-telemetry | 1 week |
-   | /aws/lambda/psb-score-telemetry | 1 week |
-   | /aws/lambda/psb-assistant | 1 week |
-
-   > 💡 **Tip:** Lambda log groups default to **Never expire**, which slowly grows storage cost.
-
-### <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🔎</span>Search the logs
-
-1. Select **Logs** > **Logs Insights**, choose the log group **/aws/lambda/psb-ingest-telemetry**, set the time range to **1h**, enter this query, and select **Run query**:
+1. In the filter box, type **psb**. You should see four log groups:
 
    ```text
-   fields @timestamp, @message
-   | filter @message like /ERROR|Error|Traceback|Task timed out/
-   | sort @timestamp desc
-   | limit 20
+   /aws/lambda/psb-ingest-telemetry
+   /aws/lambda/psb-query-telemetry
+   /aws/lambda/psb-score-telemetry
+   /aws/lambda/psb-assistant
    ```
 
-1. Change the filter line to `| filter @message like /\[ok\] wrote/` and run it again to see successful writes.
+1. Select all four checkboxes, click **Actions**, and choose **Edit retention setting(s)**.
 
-   > ℹ️ **Info:** You can also open the log group and use **Search all log streams** with a filter pattern such as **"[ok] wrote"** or **ERROR**.
+1. Set **Retention setting** to **1 week** and click **Save**.
 
-### <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧮</span>Create the metric filter
+   > **Why this matters.** A CloudWatch log group defaults to **Never expire**. Ingestion in **<inject key="LabRegion" enableCopy="false"/>** costs USD 0.70 per GB and storage USD 0.03 per GB-month, forever. A chatty Lambda in a long-running account is one of the most common sources of quiet, compounding cost, and nobody notices, because it never appears as a spike.
 
-1. Open the log group **/aws/lambda/psb-score-telemetry**, select the **Metric filters** tab, and select **Create metric filter**.
+1. Now create a metric filter that counts high-temperature readings. Click the log group **/aws/lambda/psb-ingest-telemetry**.
 
-1. Enter the filter pattern and select **Next**:
+1. Select the **Metric filters** tab and click **Create metric filter**.
 
-   | Setting | Value |
+1. Configure the filter pattern. The ingest function logs each written line, so you can match on the measurement text:
+
+   | Field | Value |
    |---|---|
-   | **Filter pattern** | "[ok] scored=" |
+   | Filter pattern | **[level="[ok]", ..., temp_field]** |
 
-1. Assign the metric and select **Next**, then **Create metric filter**:
+   Click **Next**.
 
-   | Setting | Value |
+   > **Note:** CloudWatch Logs filter patterns are not regular expressions. For structured JSON logs you would use a JSON pattern such as `{ $.temperature_c > 30 }`. Because this function logs plain text, a simpler and more robust approach for the lab is to alarm on the scoring function's flagged count instead, which is what the next steps do. Click **Cancel** and continue with step 9.
+
+1. Return to **Log groups** and click **/aws/lambda/psb-score-telemetry**.
+
+1. Select the **Metric filters** tab and click **Create metric filter**.
+
+1. Configure:
+
+   | Field | Value |
    |---|---|
-   | **Filter name** | psb-lab-anomaly-batches |
-   | **Metric namespace** | PSBLab |
-   | **Metric name** | AnomalyBatches |
-   | **Metric value** | 1 |
-   | **Default value** | 0 |
+   | Filter pattern | **"[ok] scored="** |
 
-### <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🚨</span>Create the alarm
+   Click **Next**.
 
-1. Select **Alarms** > **All alarms** > **Create alarm** > **Select metric**.
+   > **Note:** The quotation marks matter. A bare `[ok, scored, flagged]` would be a space-delimited pattern, which declares three positional fields and matches on token count rather than content; it would not do what its name suggests. A quoted string is a literal substring match against the whole log line, which is exactly what you want here: it fires once per successful scoring run and never on a failure.
 
-1. Select **PSBLab** > **Metrics with no dimensions** > **AnomalyBatches**, then **Select metric**.
+1. On the **Assign metric** page:
+
+   | Field | Value |
+   |---|---|
+   | Filter name | **psb-lab-anomaly-batches** |
+   | Metric namespace | **PSBLab** |
+   | Metric name | **AnomalyBatches** |
+   | Metric value | **1** |
+   | Default value | **0** |
+   | Unit | **Count** |
+
+   Click **Next**, then **Create metric filter**.
+
+1. Now create the alarm. In the left-hand navigation pane, expand **Alarms** and click **All alarms**, then click **Create alarm**.
+
+1. Click **Select metric**, choose the **PSBLab** namespace, select **AnomalyBatches**, and click **Select metric**.
 
 1. Configure the metric and conditions:
 
-   | Setting | Value |
+   | Field | Value |
    |---|---|
-   | **Statistic** | Sum |
-   | **Period** | 5 minutes |
-   | **Threshold type** | Static |
-   | **Condition** | Lower/Equal (<=) |
-   | **Threshold** | 0 |
-   | **Datapoints to alarm** | 3 out of 3 |
-   | **Missing data treatment** | Treat missing data as bad (breaching threshold) |
+   | Statistic | **Sum** |
+   | Period | **5 minutes** |
+   | Threshold type | **Static** |
+   | Whenever AnomalyBatches is… | **Lower/Equal** than **0** |
+   | Datapoints to alarm | **3** out of **3** |
+   | Missing data treatment | **Treat missing data as bad (breaching)** |
 
-1. Select **Next**. Under **Notification**, select **Remove** so no SNS action is configured, then select **Next**.
+   Click **Next**.
 
-1. Enter the alarm name **psb-lab-scoring-pipeline-stalled**, select **Next**, then **Create alarm**.
+   > **Note:** This alarm fires when the scoring function stops producing output for fifteen minutes: a pipeline-health alarm, not a temperature alarm. This is deliberate and it is the more valuable of the two. A temperature spike is visible on the dashboard; a scoring pipeline that silently died is not, and it is the failure mode that costs you a month of missing anomaly data before anyone notices.
 
-   > ℹ️ **Info:** The alarm goes to **In alarm** if no scoring batch is logged for 15 minutes (3 periods of 5 minutes), for example when the EventBridge rule, the endpoint or InfluxDB stops working. In production you would add an SNS topic for notifications.
+1. On the **Configure actions** page, under **Notification**, select **Remove** to delete the notification block. You will not create an SNS topic in this lab.
 
-✅ **Expected result:** All 4 log groups keep logs for 1 week, the metric filter **psb-lab-anomaly-batches** exists, and the alarm **psb-lab-scoring-pipeline-stalled** is created (state **OK** or **Insufficient data**).
+   Click **Next**.
+
+1. For **Alarm name**, enter:
+
+   - **Alarm name:** **psb-lab-scoring-pipeline-stalled**
+
+   Click **Next**, review, and click **Create alarm**.
+
+1. Confirm the alarm appears in the list. Within fifteen minutes it should move to **OK** state as the scheduled scoring function produces data points.
 
 </div>
 
 <div class="psb-panel" style="background:#ffffff;border:1px solid #d5dbe3;border-radius:16px;padding:18px 16px;margin:24px 0;">
 
-## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧩</span>Task 2: Review the Security Posture
+## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧩</span>Task 2: Review Secrets and Network Posture
 
-🎯 **Goal:** Understand which demo shortcuts you took and how you would harden them for production.
+This task has no console clicking. It is a short review of two decisions this lab made deliberately, and what you would change in production.
 
-1. Open **Secrets Manager** > **psb/influxdb/admin-token** and note that **Rotation** is **Disabled**.
+1. Open the AWS Secrets Manager console and click **psb/influxdb/admin-token**.
 
-1. Open **Timestream** > **InfluxDB databases** > **psb-lab-influx** and note **Publicly accessible: Yes**.
+1. Select the **Overview** tab and note what you get for USD 0.40 per secret per month:
 
-1. Open **IAM** > **Roles**, search for **psb**, and review the inline policy of each of the 5 roles below.
+   - The token is encrypted at rest with a KMS key and never appears in a Lambda environment variable, a CloudFormation template, or a Git repository.
+   - Access is governed by IAM, so you can see in CloudTrail exactly which principal read it and when.
+   - Three separate Lambda functions share one copy. Rotating it means updating one secret, not three deployments.
 
-1. Compare your findings with this table:
+1. Now consider what this lab did not do. Click the **Rotation** tab and confirm rotation is **Disabled**.
 
-   | Area | Lab setting | Risk | Production recommendation |
-   |---|---|---|---|
-   | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🔑</span>**Secret psb/influxdb/admin-token** | Rotation off, admin (operator) token | Long-lived, all-powerful token | Enable rotation; use a scoped write token for ingest and a read token for query. |
-   | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🗄️</span>**InfluxDB psb-lab-influx** | Publicly accessible, port 8086 open in psb-lab-influx-sg | Internet exposure | Private subnets only; run Lambdas in the VPC; restrict the security group to the Lambda security group. |
-   | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🛰️</span>**psb-lab-iot-rule-role** | Inline **psb-lab-iot-rule-s3-write**: s3:PutObject on raw/* only | Low | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">✅</span>Least privilege. Trust only iot.amazonaws.com. |
-   | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">📥</span>**psb-ingest-telemetry role** | Basic Lambda execution + **psb-lab-read-influx-token** (GetSecretValue on one secret) | Low | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">✅</span>Least privilege. Use a write-only Influx token. |
-   | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">📤</span>**psb-query-telemetry role** | Basic Lambda execution + **psb-lab-read-influx-token** | Low | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">✅</span>Least privilege. Use a read-only Influx token. Allow-listed metrics and locations prevent Flux injection. |
-   | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧮</span>**psb-score-telemetry role** | Basic Lambda execution + **psb-lab-score-telemetry-policy** (secret, endpoint/psb-anomaly-endpoint, curated/*) | Low | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">✅</span>Least privilege. Scope S3 further to curated/scored/*. |
-   | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🤖</span>**psb-assistant role** | Basic Lambda execution + **psb-lab-assistant-policy** (one model ARN, one function ARN) | Low | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">✅</span>Least privilege. Add Bedrock Guardrails and rate limits on the API. |
-   | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🔐</span>**Device psb-lab-sensor-01** | Only **psb-lab-device-policy** on its certificate | Low | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">✅</span>Own client ID and topics only. Rotate certificates. |
-   | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🌐</span>**API and dashboard** | JWT authorizer on all routes, CORS origin * | Medium (CORS) | Restrict CORS origin to the Amplify domain. |
+   In production you would enable rotation. Secrets Manager can invoke a Lambda function on a schedule to create a new InfluxDB token, update the secret, and revoke the old one. The functions pick up the new value on their next cold start, which is exactly why the caching code in this lab caches per execution environment rather than in a global that never refreshes. A long-lived admin token that three functions share is convenient for a lab and is not a production posture.
 
-   > 💡 **Tip:** The 4 Lambda execution roles were created by the console with names like **psb-score-telemetry-role-xxxxxxxx**.
+1. Next, review the network decision. Open the **Amazon Timestream** console → **InfluxDB instances** → **psb-lab-influx** → **Connectivity & security**.
 
-✅ **Expected result:** You can explain each finding and the production fix.
+1. Confirm that **Publicly accessible** is **Yes**.
+
+   > **What you would change.** In production the InfluxDB instance would be private, reachable only from inside the VPC. The three Lambda functions would be attached to private subnets in that VPC, with a security group rule allowing TCP 8086 from the Lambda security group only. Because those functions also call Secrets Manager, SageMaker Runtime and S3, you would add VPC interface endpoints for those services (or a NAT gateway) so the functions can reach AWS APIs without a route to the internet.
+
+   This lab took the public path because VPC-attached Lambda adds subnet, route-table, security-group and endpoint configuration that would have consumed an hour and taught networking rather than IoT. The security group you created is still restrictive on port, and the token is still required, but an instance reachable from the internet on port 8086 is protected by one credential, and that is not enough for real data.
+
+1. Finally, review the IAM roles you created. Open the **IAM** console → **Roles** and filter for **psb**. You should have four:
+
+   | Role | What it may do |
+   |---|---|
+   | psb-lab-iot-rule-role | s3:PutObject on the raw/ prefix only |
+   | psb-ingest-telemetry-role-* | Read one secret; write CloudWatch Logs |
+   | psb-query-telemetry-role-* | Read one secret; write CloudWatch Logs |
+   | psb-score-telemetry-role-* | Read one secret; invoke one endpoint; write curated/ |
+   | psb-assistant-role-* | Invoke one model; invoke one function |
+
+   Not one of them has a `"Resource": "*"` statement. Each names the specific ARN it needs. This is what least privilege looks like in practice, and it is achievable: it took perhaps ten extra minutes across the whole lab.
 
 </div>
 
 <div class="psb-panel" style="background:#ffffff;border:1px solid #d5dbe3;border-radius:16px;padding:18px 16px;margin:24px 0;">
 
-## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧩</span>Task 3: Review Costs and Tear Down
+## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧩</span>Task 3: Cost Review and Teardown
 
-🎯 **Goal:** Know what drives cost and stop or delete the hourly billed resources.
+Most of the services in this solution are consumption-priced and cost close to nothing when idle. Two are not, and knowing which is the point of this task.
 
-1. Review the main cost drivers in this lab:
+1. Review where the money actually goes in this architecture:
 
-   | Resource | Billing basis | Relative cost | Teardown action |
-   |---|---|---|---|
-   | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🗄️</span>**Timestream for InfluxDB psb-lab-influx** (db.influx.medium, 20 GiB, 3000 IOPS) | Per instance hour + storage | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🔴</span>High | Delete |
-   | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧪</span>**SageMaker space psb-lab-space** (ml.t3.medium) | Per hour while running | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🟠</span>Medium | Stop |
-   | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🚀</span>**Serverless endpoint psb-anomaly-endpoint** (2048 MB) | Per inference duration + data processed | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🟡</span>Low (idle) | Delete |
-   | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🏋️</span>**RCF training job** (ml.m5.large) | Per second of training (already finished) | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🟢</span>One time | None |
-   | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🖥️</span>**Lab VM** (t3.medium) | Per hour | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🟠</span>Medium | Managed by CloudLabs |
-   | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🛰️</span>**IoT Core, Lambda, API Gateway, EventBridge** | Per message / request | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🟢</span>Very low | Stop simulator, disable rule |
-   | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🤖</span>**Bedrock Nova Lite** | Per input/output token | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🟢</span>Very low | None |
-   | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">📦</span>**S3, CloudWatch Logs, Amplify** | Per GB stored / served | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🟢</span>Very low | Retention set in Task 1 |
+   | Service | Billing model | 24-hour idle cost |
+   |---|---|---|
+   | Timestream for InfluxDB db.influx.medium | Per instance-hour, always on | ≈ USD 3.41 |
+   | SageMaker real-time endpoint ml.m5.large (not used here) | Per instance-hour, always on | ≈ USD 3.46 |
+   | SageMaker serverless endpoint | Per millisecond of compute | ≈ USD 0.00 |
+   | SageMaker Studio JupyterLab space | Per instance-hour while Running | ≈ USD 1.51 if left running |
+   | AWS Lambda | Per request and GB-second | ≈ USD 0.01 |
+   | AWS IoT Core | Per message and connection-minute | ≈ USD 0.01 |
+   | Amazon S3 | Per GB-month and per request | ≈ USD 0.01 |
+   | Amazon API Gateway HTTP API | Per request | < USD 0.01 |
+   | Amazon Bedrock Nova Lite | Per token | ≈ USD 0.02 |
+   | Amazon Cognito | Per monthly active user | USD 0.00 at this volume |
+   | AWS Secrets Manager | Per secret-month + per API call | ≈ USD 0.02 |
+   | Amazon CloudWatch | Per GB ingested, per metric, per alarm | ≈ USD 0.05 |
 
-1. **Stop the simulator:** in the PowerShell window running **simulate_pi.py**, press **Ctrl+C**.
+   The pattern is clear: anything provisioned by the hour costs money whether or not you use it; anything billed per request costs nothing when idle. Choosing serverless inference over a real-time endpoint in Lab 06 saved more than the entire rest of the solution costs combined.
 
-1. **Stop the space:** open **SageMaker AI** > **Studio** > **Open Studio** > **JupyterLab**, and select **Stop** on **psb-lab-space**. This deletes the running JupyterLab app; the space and its files remain.
+1. Now shut down the expensive pieces. First, stop the SageMaker Studio space. Return to the **Amazon SageMaker AI** console → **Studio** → **psb-lab-user** → **Open Studio**.
 
-1. **Delete the endpoint:** in the SageMaker AI console, select **Inference** > **Endpoints**, select **psb-anomaly-endpoint**, then **Actions** > **Delete** and confirm. Then select **Inference** > **Endpoint configurations**, select the configuration used by the endpoint, and delete it too.
+1. In Studio, click **JupyterLab** in the left-hand navigation, find **psb-lab-space**, and click **Stop space**.
 
-1. **Disable the IoT rule:** open **AWS IoT Core** > **Message routing** > **Rules**, select **psb_telemetry_rule**, then select **Deactivate** (shown as **Disable** in some console versions) and confirm. The rule status changes to **Inactive**.
+   > **Note:** Stopping the space preserves your notebook and its 20 GB volume. The instance stops billing immediately. Only the EBS volume continues, at pennies per day.
 
-1. **Delete InfluxDB:** open **Timestream** > **InfluxDB databases**, select **psb-lab-influx**, and select **Delete**. If asked, do not create a final snapshot, type **delete me** to confirm, and select **Delete**.
+1. Delete the SageMaker inference endpoint. In the Amazon SageMaker AI console, expand **Inference** and click **Endpoints**.
 
-   > ⚠️ **Note:** Deleting the InfluxDB instance is permanent. The dashboard and API stop returning data after this step. That is expected.
+1. Select **psb-anomaly-endpoint**, click **Actions**, and choose **Delete**. Confirm.
 
-1. Tick off your teardown checklist:
+   > **Note:** A serverless endpoint costs almost nothing idle, so this step is about hygiene rather than money. It also demonstrates the habit: the endpoint is a deployed artifact, and deployed artifacts should be removed when the experiment ends. The model artifact remains in **s3://<inject key="LabBucketName" enableCopy="false"/>/model/**, so you can redeploy it at any time without retraining.
 
-   | | Teardown item |
-   |---|---|
-   | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">⬜</span>| Simulator stopped (Ctrl+C) |
-   | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">⬜</span>| Space **psb-lab-space** stopped (JupyterLab app deleted) |
-   | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">⬜</span>| Endpoint **psb-anomaly-endpoint** deleted |
-   | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">⬜</span>| Endpoint configuration deleted |
-   | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">⬜</span>| Rule **psb_telemetry_rule** disabled |
-   | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">⬜</span>| InfluxDB **psb-lab-influx** deleted (status **Deleting** is fine) |
+1. Disable the scheduled scoring rule so it does not keep invoking a deleted endpoint. In the **Amazon EventBridge** console, click **Rules**, select **psb-lab-score-every-5-min**, click **Disable**, and confirm.
 
-   ✅ **Expected result:** Observability is configured from Task 1 and every item in the teardown checklist is done.
+1. Finally, the resource that matters most. Return to the **Amazon Timestream** console → **InfluxDB instances**.
+
+1. Select **psb-lab-influx**, click **Actions**, and choose **Delete**.
+
+1. In the confirmation dialog, clear the **Create final snapshot** checkbox, type **delete me** to confirm, and click **Delete**.
+
+   > **Important:** This is the single most important cleanup step in the lab. A **db.influx.medium** Single-AZ instance costs USD 0.142 per hour (USD 3.41 per day, USD 104 per month) and it bills whether or not anything is writing to it. In a real project it is the resource most often left running after a proof of concept ends. Deletion protection was disabled in Lab 02 specifically so this step would work.
+
+1. Confirm the instance status shows **Deleting**.
+
+1. As a final check, note the resources that are safe to leave and cost nothing: the S3 bucket and its contents (pennies), the Lambda functions (free when not invoked), the API Gateway API (free when not called), the Cognito user pool (free at this volume), the IAM roles, and the Amplify app (free below the hosting allowance).
 
    > **Congratulations** on completing the task! Now, it's time to validate it. Here are the steps:
    >
@@ -290,28 +341,15 @@ In this lab, you will complete the following tasks:
 
 ## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">📝</span>Summary
 
-In this lab, you:
+In this lab, you have completed the following:
 
-- Set 1 week retention on the 4 Lambda log groups and searched logs with Logs Insights.
-- Created the metric filter **psb-lab-anomaly-batches** and the alarm **psb-lab-scoring-pipeline-stalled**.
-- Reviewed the secret, InfluxDB exposure and the 5 IAM roles for least privilege.
-- Reviewed cost drivers and tore down the hourly billed resources.
+- Applied one-week retention to all four Lambda log groups.
+- Created a CloudWatch metric filter and a pipeline-health alarm that fires when scoring stops.
+- Reviewed the secrets and network decisions this lab made, and what production would do differently.
+- Confirmed that all five IAM service roles are least-privilege.
+- Reviewed where cost actually accrues in the architecture and deleted the two provisioned resources that keep billing.
 
-</div>
-
-<div class="psb-panel" style="background:#ffffff;border:1px solid #d5dbe3;border-radius:16px;padding:18px 16px;margin:24px 0;">
-
-## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🏁</span>You Did It!
-
-Across 9 labs you built an end to end AWS platform in ap-southeast-1:
-
-| Phase | What you built |
-|---|---|
-| **I. Connect, ingest, serve** | IoT Core device identity, Rules Engine to InfluxDB and S3, query API, Cognito sign-in, Amplify dashboard |
-| **II. Machine learning** | SageMaker Random Cut Forest model, serverless endpoint, scheduled scoring pipeline |
-| **III. Generative AI and operations** | Bedrock tool use assistant, CloudWatch observability, security and cost review |
-
-Need help? Contact cloudlabs-support@spektrasystems.com. We are available 24/7.
+You have successfully completed the lab. Click **Next** to continue to the next page.
 
 </div>
 

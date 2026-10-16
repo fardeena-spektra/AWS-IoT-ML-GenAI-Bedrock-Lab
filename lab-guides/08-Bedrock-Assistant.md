@@ -85,13 +85,34 @@
 .psbgs .psb-panel{padding:14px 12px!important;margin:14px 0!important}
 .psbgs .psb-shot{margin:6px 0 10px!important;padding:3px!important}
 .psbgs .psb-ico{width:1.7em!important;height:1.7em!important;margin-right:6px!important}
+/* v7: vibrant highlights instead of plain bold, icons sized to the text, tight spacing */
+.psbgs strong,.psbgs b{color:#0e7490!important;font-weight:600!important}
+.psbgs th strong,.psbgs th b,.psbgs .psb-hero b{color:inherit!important}
+.psbgs h1 strong,.psbgs h2 strong,.psbgs h3 strong{color:inherit!important}
+.psbgs .psb-ico{width:1.3em!important;height:1.3em!important;margin-right:.35em!important;vertical-align:-0.22em!important;border-radius:7px!important;font-size:1em!important;line-height:1!important}
+.psbgs .psb-ico img{width:.95em!important;height:.95em!important}
+.psbgs h2 .psb-ico,.psbgs h3 .psb-ico{font-size:1em!important}
+.psbgs td .psb-ico{font-size:.95em!important}
+.psbgs .psb-panel{padding:10px 10px!important;margin:10px 0!important}
+.psbgs ol{padding-left:1.75em!important;margin:2px 0 6px!important}
+.psbgs ul{padding-left:1.15em!important;margin:2px 0 6px!important}
+.psbgs img{max-width:100%!important;height:auto!important}
+.psbgs li{margin:0 0 4px!important;padding-left:0!important}
+.psbgs li>p,.psbgs p{margin:0 0 6px!important}
+.psbgs table{display:table!important;width:100%!important;max-width:100%!important;margin:4px 0 8px!important}
+.psbgs th,.psbgs td{padding:6px 8px!important}
+.psbgs blockquote{margin:4px 0 8px!important;padding:6px 10px!important}
+.psbgs pre{margin:4px 0 8px!important}
+.psbgs .psb-shot{margin:4px 0 8px!important;padding:2px!important}
+.psbgs h2{margin:0 0 8px!important;padding-bottom:8px!important}
+.psbgs h3{margin:10px 0 4px!important}
 @media (prefers-reduced-motion:reduce){.psbgs *,.psbgs *::before,.psbgs *::after{animation:none!important;transition:none!important}}
 </style>
 
 <div class="psbgs">
 
 <div class="psb-hero" style="position:relative;overflow:hidden;border-radius:16px;padding:28px 20px 24px;margin:0 0 6px;text-align:center;color:#ffffff;background:linear-gradient(120deg,#070b1a,#121a3a,#0d2b36,#16123a);">
-<div class="psb-title" style="color:#ffffff;font-size:1.6em;font-weight:700;line-height:1.3;text-align:center;">Lab 08: Amazon Bedrock Assistant</div>
+<div class="psb-title" style="color:#ffffff;font-size:1.6em;font-weight:700;line-height:1.3;text-align:center;">Lab 08: Build a Natural-Language Assistant with Amazon Bedrock</div>
 <div class="psb-line" style="width:90px;height:3px;margin:14px auto 12px;border-radius:3px;background:linear-gradient(90deg,#e9b949,#14b8a6);"></div>
 <div class="psb-meta" style="color:#d5dbe3;margin-top:6px;text-align:center;">60 Minutes&nbsp;&nbsp;|&nbsp;&nbsp;13 Points</div>
 </div>
@@ -100,174 +121,295 @@
 
 ## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🎯</span>Overview
 
-Phase III begins. Operators want to ask questions in plain English, such as "How warm was the server room in the last hour?". In this lab, you build an assistant Lambda that uses the **Amazon Bedrock Converse API** with **tool use**: the model calls a **get_sensor_stats** tool, which invokes your **psb-query-telemetry** function for real numbers, then writes the answer. You expose it as **POST /assistant** and turn on the chat panel in the dashboard.
+Your dashboard answers the questions you thought to build a chart for. In this lab you will build something that answers the questions you did not.
 
-> ℹ️ **Info:** The lab title says Claude. The assistant uses **Amazon Nova Lite** through the same Converse API. You can swap in an Anthropic Claude model later by changing **MODEL_ID** (and the model ARNs in the IAM policy).
+You will create an assistant Lambda function that calls the Amazon Bedrock Converse API with a tool declared: **get_sensor_stats**. When a user asks "was anything unusual in the north lab in the last two hours?", the model will decide it needs data, emit a **toolUse** request, your Lambda will execute that tool against the query function you built in Lab 03, return the result, and the model will compose an answer grounded in your real telemetry.
 
-> ⚠️ **Note:** In this Region, Nova Lite is served through the **APAC cross-Region inference profile** **apac.amazon.nova-lite-v1:0**. Requests start in ap-southeast-1 and Bedrock routes them to an APAC Region with capacity. Always use the **apac.** prefix in this lab.
+This is the agent pattern, written out in full. There is no framework hiding the loop: you will see every step.
 
-</div>
-
-<div class="psb-panel" style="background:#ffffff;border:1px solid #d5dbe3;border-radius:16px;padding:18px 16px;margin:24px 0;">
-
-## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">📋</span>Objectives
-
-In this lab, you will complete the following tasks:
-
-1. 🔓 **Task 1:** Enable and test the model in Amazon Bedrock.
-1. 🧰 **Task 2:** Create the psb-assistant Lambda function with tool use.
-1. 💬 **Task 3:** Add the POST /assistant route and enable the dashboard chat.
+> **A note on Amazon Bedrock AgentCore.** PSB's original draft named Strands Agents on Bedrock AgentCore as the target for a full agent workflow, and that is a reasonable long-term direction. AgentCore is a managed runtime that handles agent hosting, memory, identity and observability. This lab builds the loop by hand first, deliberately: once you have written a toolUse/toolResult cycle yourself, AgentCore stops being magic and becomes a hosting decision. The tool schema and system prompt you write here transfer directly.
 
 </div>
 
 <div class="psb-panel" style="background:#ffffff;border:1px solid #d5dbe3;border-radius:16px;padding:18px 16px;margin:24px 0;">
 
-## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🏗️</span>What you build
+## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">📋</span>Lab Objectives
 
-```text
-Dashboard chat ──► POST /assistant (JWT authorizer) ──► psb-assistant
-                                                         │  Converse API (apac.amazon.nova-lite-v1:0)
-                                                         │  toolUse: get_sensor_stats
-                                                         └─► invoke psb-query-telemetry ──► InfluxDB
-```
+You will be able to complete the following tasks:
+
+- Task 1: Verify Bedrock model access and test the Converse API
+- Task 2: Build the assistant Lambda with tool use
+- Task 3: Wire it to the API and the dashboard chat panel
 
 </div>
 
 <div class="psb-panel" style="background:#ffffff;border:1px solid #d5dbe3;border-radius:16px;padding:18px 16px;margin:24px 0;">
 
-## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧩</span>Task 1: Enable and Test the Model in Amazon Bedrock
+## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧩</span>Task 1: Verify Bedrock Model Access and Test the Converse API
 
-🎯 **Goal:** Make sure Amazon Nova Lite is available in ap-southeast-1 and answers a simple prompt.
+1. In the AWS Management Console search bar, type **Bedrock** and select **Amazon Bedrock**.
 
-1. In the AWS console search bar, type **Bedrock** and open **Amazon Bedrock**. Confirm the Region is **<inject key="LabRegion" enableCopy="false"/>**.
+1. In the left-hand navigation pane, scroll down and click **Model access**.
 
-1. In the left menu, select **Model access** (under **Bedrock configurations**).
+1. Confirm that **Amazon Nova Lite** shows **Access granted**.
 
-1. Select **Modify model access** (or **Enable specific models**), select **Amazon** > **Nova Lite**, select **Next**, then **Submit**. Wait until the status shows **Access granted**.
+   > **Note:** Model access has been enabled for you by the lab deployment because it is an account-level setting that can take several minutes to propagate. If it shows **Available to request**, click **Modify model access**, select **Amazon Nova Lite**, and submit; Amazon-family models are granted immediately.
 
-   > ℹ️ **Info:** If the **Model access** page is not shown in your console, serverless foundation models are enabled automatically on first use. Continue with the next step.
+1. Test the model from the console. In the left-hand navigation pane, under **Playgrounds**, click **Chat / Text**.
 
-1. In the left menu, select **Playgrounds** > **Chat / Text**. Select **Select model**, choose **Amazon** > **Nova Lite**, and select **Apply**.
+1. Click **Select model**, choose **Amazon** as the category and **Nova Lite** as the model, then click **Apply**.
 
-1. Enter a test prompt and select **Run**:
+1. Enter a prompt such as **Explain what an anomaly score is, in two sentences.** and click **Run**. Confirm you get a response.
 
-   ```text
-   In one sentence, what is an IoT telemetry anomaly?
+   > **Why Amazon Nova Lite?** It is available on-demand natively in **<inject key="LabRegion" enableCopy="false"/>**, supports the Converse API's tool-use feature, and costs USD 0.081 per million input tokens and USD 0.324 per million output tokens, roughly two cents for this entire lab. Anthropic's Claude models are also excellent for tool use but are reachable from Singapore only through APAC cross-region inference profiles, which bill against a different source region. If you want to switch later, change the **MODEL_ID** environment variable in the next task to `apac.anthropic.claude-sonnet-4-5-20250929-v1:0` or to `amazon.nova-pro-v1:0`; no other code change is needed.
+
+1. Now test the Converse API from the command line. In PowerShell:
+
+   ```powershell
+   aws bedrock-runtime converse `
+     --region ap-southeast-1 `
+     --model-id amazon.nova-lite-v1:0 `
+     --messages '[{"role":"user","content":[{"text":"Say OK and nothing else."}]}]'
    ```
 
-1. Test the Converse API from the command line. Open **AWS CloudShell** (terminal icon in the console top bar) and run:
+1. Confirm you get a JSON response containing `"text": "OK"`.
 
-   ```bash
-   aws bedrock-runtime converse \
-     --model-id apac.amazon.nova-lite-v1:0 \
-     --messages '[{"role":"user","content":[{"text":"Reply with OK"}]}]' \
-     --region ap-southeast-1
-   ```
-
-   > 💡 **Tip:** CloudShell already uses your console sign-in. The AWS CLI on the lab VM has no credentials configured, so only use it if you have set up CLI credentials yourself. In that case, put the message in a file to avoid PowerShell quoting issues:
-   >
-   > ```powershell
-   > '[{"role":"user","content":[{"text":"Reply with OK"}]}]' | Out-File msg.json -Encoding ascii
-   > aws bedrock-runtime converse --model-id apac.amazon.nova-lite-v1:0 --messages file://msg.json --region ap-southeast-1
-   > ```
-
-✅ **Expected result:** The playground answers your prompt and the CLI response contains the text **OK**.
+   > **Note:** The Converse API (`converse` / `converse_stream`) is the modern, model-agnostic interface. The older `invoke_model` API required a different request body shape for every model family. Converse normalises messages, system prompts, inference parameters and tool use across all of them, so switching models really is a one-line change.
 
 </div>
 
 <div class="psb-panel" style="background:#ffffff;border:1px solid #d5dbe3;border-radius:16px;padding:18px 16px;margin:24px 0;">
 
-## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧩</span>Task 2: Create the psb-assistant Lambda Function with Tool Use
+## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧩</span>Task 2: Build the Assistant Lambda with Tool Use
 
-🎯 **Goal:** Deploy the assistant, give it least-privilege access to Bedrock and the query function, and test in and out of scope questions.
+1. In the Lambda console, click **Create function**.
 
-1. Open **AWS Lambda** > **Functions** > **Create function**, choose **Author from scratch**, and enter:
+1. Configure:
 
-   | Setting | Value |
+   | Field | Value |
    |---|---|
-   | **Function name** | psb-assistant |
-   | **Runtime** | Python 3.13 |
-   | **Architecture** | x86_64 |
-   | **Execution role** | Create a new role with basic Lambda permissions |
+   | Option | **Author from scratch** |
+   | Function name | **psb-assistant** |
+   | Runtime | **Python 3.13** |
+   | Architecture | **x86_64** |
+   | Execution role | **Create a new role with basic Lambda permissions** |
 
-1. Select **Create function**.
+   Click **Create function**.
 
-1. Open **C:\psb-lab-assets\lambdas\psb-assistant\lambda_function.py** in **VS Code**, copy all of it, paste it into the Lambda console editor, and select **Deploy**.
+1. Replace the contents of **lambda_function.py** with:
 
-1. Select **Configuration** > **General configuration** > **Edit**:
+   ```python
+   """
+   PSB Academy CloudLab - natural-language telemetry assistant.
 
-   | Setting | Value |
+   Amazon Bedrock Converse API with tool use. The model is given one
+   tool, get_sensor_stats, which is backed by the psb-query-telemetry
+   Lambda function built in Lab 03.
+   """
+   import json
+   import os
+
+   import boto3
+
+   MODEL_ID = os.environ.get("MODEL_ID", "amazon.nova-lite-v1:0")
+   QUERY_FUNCTION = os.environ["QUERY_FUNCTION_NAME"]
+   MAX_TOOL_TURNS = int(os.environ.get("MAX_TOOL_TURNS", "4"))
+
+   _bedrock = boto3.client("bedrock-runtime")
+   _lambda = boto3.client("lambda")
+
+   SYSTEM_PROMPT = [{
+       "text": (
+           "You are the PSB Academy laboratory monitoring assistant. "
+           "You answer questions about live sensor telemetry from three "
+           "locations: north-lab, south-lab and server-room. "
+           "Four metrics are available: temperature_c (degrees Celsius), "
+           "humidity_pct (relative humidity), co2_ppm (carbon dioxide in "
+           "parts per million) and anomaly_score (an unsupervised Random "
+           "Cut Forest score; values above about 1.5 are unusual).\n\n"
+           "Rules:\n"
+           "1. Always call get_sensor_stats before making any claim about "
+           "a number. Never guess or recall a value.\n"
+           "2. If the tool returns point_count 0, say plainly that there "
+           "is no data in that window. Do not invent a value.\n"
+           "3. Quote units. Round to one decimal place.\n"
+           "4. Be concise: two or three sentences unless asked for detail.\n"
+           "5. If asked about a location or metric that is not in the "
+           "lists above, say which ones are available."
+       )
+   }]
+
+   TOOL_CONFIG = {
+       "tools": [{
+           "toolSpec": {
+               "name": "get_sensor_stats",
+               "description": (
+                   "Return aggregated statistics and a downsampled time "
+                   "series for one sensor metric over a recent time window. "
+                   "Use this for every question about sensor values, trends "
+                   "or anomalies."
+               ),
+               "inputSchema": {"json": {
+                   "type": "object",
+                   "properties": {
+                       "metric": {
+                           "type": "string",
+                           "enum": ["temperature_c", "humidity_pct",
+                                    "co2_ppm", "vibration_g",
+                                    "anomaly_score"],
+                           "description": "Which metric to retrieve.",
+                       },
+                       "window_minutes": {
+                           "type": "integer",
+                           "description": (
+                               "How far back to look, in minutes. "
+                               "Between 1 and 1440."),
+                       },
+                       "location": {
+                           "type": "string",
+                           "enum": ["north-lab", "south-lab", "server-room"],
+                           "description": (
+                               "Optional. Omit to cover all locations."),
+                       },
+                   },
+                   "required": ["metric", "window_minutes"],
+               }},
+           }
+       }]
+   }
+
+   def run_tool(name, arguments):
+       if name != "get_sensor_stats":
+           return {"error": f"unknown tool {name}"}
+       response = _lambda.invoke(
+           FunctionName=QUERY_FUNCTION,
+           InvocationType="RequestResponse",
+           Payload=json.dumps(arguments).encode("utf-8"),
+       )
+       result = json.loads(response["Payload"].read())
+       # Send the model the summary plus a light sample of the series.
+       # Handing it 300 raw points wastes tokens and helps nothing.
+       return {
+           "summary": result.get("summary", {}),
+           "sample": result.get("points", [])[-12:],
+       }
+
+   def converse(messages):
+       return _bedrock.converse(
+           modelId=MODEL_ID,
+           system=SYSTEM_PROMPT,
+           messages=messages,
+           toolConfig=TOOL_CONFIG,
+           inferenceConfig={"maxTokens": 600, "temperature": 0.2},
+       )
+
+   def ask(question):
+       messages = [{"role": "user", "content": [{"text": question}]}]
+       trace = []
+
+       for _ in range(MAX_TOOL_TURNS):
+           response = converse(messages)
+           output = response["output"]["message"]
+           messages.append(output)
+
+           if response.get("stopReason") != "tool_use":
+               answer = "".join(block.get("text", "")
+                                for block in output["content"])
+               return {"answer": answer.strip(), "trace": trace,
+                       "usage": response.get("usage", {})}
+
+           # The model asked for one or more tools. Run them all.
+           tool_results = []
+           for block in output["content"]:
+               if "toolUse" not in block:
+                   continue
+               use = block["toolUse"]
+               trace.append({"tool": use["name"], "input": use["input"]})
+               result = run_tool(use["name"], use["input"])
+               tool_results.append({"toolResult": {
+                   "toolUseId": use["toolUseId"],
+                   "content": [{"json": result}],
+               }})
+           messages.append({"role": "user", "content": tool_results})
+
+       return {"answer": ("I could not answer that within the allowed "
+                          "number of tool calls. Try a narrower question."),
+               "trace": trace, "usage": {}}
+
+   def _response(status, body):
+       return {
+           "statusCode": status,
+           "headers": {"Content-Type": "application/json",
+                       "Access-Control-Allow-Origin": "*"},
+           "body": json.dumps(body),
+       }
+
+   def lambda_handler(event, context):
+       try:
+           body = json.loads(event.get("body") or "{}")
+       except json.JSONDecodeError:
+           return _response(400, {"error": "body must be valid JSON"})
+
+       question = (body.get("question") or "").strip()
+       if not question:
+           return _response(400, {"error": "field 'question' is required"})
+       if len(question) > 500:
+           return _response(400, {"error": "question is too long"})
+
+       try:
+           result = ask(question)
+       except Exception as err:                      # noqa: BLE001
+           print(f"[error] {type(err).__name__}: {err}")
+           return _response(502, {"error": "assistant unavailable"})
+
+       print(f"[ok] q={question[:80]!r} tools={len(result['trace'])} "
+             f"usage={result.get('usage')}")
+       return _response(200, result)
+   ```
+
+   The loop in `ask()` is the whole idea, and it is worth reading twice:
+
+   - You send the question plus the tool schema. You do not tell the model to use the tool; you describe what the tool does and let it decide.
+   - If `stopReason` is not `tool_use`, the model answered directly and you are done.
+   - If it is `tool_use`, the model has emitted a `toolUse` block containing a `toolUseId` and an `input` object matching your JSON schema. You run the tool, wrap the result in a `toolResult` block carrying the same `toolUseId`, append it as a user message, and call the model again.
+   - `MAX_TOOL_TURNS` bounds the loop. Without it a confused model can loop until the Lambda times out, and every iteration costs tokens.
+   - `run_tool` returns the summary plus the last twelve points, not all of them. Token budget is a real design constraint: a 300-point series would add roughly 4,000 input tokens per turn and would not make the answer better.
+
+1. Click **Deploy**.
+
+1. Open **Configuration** → **General configuration** → **Edit**:
+
+   | Field | Value |
    |---|---|
-   | **Memory** | 512 MB |
-   | **Timeout** | 1 min 30 sec |
+   | Memory | **512 MB** |
+   | Timeout | **1 min 30 sec** |
 
-1. Select **Configuration** > **Environment variables** > **Edit** and add:
+   Click **Save**.
+
+1. Open **Configuration** → **Environment variables** → **Edit** and add:
 
    | Key | Value |
    |---|---|
-   | **MODEL_ID** | apac.amazon.nova-lite-v1:0 |
-   | **QUERY_FUNCTION_NAME** | psb-query-telemetry |
-   | **MAX_TOOL_TURNS** | 4 |
+   | MODEL_ID | **amazon.nova-lite-v1:0** |
+   | QUERY_FUNCTION_NAME | **psb-query-telemetry** |
+   | MAX_TOOL_TURNS | **4** |
 
-1. Review how the assistant works:
+   Click **Save**.
 
-   > ℹ️ **Info: the tool use loop**
-   > 1. The question is sent to the model with a **system prompt** (answer only about the 3 lab locations and 4 metrics; politely refuse anything else) and a **toolConfig** containing **get_sensor_stats**.
-   > 1. When the model replies with **stopReason: tool_use**, the function invokes **psb-query-telemetry** directly with the tool input.
-   > 1. The tool result is sent back to the model as a **toolResult** message.
-   > 1. The loop repeats until the model gives a final answer or **MAX_TOOL_TURNS** (4) is reached.
-   > 1. The function returns **{"answer":"...","tool_calls":n}** (wrapped in an API response with CORS when called from API Gateway).
-
-   The tool definition the model sees looks like this:
-
-   ```json
-   {
-     "toolSpec": {
-       "name": "get_sensor_stats",
-       "description": "Get summary statistics (count, min, max, mean, latest) for one sensor metric over the last window_minutes, optionally for one lab location.",
-       "inputSchema": {
-         "json": {
-           "type": "object",
-           "properties": {
-             "metric": {
-               "type": "string",
-               "enum": ["temperature_c", "humidity_pct", "co2_ppm", "vibration_g", "anomaly_score"],
-               "description": "Metric to summarise."
-             },
-             "location": {
-               "type": "string",
-               "enum": ["north-lab", "south-lab", "server-room"],
-               "description": "Optional lab location. Omit for all locations."
-             },
-             "window_minutes": {
-               "type": "integer", "minimum": 1, "maximum": 1440,
-               "description": "How many minutes back to look (1-1440)."
-             }
-           },
-           "required": ["metric", "window_minutes"]
-         }
-       }
-     }
-   }
-   ```
-
-1. Select **Configuration** > **Permissions**, open the execution role in IAM, select **Add permissions** > **Create inline policy** > **JSON**, and paste this policy. Replace **&lt;AWS-ACCOUNT-ID&gt;** with your account ID:
+1. Open **Configuration** → **Permissions**, click the **Role name** link, and add an inline policy with the following JSON, replacing `<AWS-ACCOUNT-ID>` with **<inject key="AWSAccountId" enableCopy="true"/>**:
 
    ```json
    {
      "Version": "2012-10-17",
      "Statement": [
        {
-         "Sid": "InvokeNovaLiteThroughApacProfileOnly",
+         "Sid": "AllowInvokeNovaLite",
          "Effect": "Allow",
-         "Action": ["bedrock:InvokeModel", "bedrock:InvokeModelWithResponseStream"],
-         "Resource": [
-           "arn:aws:bedrock:ap-southeast-1:<AWS-ACCOUNT-ID>:inference-profile/apac.amazon.nova-lite-v1:0",
-           "arn:aws:bedrock:*::foundation-model/amazon.nova-lite-v1:0"
-         ]
+         "Action": ["bedrock:InvokeModel", "bedrock:Converse"],
+         "Resource": "arn:aws:bedrock:ap-southeast-1::foundation-model/amazon.nova-lite-v1:0"
        },
        {
-         "Sid": "InvokeQueryFunctionOnly",
+         "Sid": "AllowInvokeQueryFunction",
          "Effect": "Allow",
          "Action": "lambda:InvokeFunction",
          "Resource": "arn:aws:lambda:ap-southeast-1:<AWS-ACCOUNT-ID>:function:psb-query-telemetry"
@@ -276,105 +418,118 @@ Dashboard chat ──► POST /assistant (JWT authorizer) ──► psb-assistan
    }
    ```
 
-   > ⚠️ **Note:** The Converse API is authorized by **bedrock:InvokeModel**. The policy allows the APAC inference profile in your account and the Nova Lite foundation model in any Region the profile routes to. Foundation model ARNs have an **empty account field** (two colons before foundation-model). The file is also at **C:\psb-lab-assets\policies\psb-lab-assistant-policy.json**.
+1. Click **Next**, name it **psb-lab-assistant-policy**, and click **Create policy**.
 
-1. Select **Next**, name the policy **psb-lab-assistant-policy**, and select **Create policy**.
+   > **Note:** The Bedrock foundation-model ARN has an empty account field: `arn:aws:bedrock:ap-southeast-1::foundation-model/...` with two colons. Foundation models are owned by AWS, not by your account. Writing your account ID there is a common mistake and produces an **AccessDeniedException** that looks like a model-access problem.
 
-1. Back in Lambda, open the **Test** tab, create an event named **ask-question**, and select **Test**:
-
-   ```json
-   {"question":"What was the average temperature in the server-room over the last hour?"}
-   ```
-
-1. Create a second test event with an out of scope question and run it:
+1. Return to the function, open the **Test** tab, create an event named **ask-question**, and set the body to:
 
    ```json
-   {"question":"What is the temperature in the east wing?"}
+   {
+     "body": "{\"question\": \"What is the average temperature in the north lab over the last hour, and was anything unusual?\"}"
+   }
    ```
 
-   | Sample question | Scope | Expected behavior |
-   |---|---|---|
-   | What was the average temperature in the server-room over the last hour? | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">✅</span>In scope | Calls **get_sensor_stats** and answers with a real number. **tool_calls** ≥ 1. |
-   | Which location had the highest CO₂ in the last 30 minutes? | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">✅</span>In scope | Calls the tool for each location and compares. |
-   | Were there any anomalies in north-lab in the last hour? | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">✅</span>In scope | Uses **anomaly_score** and reports flagged readings. |
-   | What is the temperature in the east wing? | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">❌</span>Out of scope | Politely refuses: only north-lab, south-lab and server-room are monitored. |
-   | Write me a poem about the weather in Paris. | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">❌</span>Out of scope | Politely refuses and explains what it can answer. |
+1. Click **Test**. You should get a 200 response whose body contains something like:
 
-   | Problem | Likely cause and fix |
-   |---|---|
-   | AccessDeniedException on Converse | Model ARN or region in **psb-lab-assistant-policy** is wrong, or model access is not granted. |
-   | AccessDenied on lambda:InvokeFunction | Wrong account ID in the query function ARN. |
-   | Task timed out | Timeout is not 1 min 30 sec. |
+   ```json
+   {
+     "answer": "Over the last hour the north lab averaged 22.9 °C, ranging from 21.9 to 24.1 °C. The anomaly score stayed below 1.2 for the whole window, so nothing unusual was detected.",
+     "trace": [
+       {"tool": "get_sensor_stats", "input": {"metric": "temperature_c", "window_minutes": 60, "location": "north-lab"}},
+       {"tool": "get_sensor_stats", "input": {"metric": "anomaly_score", "window_minutes": 60, "location": "north-lab"}}
+     ],
+     "usage": {"inputTokens": 2841, "outputTokens": 74, "totalTokens": 2915}
+   }
+   ```
 
-✅ **Expected result:** The in scope test returns an **answer** with **tool_calls** of 1 or more, and the east wing question is politely refused.
+1. Look carefully at the **trace**. The model made two tool calls without being told to: it worked out that "average temperature" and "anything unusual" are two different metrics. That decision is the thing you built.
+
+1. Try a question that should get a refusal rather than an invention:
+
+   ```json
+   { "body": "{\"question\": \"What was the temperature in the east wing last March?\"}" }
+   ```
+
+   The assistant should tell you that **east-wing** is not one of the available locations, rather than making up a number.
+
+   > **Troubleshooting:** An **AccessDeniedException** on `bedrock:InvokeModel` means the ARN in the inline policy has your account ID where it should have nothing. A **ValidationException** mentioning `toolConfig` means the model ID does not support tool use; confirm it is `amazon.nova-lite-v1:0`. If the assistant answers without any trace entries, the model decided it did not need data; rephrase the question to ask for a specific number.
 
 </div>
 
 <div class="psb-panel" style="background:#ffffff;border:1px solid #d5dbe3;border-radius:16px;padding:18px 16px;margin:24px 0;">
 
-## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧩</span>Task 3: Add the POST /assistant Route and Enable the Dashboard Chat
+## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧩</span>Task 3: Wire It to the API and the Dashboard Chat Panel
 
-🎯 **Goal:** Expose the assistant through your protected API and use it from the dashboard.
+1. Return to the API Gateway console and open **psb-lab-api**.
 
-### <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🔗</span>Create the route
+1. In the left-hand navigation pane, under **Develop**, click **Routes**.
 
-1. Open **API Gateway** > **APIs** > **psb-lab-api** > **Routes** and select **Create**.
+1. Click **Create**.
 
-1. Set the method to **POST**, the path to **/assistant**, and select **Create**.
+1. Configure:
 
-### <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🔌</span>Attach the integration
-
-1. Select the **POST /assistant** route, then select **Attach integration** > **Create and attach an integration**.
-
-1. Configure it:
-
-   | Setting | Value |
+   | Field | Value |
    |---|---|
-   | **Integration type** | Lambda function |
-   | **AWS Region** | ap-southeast-1 |
-   | **Lambda function** | psb-assistant |
-   | **Payload format version** (Advanced settings) | 2.0 |
-   | **Grant API Gateway permission to invoke your Lambda function** | On |
+   | Method | **POST** |
+   | Path | **/assistant** |
 
-1. Select **Create**.
+   Click **Create**.
 
-### <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🔐</span>Attach the authorizer
+1. With **POST /assistant** selected, click **Attach integration**, then **Create and attach an integration**:
 
-1. In the left menu, select **Authorization**, select the **POST /assistant** route, choose **psb-lab-cognito-authorizer** from the list, and select **Attach authorizer**.
+   | Field | Value |
+   |---|---|
+   | Integration type | **Lambda function** |
+   | AWS Region | **<inject key="LabRegion" enableCopy="false"/>** |
+   | Lambda function | **psb-assistant** |
+   | Payload format version | **2.0** |
 
-   > ℹ️ **Info:** The **$default** stage has automatic deployment turned on, so the new route is live straight away.
+   Click **Create**.
 
-### <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">💬</span>Enable the chat panel
+1. In the left-hand navigation pane, click **Authorization**, select the **Attach authorizers to routes** tab, click **POST /assistant**, choose **psb-lab-cognito-authorizer**, and click **Attach authorizer**.
 
-1. In **VS Code**, open **C:\psb-lab-assets\dashboard\src\config.js** and set:
+1. Test it from PowerShell with a fresh token:
 
-   ```javascript
-   assistantEnabled: true
+   ```powershell
+   curl.exe -X POST "<INVOKE-URL>/assistant" `
+     -H "Authorization: Bearer <ID-TOKEN>" `
+     -H "Content-Type: application/json" `
+     -d '{\"question\":\"Which location has the highest CO2 right now?\"}'
    ```
 
-1. Rebuild and zip the dashboard in PowerShell:
+1. Confirm you get a natural-language answer.
+
+1. Now enable the chat panel in the dashboard. On the Lab VM, in VS Code, open **C:\psb-lab-assets\dashboard\src\config.js** and add one line inside the **config** object:
+
+   ```javascript
+   assistantEnabled: true,
+   ```
+
+1. Save the file, then rebuild and repackage:
 
    ```powershell
    cd C:\psb-lab-assets\dashboard
    npm run build
-   Compress-Archive -Path dist\* -DestinationPath dashboard-build.zip -Force
+   Compress-Archive -Path .\dist\* -DestinationPath .\dashboard-build.zip -Force
    ```
 
-   > 💡 **Tip:** If you used the **dist.zip** fallback in Lab 05, set **assistantEnabled** to **true** in its **config.json** and re-zip instead.
+1. Return to the AWS Amplify console, open **psb-lab-dashboard**, and click **Deploy updates**.
 
-1. Open **AWS Amplify** > **psb-lab-dashboard** > branch **main**, select **Deploy updates**, drag and drop the new **dashboard-build.zip**, and select **Save and deploy**.
+1. Drag **dashboard-build.zip** into the upload area and click **Save and deploy**.
 
-1. When the deployment shows **Deployed**, open the dashboard, sign in as **student@psb.lab**, and ask questions in the chat panel, for example:
+1. When the deployment shows **Deployed**, open your Amplify domain and sign in.
 
-   ```text
-   What was the average temperature in the server-room over the last hour?
-   Which location had the highest CO2 in the last 30 minutes?
-   What is the humidity in the east wing?
-   ```
+1. A chat panel now appears beneath the chart. Try these questions:
 
-   > 🧭 **Concept note:** For production agents, look at the open source **Strands Agents SDK** (model-driven agents in a few lines of Python) and **Amazon Bedrock AgentCore** (managed runtime, memory, identity, gateway and observability for agents).
+   - What is the average CO2 in the server room over the last two hours?
+   - Has anything been unusual in the last 30 minutes?
+   - Compare temperature between the north lab and the south lab today.
+   - What is the highest vibration reading in the last hour?
 
-   ✅ **Expected result:** **POST /assistant** is protected by **psb-lab-cognito-authorizer**, and the dashboard chat answers in scope questions with real sensor numbers.
+1. Watch the network tab in your browser developer tools (**F12**) while you ask a question. You will see a single POST to **/assistant** that takes two to six seconds: the model round-trips, the tool runs, the model round-trips again.
+
+   > **Where this goes next: Strands Agents on Bedrock AgentCore.** What you have built is a single-turn, single-tool agent running in a Lambda function. It has no memory between questions, no identity propagation to the tool, and no tracing beyond your own print statements. Strands Agents is an open-source SDK that expresses the same loop declaratively: you register Python functions as tools with a decorator and the SDK runs the cycle. Amazon Bedrock AgentCore then hosts that agent, adding a managed runtime with session isolation, a gateway that turns existing APIs into tools, short- and long-term memory, identity propagation so the tool runs as the end user rather than as the Lambda role, and OpenTelemetry-based observability. Your **SYSTEM_PROMPT** and **TOOL_CONFIG** port across almost verbatim. Build the loop by hand once, as you just have; adopt the runtime when session state, multi-agent coordination or per-user authorisation becomes the problem you are actually solving.
 
    > **Congratulations** on completing the task! Now, it's time to validate it. Here are the steps:
    >
@@ -390,14 +545,16 @@ Dashboard chat ──► POST /assistant (JWT authorizer) ──► psb-assistan
 
 ## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">📝</span>Summary
 
-In this lab, you:
+In this lab, you have completed the following:
 
-- Enabled **Amazon Nova Lite** and tested it in the playground and with the Converse API.
-- Built **psb-assistant**, which uses Bedrock tool use (**get_sensor_stats**) to fetch real data from **psb-query-telemetry**.
-- Restricted it with **psb-lab-assistant-policy** to one model and one function.
-- Published **POST /assistant** behind the Cognito JWT authorizer and enabled the dashboard chat panel.
+- Verified Amazon Bedrock model access and tested the Converse API.
+- Built an assistant Lambda function implementing the Converse tool-use loop from first principles.
+- Declared a **get_sensor_stats** tool backed by your existing query function, with a grounded system prompt that forbids guessing.
+- Exposed it through a secured API route and enabled the dashboard chat panel.
 
-Click **Next** to continue.
+Phase III is complete. A non-specialist can now ask your solution a question in English and get an answer grounded in real sensor data.
+
+You have successfully completed the lab. Click **Next** to continue to the next lab.
 
 </div>
 

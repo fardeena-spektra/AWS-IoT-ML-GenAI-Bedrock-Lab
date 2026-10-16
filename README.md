@@ -40,7 +40,7 @@ CloudLabs guided lab package: **IoT sensors → time-series → ML anomaly detec
 
 Every resource carries the tag `aws-apn-id = pc:7finjv2fdluw3t9gvedjkgubj`, except IAM roles/profiles, routes, route-table associations and the gateway attachment. UserData restarts the SSM agent at the end. Bootstrap log: `C:\cloudlabs-bootstrap.log`.
 
-**CFT outputs (map in CloudLabs, used as inject keys):** `AWSUserName`, `AWSPassword`, `SignInUrl`, `LabRegion`, `LabBucketName`, `SageMakerDomainName`, `SageMakerDomainId`, `SageMakerUserProfile`, `WindowsVMPublicIP`, `WindowsVMPrivateIP`, `VMPublicDNSName`, `windowsvmAdminUsername`, `WindowsVMPassword`, `clusterSubnetId`, `clusterSecurityGroupId`, `TaskExecutionRole`, `CloudLabsDeploymentID`.
+**CFT outputs (map in CloudLabs, used as inject keys):** `AWSAccountId`, `AWSUserName`, `AWSPassword`, `SignInUrl`, `LabRegion`, `LabBucketName`, `SageMakerDomainName`, `SageMakerDomainId`, `SageMakerUserProfile`, `WindowsVMPublicIP`, `WindowsVMPrivateIP`, `VMPublicDNSName`, `windowsvmAdminUsername`, `WindowsVMPassword`, `clusterSubnetId`, `clusterSecurityGroupId`, `TaskExecutionRole`, `CloudLabsDeploymentID`.
 
 ## ✅ Setup checklist
 
@@ -56,6 +56,5 @@ Every resource carries the tag `aws-apn-id = pc:7finjv2fdluw3t9gvedjkgubj`, exce
 ## ℹ️ Notes
 
 - The lab title says Claude. The assistant uses **Amazon Nova Lite** through the Bedrock Converse API, as in the original. A Claude model can be swapped in by changing `MODEL_ID` and the model ARNs in `psb-lab-assistant-policy`.
-- The guide content follows the original pages. The code (simulator, Lambdas, dashboard, notebook) was written fresh to match the behaviour the original guide describes, because the original source files could not be retrieved.
-- The IoT rule SQL keeps `injected_anomaly` so the notebook can measure precision and recall. The ingest Lambda does not write it to InfluxDB.
+- The lab guides and the lab code (simulator, 4 Lambda functions, notebook, policies, dashboard config) follow the original lab guide text and code. Only the page design, inject keys and one validation per lab were added.
 - No screenshots are included in the guides yet.

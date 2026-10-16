@@ -7,7 +7,7 @@
  Parameters  : DeploymentId = GET-DEPLOYMENT-ID, Region = ap-southeast-1 (AccessKey / SecretKey optional; blank = Function App lab credentials)
 
  Passes when:
-   - user pool psb-lab-users has domain psb-lab-<DeploymentId> and app client psb-lab-dashboard
+   - user pool psb-lab-users has a Cognito domain (any prefix) and app client psb-lab-dashboard
      (implicit + code grants, scopes email openid profile, callback http://localhost:5173/)
    - user student@psb.lab is CONFIRMED (new password set)
    - JWT authorizer psb-lab-cognito-authorizer (Authorization header, pool issuer, client audience)
@@ -309,13 +309,12 @@ function Invoke-LabChecks {
         return $out
     }
 
-    Test-Step "Cognito domain psb-lab-$DeploymentId" {
+    Test-Step "Cognito domain on psb-lab-users" {
         $pool = Get-LabUserPool
         if (-not $pool) { return "Cannot check the domain because user pool psb-lab-users does not exist." }
         $full = Get-CGIPUserPool -UserPoolId $pool.Id
-        if ("$($full.Domain)" -ne "psb-lab-$DeploymentId") {
-            $now = if ($full.Domain) { "is $($full.Domain)" } else { "is not set" }
-            return "The Cognito domain prefix of psb-lab-users $now. Under Branding > Domain set the Cognito domain prefix to psb-lab-$DeploymentId."
+        if (-not "$($full.Domain)".Trim() -and -not "$($full.CustomDomain)".Trim()) {
+            return "User pool psb-lab-users has no Cognito domain. Go to Branding > Domain, click Actions > Create Cognito domain, enter a unique prefix such as psb-lab-$DeploymentId and click Create."
         }
     }
 
@@ -359,7 +358,7 @@ function Invoke-LabChecks {
         return $out
     }
 
-    $script:SuccessText = "Lab 04 complete: user pool psb-lab-users with domain psb-lab-$DeploymentId and app client psb-lab-dashboard is set up, student@psb.lab is confirmed, and both API routes require a Cognito JWT through psb-lab-cognito-authorizer."
+    $script:SuccessText = "Lab 04 complete: user pool psb-lab-users with a Cognito domain and app client psb-lab-dashboard is set up, student@psb.lab is confirmed, and both API routes require a Cognito JWT through psb-lab-cognito-authorizer."
 }
 
 # ---------------- main ----------------

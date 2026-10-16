@@ -85,13 +85,34 @@
 .psbgs .psb-panel{padding:14px 12px!important;margin:14px 0!important}
 .psbgs .psb-shot{margin:6px 0 10px!important;padding:3px!important}
 .psbgs .psb-ico{width:1.7em!important;height:1.7em!important;margin-right:6px!important}
+/* v7: vibrant highlights instead of plain bold, icons sized to the text, tight spacing */
+.psbgs strong,.psbgs b{color:#0e7490!important;font-weight:600!important}
+.psbgs th strong,.psbgs th b,.psbgs .psb-hero b{color:inherit!important}
+.psbgs h1 strong,.psbgs h2 strong,.psbgs h3 strong{color:inherit!important}
+.psbgs .psb-ico{width:1.3em!important;height:1.3em!important;margin-right:.35em!important;vertical-align:-0.22em!important;border-radius:7px!important;font-size:1em!important;line-height:1!important}
+.psbgs .psb-ico img{width:.95em!important;height:.95em!important}
+.psbgs h2 .psb-ico,.psbgs h3 .psb-ico{font-size:1em!important}
+.psbgs td .psb-ico{font-size:.95em!important}
+.psbgs .psb-panel{padding:10px 10px!important;margin:10px 0!important}
+.psbgs ol{padding-left:1.75em!important;margin:2px 0 6px!important}
+.psbgs ul{padding-left:1.15em!important;margin:2px 0 6px!important}
+.psbgs img{max-width:100%!important;height:auto!important}
+.psbgs li{margin:0 0 4px!important;padding-left:0!important}
+.psbgs li>p,.psbgs p{margin:0 0 6px!important}
+.psbgs table{display:table!important;width:100%!important;max-width:100%!important;margin:4px 0 8px!important}
+.psbgs th,.psbgs td{padding:6px 8px!important}
+.psbgs blockquote{margin:4px 0 8px!important;padding:6px 10px!important}
+.psbgs pre{margin:4px 0 8px!important}
+.psbgs .psb-shot{margin:4px 0 8px!important;padding:2px!important}
+.psbgs h2{margin:0 0 8px!important;padding-bottom:8px!important}
+.psbgs h3{margin:10px 0 4px!important}
 @media (prefers-reduced-motion:reduce){.psbgs *,.psbgs *::before,.psbgs *::after{animation:none!important;transition:none!important}}
 </style>
 
 <div class="psbgs">
 
 <div class="psb-hero" style="position:relative;overflow:hidden;border-radius:16px;padding:28px 20px 24px;margin:0 0 6px;text-align:center;color:#ffffff;background:linear-gradient(120deg,#070b1a,#121a3a,#0d2b36,#16123a);">
-<div class="psb-title" style="color:#ffffff;font-size:1.6em;font-weight:700;line-height:1.3;text-align:center;">Lab 04: Amazon Cognito Authentication</div>
+<div class="psb-title" style="color:#ffffff;font-size:1.6em;font-weight:700;line-height:1.3;text-align:center;">Lab 04: Secure the API with Amazon Cognito</div>
 <div class="psb-line" style="width:90px;height:3px;margin:14px auto 12px;border-radius:3px;background:linear-gradient(90deg,#e9b949,#14b8a6);"></div>
 <div class="psb-meta" style="color:#d5dbe3;margin-top:6px;text-align:center;">40 Minutes&nbsp;&nbsp;|&nbsp;&nbsp;10 Points</div>
 </div>
@@ -100,175 +121,180 @@
 
 ## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🎯</span>Overview
 
-Your API is currently open to anyone with the URL. In this lab, you add user sign-in with **Amazon Cognito** and protect the API with a **JWT authorizer** in API Gateway. Only requests carrying a valid Cognito ID token are allowed through.
+Your API currently answers anyone who knows the URL. In this lab you will fix that.
+
+You will create an Amazon Cognito user pool to hold your application's users, add an app client and a hosted sign-in UI, and attach a JWT authorizer to your API Gateway routes so that every request must carry a valid, unexpired, correctly-audienced token. You will then prove the boundary works by calling the API with and without a token.
 
 </div>
 
 <div class="psb-panel" style="background:#ffffff;border:1px solid #d5dbe3;border-radius:16px;padding:18px 16px;margin:24px 0;">
 
-## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">📋</span>Objectives
+## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">📋</span>Lab Objectives
 
-- **Task 1:** Create the Cognito user pool, app client, domain and a test user, then sign in to get an ID token.
-- **Task 2:** Add a JWT authorizer to **psb-lab-api** and test it with and without a token.
+You will be able to complete the following tasks:
 
-</div>
-
-<div class="psb-panel" style="background:#ffffff;border:1px solid #d5dbe3;border-radius:16px;padding:18px 16px;margin:24px 0;">
-
-## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🏗️</span>What you build
-
-```text
-User ──sign in──> Cognito managed login (psb-lab-users) ──id_token──> Client
-Client ──Authorization: Bearer <id_token>──> API Gateway (psb-lab-cognito-authorizer) ──> psb-query-telemetry
-```
+- Task 1: Create the Cognito user pool, app client and hosted UI
+- Task 2: Attach a JWT authorizer to the API and verify enforcement
 
 </div>
 
 <div class="psb-panel" style="background:#ffffff;border:1px solid #d5dbe3;border-radius:16px;padding:18px 16px;margin:24px 0;">
 
-## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧩</span>Task 1: Create the User Pool and Get an ID Token
+## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧩</span>Task 1: Create the Cognito User Pool, App Client and Hosted UI
 
-🎯 **Goal:** Set up Cognito for the single-page dashboard and sign in as a test user.
+1. In the AWS Management Console search bar, type **Cognito** and select **Amazon Cognito**.
 
-1. Open **Amazon Cognito** and click **Get started for free in less than five minutes** (or **User pools** > **Create user pool**). The **Set up resources for your application** page opens.
+1. Click **Create user pool**.
 
-1. Enter the following settings:
+1. On the **Define your application** page:
 
-   | Setting | Value |
+   | Field | Value |
    |---|---|
    | Application type | **Single-page application (SPA)** |
    | Name your application | **psb-lab-dashboard** |
-   | Options for sign-in identifiers | **Email** |
-   | Return URL | **http://localhost:5173/** |
+   | Options for sign-in identifiers | Select **Email** only |
+   | Required attributes for sign-up | Select **email** |
 
-   Leave the other options as default and click **Create user directory**.
-
-1. On the next page, click **Go to overview**. Record these values in Notepad (from the **User pool overview** and **Applications** > **App clients** > **psb-lab-dashboard**):
-
-   | Value | Notepad name | Example |
-   |---|---|---|
-   | User pool ID | **USER-POOL-ID** | **ap-southeast-1_AbCdEfGhI** |
-   | Client ID | **CLIENT-ID** | **1a2b3c4d5e6f7g8h9i0j** |
-   | Cognito domain | **COGNITO-DOMAIN** | set in step 5 |
-
-1. On the **User pool overview** page, click **Rename**, enter **psb-lab-users** and click **Save changes**.
-
-   > ℹ️ **Info:** The wizard gives the pool an automatic name. Renaming it makes it easy to find and is checked by the validation.
-
-1. In the left menu select **Branding** > **Domain**. Set a Cognito domain with the prefix **psb-lab-<inject key="DeploymentID" enableCopy="false"/>**:
-
-   - If a Cognito domain with a random prefix already exists, select **Actions** > **Delete Cognito domain** and confirm.
-   - Select **Actions** > **Create Cognito domain**, enter the prefix **psb-lab-<inject key="DeploymentID" enableCopy="false"/>**, keep **Branding version** as **Managed login**, and click **Create Cognito domain**.
-
-   Save the domain in Notepad as **COGNITO-DOMAIN** (without **https://**):
+1. Under **Add a return URL**, enter the following placeholder. You will replace it in Lab 05 once you know your Amplify domain:
 
    ```text
-   psb-lab-<inject key="DeploymentID" enableCopy="false"/>.auth.ap-southeast-1.amazoncognito.com
+   http://localhost:5173/
    ```
 
-1. Select **Applications** > **App clients** > **psb-lab-dashboard**, open the **Login pages** tab, and under **Managed login pages configuration** click **Edit**:
+1. Click **Create user directory**.
 
-   | Setting | Value |
+1. Once the pool is created, you land on the application overview. Copy the following three values into your notepad; you will need all of them:
+
+   | Value | Where it appears |
+   |---|---|
+   | User pool ID | Format ap-southeast-1_XXXXXXXXX |
+   | Client ID | A 26-character alphanumeric string |
+   | Cognito domain | Format https://&lt;prefix&gt;.auth.ap-southeast-1.amazoncognito.com |
+
+   > **Note:** If a Cognito domain was not created automatically, go to **Branding** → **Domain** in the left-hand navigation, click **Actions** → **Create Cognito domain**, enter a globally unique prefix such as **psb-lab-<inject key="DeploymentID" enableCopy="false"/>**, and click **Create**.
+
+1. Now rename the pool for clarity. In the left-hand navigation pane, click **Overview**, then **Edit** next to the pool name, set it to **psb-lab-users**, and save.
+
+1. Enable the OAuth flow this lab uses. In the left-hand navigation pane, under **Applications**, click **App clients**, then click **psb-lab-dashboard**.
+
+1. Scroll to **Login pages** and click **Edit**.
+
+1. Set the following, then click **Save changes**:
+
+   | Field | Value |
    |---|---|
    | Allowed callback URLs | **http://localhost:5173/** |
-   | OAuth 2.0 grant types | **Implicit grant** and **Authorization code grant** |
-   | OpenID Connect scopes | **Email**, **OpenID**, **Profile** |
+   | Allowed sign-out URLs | **http://localhost:5173/** |
+   | Identity providers | **Cognito user pool** |
+   | OAuth 2.0 grant types | Select **Implicit grant** (leave **Authorization code grant** selected as well) |
+   | OpenID Connect scopes | **email**, **openid**, **profile** |
 
-   Click **Save changes**.
+   > **Important:** The SPA quick-setup flow enables **Authorization code grant** only. The next few steps sign you in with `response_type=token`, which is the implicit grant, so it must be enabled here or the hosted UI will reject the request with `unauthorized_client`. You will add your Amplify domain to these same lists in Lab 05.
 
-1. Select **User management** > **Users** > **Create user**:
+1. Create a test user. In the left-hand navigation pane, under **User management**, click **Users**, then click **Create user**.
 
-   | Setting | Value |
+1. On the **Create user** page, provide the following:
+
+   | Field | Value |
    |---|---|
    | Invitation message | **Don't send an invitation** |
    | Email address | **student@psb.lab** |
-   | Mark email address as verified | **Selected** |
-   | Temporary password | **Set a password**: **PsbLab#2026!** |
+   | Mark email address as verified | **Checked** |
+   | Password | **Set a password** |
+   | Password value | **PsbLab#2026!** |
 
-   Click **Create user**.
+1. Click **Create user**.
 
-1. Build the managed login (Hosted UI) URL. In Notepad, replace **&lt;COGNITO-DOMAIN&gt;** and **&lt;CLIENT-ID&gt;**:
+1. Confirm the user appears in the list with status **Force change password**.
+
+1. Sign in once through the hosted UI to clear the forced password change. Open a new browser tab and navigate to the following URL, replacing `<COGNITO-DOMAIN>` and `<CLIENT-ID>`:
 
    ```text
-   https://<COGNITO-DOMAIN>/login?client_id=<CLIENT-ID>&response_type=token&scope=email+openid+profile&redirect_uri=http://localhost:5173/
+   <COGNITO-DOMAIN>/login?client_id=<CLIENT-ID>&response_type=token&scope=email+openid&redirect_uri=http://localhost:5173/
    ```
 
-1. Open the URL in the browser. Sign in with **student@psb.lab** and **PsbLab#2026!**. When asked, set the new password:
+1. Sign in as **student@psb.lab** with **PsbLab#2026!**. You will be prompted to set a new password; set it to:
 
-   | Setting | Value |
-   |---|---|
-   | New password | **PsbLab#2026!New** |
-
-1. The browser redirects to **http://localhost:5173/** and the page **does not load**. This is expected, because nothing runs on localhost yet. Copy the full address bar, find the value between **id_token=** and the next **&**, and copy it.
-
-1. In **PowerShell**, store the token in an environment variable (paste your token):
-
-   ```powershell
-   $env:ID_TOKEN = "<PASTE-ID-TOKEN-HERE>"
+   ```text
+   PsbLab#2026!New
    ```
 
-   > ⚠️ **Note:** The ID token expires after **1 hour**. If later calls return **401**, repeat steps 9 to 11 (you sign in with **PsbLab#2026!New** from now on).
+1. After sign-in, the browser will redirect to **http://localhost:5173/** and show a connection error. That is expected: nothing is listening on that port yet. What matters is the URL bar, which now contains a fragment like:
 
-✅ **Expected result:** The user pool **psb-lab-users** exists with app client **psb-lab-dashboard** and domain **psb-lab-<inject key="DeploymentID" enableCopy="false"/>**, the user **student@psb.lab** is **Confirmed**, and you have an ID token in **$env:ID_TOKEN**.
+   ```text
+   http://localhost:5173/#id_token=eyJraWQiOiJ...&access_token=eyJra...&expires_in=3600&token_type=Bearer
+   ```
+
+1. Copy the value of **id_token**: everything between `id_token=` and the following `&`. Paste it into your notepad. It is a long JWT beginning `eyJ`.
+
+   > **Note:** This is an OAuth 2.0 implicit-flow response. The token is delivered in the URL fragment (after `#`) rather than the query string, so it is never sent to a server in a request line or written to a server access log. Modern SPAs use Authorization Code with PKCE instead, which Amplify's auth library does for you in Lab 05; implicit flow is used here only because it hands you a token you can paste into curl.
 
 </div>
 
 <div class="psb-panel" style="background:#ffffff;border:1px solid #d5dbe3;border-radius:16px;padding:18px 16px;margin:24px 0;">
 
-## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧩</span>Task 2: Protect the API with a JWT Authorizer
+## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧩</span>Task 2: Attach a JWT Authorizer to the API and Verify Enforcement
 
-🎯 **Goal:** Allow only signed-in users to call **GET /telemetry** and **GET /anomalies**.
+1. Return to the API Gateway console and open **psb-lab-api**.
 
-1. Open **API Gateway** > **psb-lab-api**. In the left menu, under **Develop**, select **Authorization**.
+1. In the left-hand navigation pane, under **Develop**, click **Authorization**.
 
-1. Open the **Manage authorizers** tab and click **Create**:
+1. Select the **Manage authorizers** tab and click **Create**.
 
-   | Setting | Value |
+1. Configure the authorizer:
+
+   | Field | Value |
    |---|---|
    | Authorizer type | **JWT** |
    | Name | **psb-lab-cognito-authorizer** |
    | Identity source | **$request.header.Authorization** |
    | Issuer URL | **https://cognito-idp.ap-southeast-1.amazonaws.com/&lt;USER-POOL-ID&gt;** |
-   | Audience | **&lt;CLIENT-ID&gt;** (click **Add audience**) |
+   | Audience | **&lt;CLIENT-ID&gt;** |
 
-   Click **Create**.
+   > **Note:** The Issuer URL is not your Cognito hosted-UI domain; it is the identity-provider endpoint, built from the region and the user pool ID. Getting these two confused is the most common cause of a 401 at this step. The Audience must be the app client ID, because that is the `aud` claim Cognito puts in the ID token.
 
-1. Open the **Attach authorizers to routes** tab. Select **GET** under **/telemetry**, choose **psb-lab-cognito-authorizer** and click **Attach authorizer**. Repeat for **GET** under **/anomalies**.
+1. Click **Create**.
 
-   > ℹ️ **Info:** The **$default** stage auto-deploys, so the change is live within a few seconds.
+1. Select the **Attach authorizers to routes** tab.
 
-1. In **PowerShell**, call the API **without** a token:
+1. Click **GET /telemetry**, select **psb-lab-cognito-authorizer** from the dropdown, and click **Attach authorizer**.
 
-   ```powershell
-   curl.exe -i "<API-URL>/telemetry?metric=temperature_c&window_minutes=30"
-   ```
+1. Repeat for **GET /anomalies**.
 
-   Confirm the response is **401** with **{"message":"Unauthorized"}**.
+1. Confirm both routes now show **psb-lab-cognito-authorizer** in the **Attached authorizer** column.
 
-1. Call the API **with** the token:
+1. Now verify enforcement. In PowerShell, call the API without a token:
 
    ```powershell
-   curl.exe -i -H "Authorization: Bearer $env:ID_TOKEN" "<API-URL>/telemetry?metric=temperature_c&window_minutes=30"
+   curl.exe -i "<INVOKE-URL>/telemetry?metric=temperature_c"
    ```
 
-   Confirm the response is **200** with telemetry data.
+   You should receive:
 
-1. Decode the token claims to see what the authorizer checks. Paste the token on **https://jwt.io**, or run this in PowerShell:
+   ```text
+   HTTP/2 401
+   {"message":"Unauthorized"}
+   ```
+
+1. Now call it with the token you copied in Task 1 step 18:
 
    ```powershell
-   $p = $env:ID_TOKEN.Split('.')[1].Replace('-','+').Replace('_','/')
-   switch ($p.Length % 4) { 2 { $p += '==' } 3 { $p += '=' } }
-   [System.Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($p)) | ConvertFrom-Json | Select-Object email, aud, iss, exp
+   curl.exe -i -H "Authorization: Bearer <ID-TOKEN>" "<INVOKE-URL>/telemetry?metric=temperature_c&window_minutes=30"
    ```
 
-   | Claim | Meaning |
-   |---|---|
-   | **email** | The signed-in user (**student@psb.lab**) |
-   | **aud** | Audience, must equal your **Client ID** |
-   | **iss** | Issuer, must equal your user pool URL |
-   | **exp** | Expiry time (epoch seconds) |
+   You should receive **HTTP/2 200** and your telemetry JSON.
 
-   ✅ **Expected result:** Without a token the API returns **401 Unauthorized**; with a valid token it returns **200**. Both routes use **psb-lab-cognito-authorizer**.
+   > **Troubleshooting:** A 401 with a valid-looking token usually means one of three things: the token has expired (they last one hour; repeat Task 1 steps 15 to 18 to get a fresh one); you pasted the `access_token` instead of the `id_token` (the audience claim differs); or the Issuer URL in the authorizer has a trailing slash, which it must not have.
+
+1. Finally, understand what the authorizer is not doing. Paste your token into a JWT decoder to inspect its claims; you can do this offline in PowerShell:
+
+   ```powershell
+   $t = "<ID-TOKEN>".Split(".")[1]
+   $t = $t.PadRight($t.Length + (4 - $t.Length % 4) % 4, "=")
+   [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($t))
+   ```
+
+   You will see claims including `sub`, `aud`, `iss`, `exp` and `email`. API Gateway verifies the signature, the issuer, the audience and the expiry; it does not decide what this particular user is allowed to see. That is authorization, and it belongs in your Lambda function. In a multi-tenant version of this solution, **psb-query-telemetry** would read the `sub` or a custom `custom:site_id` claim from `event.requestContext.authorizer.jwt.claims` and add it to the Flux filter.
 
    > **Congratulations** on completing the task! Now, it's time to validate it. Here are the steps:
    >
@@ -284,14 +310,14 @@ Client ──Authorization: Bearer <id_token>──> API Gateway (psb-lab-cognit
 
 ## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">📝</span>Summary
 
-In this lab, you:
+In this lab, you have completed the following:
 
-- Created the Cognito user pool **psb-lab-users** with the SPA app client **psb-lab-dashboard** and the domain **psb-lab-<inject key="DeploymentID" enableCopy="false"/>**.
-- Enabled implicit and authorization code grants with **email**, **openid** and **profile** scopes.
-- Created and signed in as **student@psb.lab** to obtain an ID token.
-- Protected **GET /telemetry** and **GET /anomalies** with the JWT authorizer **psb-lab-cognito-authorizer**.
+- Created an Amazon Cognito user pool, app client and hosted sign-in UI.
+- Created a test user and obtained a JWT through the hosted UI.
+- Attached a JWT authorizer to both API Gateway routes.
+- Verified that unauthenticated requests are rejected and authenticated requests succeed, and inspected the token's claims.
 
-Click **Next** to continue.
+You have successfully completed the lab. Click **Next** to continue to the next lab.
 
 </div>
 

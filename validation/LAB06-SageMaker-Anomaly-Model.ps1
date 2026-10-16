@@ -323,22 +323,22 @@ function Invoke-LabChecks {
         }
         if (-not $found) {
             $running = @(Get-SMTrainingJobList -SortBy CreationTime -SortOrder Descending) | Where-Object { $_ -and "$($_.TrainingJobStatus)" -eq "InProgress" }
-            if ($running) { return "A training job is still in progress. Wait until notebook cell 4 finishes (5-8 minutes) and validate again." }
-            return "No completed RandomCutForest training job with output under s3://$Bucket/model/ was found. Run notebook cells 1-4 with BUCKET = '$Bucket'."
+            if ($running) { return "A training job is still in progress. Wait until notebook Cell 4 finishes (about five minutes) and validate again." }
+            return "No completed RandomCutForest training job with output under s3://$Bucket/model/ was found. Run notebook cells 1 to 4 with BUCKET = '$Bucket'."
         }
     }
 
     Test-Step "Endpoint psb-anomaly-endpoint is InService" {
         $e = Get-OrNull { Get-SMEndpoint -EndpointName "psb-anomaly-endpoint" }
-        if (-not $e) { return "Endpoint psb-anomaly-endpoint was not found. Run notebook cell 5 to deploy the serverless endpoint." }
+        if (-not $e) { return "Endpoint psb-anomaly-endpoint was not found. Run notebook Cell 5 to deploy the serverless endpoint." }
         $st = "$($e.EndpointStatus)"
         if ($st -eq "Creating") { return "Endpoint psb-anomaly-endpoint is still Creating. Wait 3-5 minutes and validate again." }
-        if ($st -ne "InService") { return "Endpoint psb-anomaly-endpoint is $st. Delete it and run notebook cell 5 again. Reason: $($e.FailureReason)" }
+        if ($st -ne "InService") { return "Endpoint psb-anomaly-endpoint is $st. Delete it and run notebook Cell 5 again. Reason: $($e.FailureReason)" }
     }
 
     Test-Step "Scored backfill file curated/scored/backfill-scored.csv" {
         $k = @(Get-S3Keys "curated/scored/backfill-scored.csv" 1)
-        if ($k.Count -eq 0) { return "s3://$Bucket/curated/scored/backfill-scored.csv was not found. Run notebook cells 6-10 (scoring, cutoff, metrics, plot, write CSV)." }
+        if ($k.Count -eq 0) { return "s3://$Bucket/curated/scored/backfill-scored.csv was not found. Run notebook cells 6 to 9 (Cell 9 writes the CSV) with BUCKET = '$Bucket'." }
     }
 
     $script:SuccessText = "Lab 06 complete: 24 hours of backfill data is in s3://$Bucket/raw/, psb-lab-space exists in psb-lab-domain, a RandomCutForest model was trained into model/, psb-anomaly-endpoint is InService and the scored backfill CSV was written."

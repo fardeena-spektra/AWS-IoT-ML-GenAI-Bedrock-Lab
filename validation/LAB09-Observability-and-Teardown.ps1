@@ -9,8 +9,8 @@
  Passes when:
    - the 4 /aws/lambda/psb-* log groups keep logs for 7 days
    - metric filter psb-lab-anomaly-batches and alarm psb-lab-scoring-pipeline-stalled match the lab settings
-   - teardown done: endpoint psb-anomaly-endpoint deleted, rule psb_telemetry_rule disabled,
-     InfluxDB psb-lab-influx deleted (or deleting), no running app in space psb-lab-space
+   - teardown done: space psb-lab-space stopped, endpoint psb-anomaly-endpoint deleted,
+     EventBridge rule psb-lab-score-every-5-min disabled, InfluxDB psb-lab-influx deleting or deleted
 #>
 # CloudLabs injects the step parameters as variables before this script runs,
 # so there is no param() block here (it would fail with "The term 'param' is not recognized").
@@ -23,7 +23,7 @@ if (-not $Region) { $Region = "ap-southeast-1" }
 Write-Host "DeploymentId: $DeploymentId | Region: $Region"
 
 $LabTitle        = "Lab 09"
-$RequiredModules = @("AWS.Tools.CloudWatchLogs", "AWS.Tools.CloudWatch", "AWS.Tools.SageMaker", "AWS.Tools.IoT", "AWS.Tools.TimestreamInfluxDB")
+$RequiredModules = @("AWS.Tools.CloudWatchLogs", "AWS.Tools.CloudWatch", "AWS.Tools.SageMaker", "AWS.Tools.EventBridge", "AWS.Tools.TimestreamInfluxDB")
 $ErrorActionPreference = "Stop"
 $ProgressPreference    = "SilentlyContinue"
 $message  = $null
@@ -308,11 +308,12 @@ function Invoke-LabChecks {
         $out = @()
         if ("$($f.FilterPattern)" -notlike '*`[ok`] scored=*') { $out += "Metric filter psb-lab-anomaly-batches pattern is '$($f.FilterPattern)'. Set it to `"[ok] scored=`" (with the double quotes)." }
         $t = @($f.MetricTransformations)[0]
-        if (-not $t) { $out += "Metric filter psb-lab-anomaly-batches has no metric. Set namespace PSBLab, metric AnomalyBatches, value 1, default 0." }
+        if (-not $t) { $out += "Metric filter psb-lab-anomaly-batches has no metric. Set namespace PSBLab, metric AnomalyBatches, value 1, default 0, unit Count." }
         else {
             if ($t.MetricNamespace -ne "PSBLab" -or $t.MetricName -ne "AnomalyBatches") { $out += "Metric filter psb-lab-anomaly-batches publishes $($t.MetricNamespace)/$($t.MetricName). Use namespace PSBLab and metric name AnomalyBatches." }
             if ("$($t.MetricValue)" -ne "1") { $out += "Metric filter psb-lab-anomaly-batches metric value is '$($t.MetricValue)'. Set it to 1." }
             if ($null -eq $t.DefaultValue -or [double]$t.DefaultValue -ne 0) { $out += "Metric filter psb-lab-anomaly-batches default value is '$($t.DefaultValue)'. Set it to 0." }
+            if ("$($t.Unit)" -ne "Count") { $out += "Metric filter psb-lab-anomaly-batches unit is '$($t.Unit)'. Set Unit to Count." }
         }
         return $out
     }
@@ -329,18 +330,19 @@ function Invoke-LabChecks {
         if ("$($a.ComparisonOperator)" -ne "LessThanOrEqualToThreshold" -or [double]$a.Threshold -ne 0) { $out += "Alarm condition is $($a.ComparisonOperator) $($a.Threshold). Set it to Lower/Equal (<=) 0." }
         if ([int]$a.EvaluationPeriods -ne 3 -or [int]$a.DatapointsToAlarm -ne 3) { $out += "Alarm uses $($a.DatapointsToAlarm) out of $($a.EvaluationPeriods) datapoints. Set Datapoints to alarm to 3 out of 3." }
         if ("$($a.TreatMissingData)" -ne "breaching") { $out += "Alarm treats missing data as '$($a.TreatMissingData)'. Set it to Treat missing data as bad (breaching threshold)." }
-        if (@($a.AlarmActions).Where({ $_ }).Count -gt 0) { $out += "Alarm psb-lab-scoring-pipeline-stalled has notification actions. Remove them (no SNS action in this lab)." }
+        $acts = @($a.AlarmActions) + @($a.OKActions) + @($a.InsufficientDataActions)
+        if (@($acts).Where({ $_ }).Count -gt 0) { $out += "Alarm psb-lab-scoring-pipeline-stalled has notification actions. Remove them (on Configure actions, select Remove; no SNS topic in this lab)." }
         return $out
     }
 
     Test-Step "Teardown: endpoint psb-anomaly-endpoint deleted" {
         $e = Get-OrNull { Get-SMEndpoint -EndpointName "psb-anomaly-endpoint" }
-        if ($e -and "$($e.EndpointStatus)" -ne "Deleting") { return "Endpoint psb-anomaly-endpoint still exists ($($e.EndpointStatus)). Delete it in SageMaker AI > Inference > Endpoints (and its endpoint configuration)." }
+        if ($e -and "$($e.EndpointStatus)" -ne "Deleting") { return "Endpoint psb-anomaly-endpoint still exists ($($e.EndpointStatus)). Delete it in SageMaker AI > Inference > Endpoints (select it, Actions > Delete)." }
     }
 
-    Test-Step "Teardown: rule psb_telemetry_rule disabled" {
-        $r = Get-OrNull { Get-IOTTopicRule -RuleName "psb_telemetry_rule" }
-        if ($r -and $r.Rule -and -not $r.Rule.RuleDisabled) { return "IoT rule psb_telemetry_rule is still active. Open IoT Core > Message routing > Rules, select it and choose Deactivate." }
+    Test-Step "Teardown: EventBridge rule psb-lab-score-every-5-min disabled" {
+        $r = Get-OrNull { Get-EVBRuleDetail -Name "psb-lab-score-every-5-min" }
+        if ($r -and "$($r.State)" -ne "DISABLED") { return "EventBridge rule psb-lab-score-every-5-min is still $($r.State). In the Amazon EventBridge console click Rules, select psb-lab-score-every-5-min, click Disable and confirm." }
     }
 
     Test-Step "Teardown: InfluxDB psb-lab-influx deleted" {
@@ -353,7 +355,7 @@ function Invoke-LabChecks {
         if ($running) { return "Space psb-lab-space is still running. In SageMaker Studio open JupyterLab and choose Stop on psb-lab-space." }
     }
 
-    $script:SuccessText = "Lab 09 complete: Lambda logs keep 7 days, the psb-lab-anomaly-batches metric filter and psb-lab-scoring-pipeline-stalled alarm are configured, and the endpoint, IoT rule, InfluxDB instance and JupyterLab space are torn down."
+    $script:SuccessText = "Lab 09 complete: Lambda logs keep 7 days, the psb-lab-anomaly-batches metric filter and psb-lab-scoring-pipeline-stalled alarm are configured, the JupyterLab space is stopped, the endpoint is deleted, the scoring rule is disabled and the InfluxDB instance is being deleted."
 }
 
 # ---------------- main ----------------

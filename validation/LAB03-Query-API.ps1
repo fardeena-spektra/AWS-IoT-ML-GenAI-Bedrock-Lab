@@ -9,7 +9,7 @@
  Passes when:
    - Lambda psb-query-telemetry is configured (py3.13, 256 MB, 30 s, 4 env vars) with inline psb-lab-read-influx-token
    - HTTP API psb-lab-api has CORS, routes GET /telemetry + GET /anomalies -> psb-query-telemetry (payload 2.0), $default auto-deploy
-   - a direct invoke of psb-query-telemetry returns temperature points from InfluxDB
+   - a direct invoke of psb-query-telemetry returns data (summary.point_count > 0 or points not empty)
 #>
 # CloudLabs injects the step parameters as variables before this script runs,
 # so there is no param() block here (it would fail with "The term 'param' is not recognized").
@@ -344,16 +344,24 @@ function Invoke-LabChecks {
 
     Test-Step "Direct invoke of $fn returns points" {
         if (-not $ctx["lambda:$fn"]) { return "Cannot invoke $fn because the function was not found." }
-        $payload = '{"metric":"temperature_c","window_minutes":60,"bucket_seconds":60}'
-        $resp = Invoke-LMFunction -FunctionName $fn -Payload $payload
+        # Same shape as the direct-query test event; retry with a wider window when the last 30 minutes are empty
         $text = ""
-        if ($resp.Payload) { $text = [System.IO.StreamReader]::new($resp.Payload).ReadToEnd() }
-        if ($resp.FunctionError) { return "Invoking $fn failed ($($resp.FunctionError)): $($text.Substring(0, [Math]::Min(200, $text.Length))). Run the direct-query test event and check the CloudWatch log of $fn." }
-        $obj = $null
-        try { $obj = $text | ConvertFrom-Json } catch { }
-        if ($obj -and $obj.body -and -not $obj.points) { try { $obj = $obj.body | ConvertFrom-Json } catch { } }
-        $count = @($obj.points).Where({ $_ }).Count
-        if ($count -eq 0) { return "$fn returned no temperature_c points for the last 60 minutes. Keep the simulator running, confirm Lab 02 writes reach InfluxDB, then validate again. Response: $($text.Substring(0, [Math]::Min(200, $text.Length)))" }
+        foreach ($mins in @(30, 240)) {
+            $payload = '{"metric":"temperature_c","window_minutes":' + $mins + ',"bucket_seconds":60}'
+            $resp = Invoke-LMFunction -FunctionName $fn -Payload $payload
+            $text = ""
+            if ($resp.Payload) { $text = [System.IO.StreamReader]::new($resp.Payload).ReadToEnd() }
+            if ($resp.FunctionError) { return "Invoking $fn failed ($($resp.FunctionError)): $($text.Substring(0, [Math]::Min(200, $text.Length))). Run the direct-query test event and check the CloudWatch log of $fn." }
+            $obj = $null
+            try { $obj = $text | ConvertFrom-Json } catch { }
+            if ($obj -and $obj.body -and -not $obj.summary) { try { $obj = $obj.body | ConvertFrom-Json } catch { } }
+            if ($obj -and $obj.error) { return "$fn returned an error: $($obj.error)" }
+            $pc = 0
+            if ($obj -and $obj.summary -and $null -ne $obj.summary.point_count) { [void][int]::TryParse("$($obj.summary.point_count)", [ref]$pc) }
+            $count = @($obj.points).Where({ $_ }).Count
+            if ($pc -gt 0 -or $count -gt 0) { return }
+        }
+        return "$fn returned point_count 0 (no data in the window). Confirm your simulator is still running and that Lab 02 writes reach InfluxDB, then validate again. Response: $($text.Substring(0, [Math]::Min(200, $text.Length)))"
     }
 
     $script:SuccessText = "Lab 03 complete: psb-query-telemetry is configured with least privilege, psb-lab-api serves GET /telemetry and GET /anomalies with CORS on an auto-deployed `$default stage, and a test query returned live temperature points."

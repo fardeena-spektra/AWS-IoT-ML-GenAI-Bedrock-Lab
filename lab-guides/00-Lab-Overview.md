@@ -85,6 +85,27 @@
 .psbgs .psb-panel{padding:14px 12px!important;margin:14px 0!important}
 .psbgs .psb-shot{margin:6px 0 10px!important;padding:3px!important}
 .psbgs .psb-ico{width:1.7em!important;height:1.7em!important;margin-right:6px!important}
+/* v7: vibrant highlights instead of plain bold, icons sized to the text, tight spacing */
+.psbgs strong,.psbgs b{color:#0e7490!important;font-weight:600!important}
+.psbgs th strong,.psbgs th b,.psbgs .psb-hero b{color:inherit!important}
+.psbgs h1 strong,.psbgs h2 strong,.psbgs h3 strong{color:inherit!important}
+.psbgs .psb-ico{width:1.3em!important;height:1.3em!important;margin-right:.35em!important;vertical-align:-0.22em!important;border-radius:7px!important;font-size:1em!important;line-height:1!important}
+.psbgs .psb-ico img{width:.95em!important;height:.95em!important}
+.psbgs h2 .psb-ico,.psbgs h3 .psb-ico{font-size:1em!important}
+.psbgs td .psb-ico{font-size:.95em!important}
+.psbgs .psb-panel{padding:10px 10px!important;margin:10px 0!important}
+.psbgs ol{padding-left:1.75em!important;margin:2px 0 6px!important}
+.psbgs ul{padding-left:1.15em!important;margin:2px 0 6px!important}
+.psbgs img{max-width:100%!important;height:auto!important}
+.psbgs li{margin:0 0 4px!important;padding-left:0!important}
+.psbgs li>p,.psbgs p{margin:0 0 6px!important}
+.psbgs table{display:table!important;width:100%!important;max-width:100%!important;margin:4px 0 8px!important}
+.psbgs th,.psbgs td{padding:6px 8px!important}
+.psbgs blockquote{margin:4px 0 8px!important;padding:6px 10px!important}
+.psbgs pre{margin:4px 0 8px!important}
+.psbgs .psb-shot{margin:4px 0 8px!important;padding:2px!important}
+.psbgs h2{margin:0 0 8px!important;padding-bottom:8px!important}
+.psbgs h3{margin:10px 0 4px!important}
 @media (prefers-reduced-motion:reduce){.psbgs *,.psbgs *::before,.psbgs *::after{animation:none!important;transition:none!important}}
 </style>
 
@@ -97,34 +118,78 @@
 <div class="psb-meta" style="color:#d5dbe3;margin-top:6px;text-align:center;">8 Hours 10 Minutes&nbsp;&nbsp;|&nbsp;&nbsp;100 Points&nbsp;&nbsp;|&nbsp;&nbsp;9 Labs</div>
 </div>
 
+**Overall Estimated Duration:** 8 Hours 10 Minutes
+
 <div class="psb-panel" style="background:#ffffff;border:1px solid #d5dbe3;border-radius:16px;padding:18px 16px;margin:24px 0;">
 
-## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🎯</span>About This Lab
+## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">📖</span>Overview
 
-You build an end-to-end solution on AWS: a simulated sensor streams telemetry (temperature, humidity, CO₂, vibration) into **AWS IoT Core**, the data is stored in **Amazon Timestream for InfluxDB** and **Amazon S3**, served through **AWS Lambda** and **Amazon API Gateway**, secured with **Amazon Cognito** and shown on an **AWS Amplify** dashboard. You then detect anomalies with **Amazon SageMaker AI** and add a natural language assistant with **Amazon Bedrock**.
+Modern industrial and campus IoT solutions are rarely a single service. They are a pipeline: a device at the edge, a secure ingestion layer, a time-series store, an API, a dashboard, a model that finds what a human would miss, and, increasingly, an assistant that lets a non-specialist ask questions of the data in plain language.
 
-### <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🗺️</span>Labs
+This lab builds that entire pipeline on AWS, end to end, in three phases.
 
-| Lab | Title | Phase | Timing | Points |
-|:---:|---|:---:|:---:|:---:|
-| 01 | IoT Identity and Device Simulator | I | 45 min | 10 |
-| 02 | Rules Engine to InfluxDB and Amazon S3 | I | 65 min | 16 |
-| 03 | Query Lambda and HTTP API | I | 55 min | 10 |
-| 04 | Amazon Cognito Authentication | I | 40 min | 10 |
-| 05 | AWS Amplify Dashboard | I | 45 min | 9 |
-| 06 | Amazon SageMaker AI Anomaly Model | II | 70 min | 15 |
-| 07 | Automated Scoring Pipeline | II | 50 min | 12 |
-| 08 | Amazon Bedrock Assistant | III | 60 min | 13 |
-| 09 | Observability and Teardown | III | 40 min | 5 |
-| | **Total** | | **8 h 10 min** | **100** |
+In **Phase I** you provision a device identity in AWS IoT Core, connect a Raspberry Pi sensor gateway over MQTT with mutual TLS, route its telemetry through the IoT Rules Engine into Amazon Timestream for InfluxDB and Amazon S3, expose it through a serverless API built on AWS Lambda and Amazon API Gateway, secure that API with Amazon Cognito, and publish a React dashboard on AWS Amplify Hosting.
 
-**Phase I:** connect, ingest and serve. **Phase II:** machine learning. **Phase III:** generative AI and operations.
+In **Phase II** you use Amazon SageMaker AI to train an unsupervised anomaly-detection model on the telemetry you have collected, deploy it to a serverless inference endpoint, and close the loop by writing anomaly scores back into the same pipeline so the dashboard can display them.
+
+In **Phase III** you build a natural-language assistant on Amazon Bedrock that answers questions such as "was anything unusual in the north lab in the last two hours?" by calling your own API as a tool.
+
+You will finish with a working, secured, monitored solution and, more importantly, with a clear picture of how the pieces fit together and what each one costs.
+
+> **A note on the Raspberry Pi.** This lab environment runs entirely in your browser, so the physical Raspberry Pi is represented by a device simulator that runs on your Lab VM. The simulator uses a real X.509 device certificate, connects to the real AWS IoT Core endpoint over TLS on port 8883, and publishes the same payload on the same topic that a physical Pi would. Everything from AWS IoT Core onwards is identical.
 
 </div>
 
 <div class="psb-panel" style="background:#ffffff;border:1px solid #d5dbe3;border-radius:16px;padding:18px 16px;margin:24px 0;">
 
-## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🏗️</span>Solution Architecture
+## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🏁</span>Objective
+
+This lab is designed to equip participants with hands-on experience in building a complete IoT-to-AI solution on AWS. By completing this lab, participants will learn to:
+
+- **Provision a secure device identity:** Create an AWS IoT Core Thing, generate an X.509 certificate, author a least-privilege IoT policy, and connect a device over MQTT with mutual TLS. Participants will establish a trusted, authenticated channel between an edge device and the cloud.
+- **Route telemetry with the IoT Rules Engine:** Write a rule with a SQL statement and fan a single message out to two destinations. Participants will build a serverless ingestion path that stores telemetry in both a time-series database and an object store without running a server.
+- **Operate a managed time-series database:** Provision Amazon Timestream for InfluxDB, write with the InfluxDB line protocol, and read with Flux queries. Participants will store and query high-frequency sensor data using a purpose-built engine.
+- **Build a serverless API:** Create AWS Lambda functions and an Amazon API Gateway HTTP API to expose telemetry and analytics to a frontend. Participants will design and deploy a serverless REST interface over their data.
+- **Secure an API with managed identity:** Create an Amazon Cognito user pool and attach a JWT authorizer to the API. Participants will implement authentication and authorization for a web application without writing an auth server.
+- **Deploy a modern web frontend:** Build and publish a React dashboard on AWS Amplify Hosting. Participants will deliver a hosted, HTTPS-served single-page application backed by their own API.
+- **Train and deploy a machine-learning model:** Use Amazon SageMaker AI to prepare data, train a Random Cut Forest anomaly-detection model, evaluate it, and deploy it to a serverless inference endpoint. Participants will take a model from raw telemetry to a callable endpoint.
+- **Operationalise inference:** Schedule a Lambda function to score recent readings and write results back into the pipeline. Participants will build a closed-loop ML system rather than a one-off notebook experiment.
+- **Build a generative-AI assistant:** Use the Amazon Bedrock Converse API with tool use to let a foundation model query the learner's own telemetry API and answer questions in natural language. Participants will implement the agent tool-calling pattern from first principles.
+- **Apply operational and cost discipline:** Configure CloudWatch log retention, a metric filter and an alarm; store credentials in AWS Secrets Manager; and tear down the resources that keep billing. Participants will apply production hygiene to a cloud solution.
+
+</div>
+
+<div class="psb-panel" style="background:#ffffff;border:1px solid #d5dbe3;border-radius:16px;padding:18px 16px;margin:24px 0;">
+
+## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">📋</span>Pre-requisites
+
+Participants should have basic knowledge and understanding of the following:
+
+- **AWS Account:** Access to an AWS account with permissions to create IoT, storage, serverless, machine-learning and generative-AI resources. This is provided by your lab environment.
+- **Cloud Fundamentals:** Understanding of regions, IAM roles and policies, and the AWS Management Console.
+- **Python:** Ability to read and lightly modify Python code. You will not be asked to write anything from scratch; all code is provided.
+- **REST and JSON:** Familiarity with HTTP methods, status codes and JSON payload structures.
+- **Command Line:** Comfort running commands in a Windows terminal (PowerShell) and reading their output.
+- **IoT Concepts (helpful, not required):** Awareness of MQTT publish/subscribe, topics and TLS client certificates.
+- **Machine Learning (helpful, not required):** Awareness of what training and inference mean. No prior SageMaker experience is assumed.
+
+</div>
+
+<div class="psb-panel" style="background:#ffffff;border:1px solid #d5dbe3;border-radius:16px;padding:18px 16px;margin:24px 0;">
+
+## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🏗️</span>Architecture
+
+This hands-on lab covers a complete IoT-to-AI solution architecture on AWS, built in three phases that stack on one another.
+
+**Phase I** establishes the data path. A simulated Raspberry Pi sensor gateway on the Lab VM authenticates to AWS IoT Core with an X.509 certificate and publishes JSON telemetry over MQTT. A single IoT rule fans that message out to two actions: an AWS Lambda function that writes it into Amazon Timestream for InfluxDB using the InfluxDB line protocol, and a direct Amazon S3 action that lands the raw JSON as a training corpus. A second Lambda function reads the time-series data back with a Flux query and serves it through an Amazon API Gateway HTTP API, protected by an Amazon Cognito JWT authorizer. A React single-page application, hosted on AWS Amplify, signs the user in against Cognito and renders the telemetry.
+
+**Phase II** adds intelligence. Amazon SageMaker Studio reads the accumulated raw telemetry from S3, prepares it, and runs a SageMaker training job using the built-in Random Cut Forest algorithm, an unsupervised anomaly detector well suited to sensor time series. The trained model is deployed to a SageMaker Serverless Inference endpoint, which bills only for the milliseconds it computes. A scheduled Lambda function pulls the most recent readings, scores them against the endpoint, and writes the anomaly scores back into Timestream for InfluxDB and into the S3 curated/ prefix, so the dashboard can overlay them on the live chart.
+
+**Phase III** adds a conversational interface. A chat panel in the React application posts a question to the same API Gateway. An assistant Lambda function calls the Amazon Bedrock Converse API with a get_sensor_stats tool declared in the request. The model decides when it needs data, emits a toolUse block, the Lambda executes the tool against the existing telemetry query path, returns a toolResult, and the model composes a natural-language answer grounded in the learner's real data.
+
+Cutting across all three phases, Amazon Cognito provides identity, AWS Secrets Manager holds the InfluxDB admin token that three Lambda functions share, Amazon CloudWatch collects logs, a custom metric and an alarm, and four least-privilege IAM service roles govern what each component may do.
+
+### <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🗺️</span>Architecture Diagram
 
 <div class="psb-shot">
 
@@ -132,57 +197,75 @@ You build an end-to-end solution on AWS: a simulated sensor streams telemetry (t
 
 </div>
 
-### <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">☁️</span>AWS Services
+### <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧱</span>Architecture Diagram Explanation of Components
 
-| Service | Used for |
+The architecture for this lab involves the following key components:
+
+| Component | Description |
 |---|---|
-| <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;"><img class="psb-svc" src="https://raw.githubusercontent.com/fardeena-spektra/AWS-IoT-ML-GenAI-Bedrock-Lab/main/lab-guides/media/icons/AWSIoTCore.png" alt="" width="24" height="24" style="width:24px;height:24px;border-radius:4px;"></span> **AWS IoT Core** | Device identity, MQTT and the Rules Engine |
-| <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;"><img class="psb-svc" src="https://raw.githubusercontent.com/fardeena-spektra/AWS-IoT-ML-GenAI-Bedrock-Lab/main/lab-guides/media/icons/AmazonTimestream.png" alt="" width="24" height="24" style="width:24px;height:24px;border-radius:4px;"></span> **Amazon Timestream for InfluxDB** | Telemetry and anomaly scores |
-| <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;"><img class="psb-svc" src="https://raw.githubusercontent.com/fardeena-spektra/AWS-IoT-ML-GenAI-Bedrock-Lab/main/lab-guides/media/icons/AmazonSimpleStorageService.png" alt="" width="24" height="24" style="width:24px;height:24px;border-radius:4px;"></span> **Amazon S3** | Raw data, training data and results |
-| <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;"><img class="psb-svc" src="https://raw.githubusercontent.com/fardeena-spektra/AWS-IoT-ML-GenAI-Bedrock-Lab/main/lab-guides/media/icons/AWSLambda.png" alt="" width="24" height="24" style="width:24px;height:24px;border-radius:4px;"></span> **AWS Lambda** | Ingest, query, scoring and assistant functions |
-| <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;"><img class="psb-svc" src="https://raw.githubusercontent.com/fardeena-spektra/AWS-IoT-ML-GenAI-Bedrock-Lab/main/lab-guides/media/icons/AWSSecretsManager.png" alt="" width="24" height="24" style="width:24px;height:24px;border-radius:4px;"></span> **AWS Secrets Manager** | InfluxDB token |
-| <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;"><img class="psb-svc" src="https://raw.githubusercontent.com/fardeena-spektra/AWS-IoT-ML-GenAI-Bedrock-Lab/main/lab-guides/media/icons/AmazonAPIGateway.png" alt="" width="24" height="24" style="width:24px;height:24px;border-radius:4px;"></span> **Amazon API Gateway** | HTTP API |
-| <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;"><img class="psb-svc" src="https://raw.githubusercontent.com/fardeena-spektra/AWS-IoT-ML-GenAI-Bedrock-Lab/main/lab-guides/media/icons/AmazonCognito.png" alt="" width="24" height="24" style="width:24px;height:24px;border-radius:4px;"></span> **Amazon Cognito** | Sign-in and JWT authorization |
-| <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;"><img class="psb-svc" src="https://raw.githubusercontent.com/fardeena-spektra/AWS-IoT-ML-GenAI-Bedrock-Lab/main/lab-guides/media/icons/AWSAmplify.png" alt="" width="24" height="24" style="width:24px;height:24px;border-radius:4px;"></span> **AWS Amplify Hosting** | Dashboard hosting |
-| <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;"><img class="psb-svc" src="https://raw.githubusercontent.com/fardeena-spektra/AWS-IoT-ML-GenAI-Bedrock-Lab/main/lab-guides/media/icons/AmazonSageMakerAI.png" alt="" width="24" height="24" style="width:24px;height:24px;border-radius:4px;"></span> **Amazon SageMaker AI** | Random Cut Forest model and endpoint |
-| <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;"><img class="psb-svc" src="https://raw.githubusercontent.com/fardeena-spektra/AWS-IoT-ML-GenAI-Bedrock-Lab/main/lab-guides/media/icons/AmazonEventBridge.png" alt="" width="24" height="24" style="width:24px;height:24px;border-radius:4px;"></span> **Amazon EventBridge** | Scoring schedule (every 5 minutes) |
-| <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;"><img class="psb-svc" src="https://raw.githubusercontent.com/fardeena-spektra/AWS-IoT-ML-GenAI-Bedrock-Lab/main/lab-guides/media/icons/AmazonBedrock.png" alt="" width="24" height="24" style="width:24px;height:24px;border-radius:4px;"></span> **Amazon Bedrock** | Assistant with tool use |
-| <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;"><img class="psb-svc" src="https://raw.githubusercontent.com/fardeena-spektra/AWS-IoT-ML-GenAI-Bedrock-Lab/main/lab-guides/media/icons/AmazonCloudWatch.png" alt="" width="24" height="24" style="width:24px;height:24px;border-radius:4px;"></span> **Amazon CloudWatch** | Logs, metric filter and alarm |
-| <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;"><img class="psb-svc" src="https://raw.githubusercontent.com/fardeena-spektra/AWS-IoT-ML-GenAI-Bedrock-Lab/main/lab-guides/media/icons/AWSIdentityandAccessManagement.png" alt="" width="24" height="24" style="width:24px;height:24px;border-radius:4px;"></span> **AWS IAM** | Least-privilege roles and policies |
+| <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;"><img class="psb-svc" src="https://raw.githubusercontent.com/fardeena-spektra/AWS-IoT-ML-GenAI-Bedrock-Lab/main/lab-guides/media/icons/AmazonEC2.png" alt="" width="24" height="24" style="width:24px;height:24px;border-radius:4px;"></span> **Raspberry Pi Simulator** | A Python script using the paho-mqtt client, running on the Lab VM. It authenticates with an X.509 device certificate and publishes JSON sensor readings to AWS IoT Core over TLS on port 8883, exactly as a physical Raspberry Pi would. |
+| <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;"><img class="psb-svc" src="https://raw.githubusercontent.com/fardeena-spektra/AWS-IoT-ML-GenAI-Bedrock-Lab/main/lab-guides/media/icons/AWSIoTCore.png" alt="" width="24" height="24" style="width:24px;height:24px;border-radius:4px;"></span> **AWS IoT Core** | A managed service that lets connected devices interact securely with cloud applications. It provides the device registry (Things), certificate-based authentication, the MQTT message broker, and the Rules Engine. |
+| <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;"><img class="psb-svc" src="https://raw.githubusercontent.com/fardeena-spektra/AWS-IoT-ML-GenAI-Bedrock-Lab/main/lab-guides/media/icons/AWSIoTCore.png" alt="" width="24" height="24" style="width:24px;height:24px;border-radius:4px;"></span> **AWS IoT Rules Engine** | Evaluates inbound MQTT messages against a SQL statement and routes matching messages to one or more AWS services. A single rule can fan out to multiple actions. |
+| <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;"><img class="psb-svc" src="https://raw.githubusercontent.com/fardeena-spektra/AWS-IoT-ML-GenAI-Bedrock-Lab/main/lab-guides/media/icons/AmazonTimestream.png" alt="" width="24" height="24" style="width:24px;height:24px;border-radius:4px;"></span> **Amazon Timestream for InfluxDB** | A fully managed InfluxDB 2.7 service purpose-built for time-series workloads. It provides the InfluxDB line-protocol write API and the Flux query language. |
+| <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;"><img class="psb-svc" src="https://raw.githubusercontent.com/fardeena-spektra/AWS-IoT-ML-GenAI-Bedrock-Lab/main/lab-guides/media/icons/AmazonSimpleStorageService.png" alt="" width="24" height="24" style="width:24px;height:24px;border-radius:4px;"></span> **Amazon S3** | Object storage used here as the raw telemetry landing zone, the machine-learning training corpus, the model artifact store, and the destination for scored output. |
+| <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;"><img class="psb-svc" src="https://raw.githubusercontent.com/fardeena-spektra/AWS-IoT-ML-GenAI-Bedrock-Lab/main/lab-guides/media/icons/AWSLambda.png" alt="" width="24" height="24" style="width:24px;height:24px;border-radius:4px;"></span> **AWS Lambda** | Serverless compute. Four functions in this lab: telemetry ingestion, telemetry query, scheduled scoring, and the generative-AI assistant. |
+| <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;"><img class="psb-svc" src="https://raw.githubusercontent.com/fardeena-spektra/AWS-IoT-ML-GenAI-Bedrock-Lab/main/lab-guides/media/icons/AmazonAPIGateway.png" alt="" width="24" height="24" style="width:24px;height:24px;border-radius:4px;"></span> **Amazon API Gateway (HTTP API)** | A managed API front door that routes HTTP requests to Lambda functions and enforces JWT-based authorization at the edge. |
+| <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;"><img class="psb-svc" src="https://raw.githubusercontent.com/fardeena-spektra/AWS-IoT-ML-GenAI-Bedrock-Lab/main/lab-guides/media/icons/AmazonCognito.png" alt="" width="24" height="24" style="width:24px;height:24px;border-radius:4px;"></span> **Amazon Cognito** | Managed user directory and identity provider. Issues the JSON Web Tokens that the dashboard presents to API Gateway. |
+| <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;"><img class="psb-svc" src="https://raw.githubusercontent.com/fardeena-spektra/AWS-IoT-ML-GenAI-Bedrock-Lab/main/lab-guides/media/icons/AWSAmplify.png" alt="" width="24" height="24" style="width:24px;height:24px;border-radius:4px;"></span> **AWS Amplify Hosting** | A managed hosting service for single-page applications, providing HTTPS, a CDN and atomic deployments. |
+| <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;"><img class="psb-svc" src="https://raw.githubusercontent.com/fardeena-spektra/AWS-IoT-ML-GenAI-Bedrock-Lab/main/lab-guides/media/icons/AmazonSageMakerAI.png" alt="" width="24" height="24" style="width:24px;height:24px;border-radius:4px;"></span> **Amazon SageMaker AI** | A managed machine-learning platform. Used here for the Studio JupyterLab development environment, a managed training job, and a serverless inference endpoint. |
+| <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;"><img class="psb-svc" src="https://raw.githubusercontent.com/fardeena-spektra/AWS-IoT-ML-GenAI-Bedrock-Lab/main/lab-guides/media/icons/AmazonBedrock.png" alt="" width="24" height="24" style="width:24px;height:24px;border-radius:4px;"></span> **Amazon Bedrock** | A managed service offering foundation models through a single API. The Converse API's tool-use capability lets a model call your own functions. |
+| <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;"><img class="psb-svc" src="https://raw.githubusercontent.com/fardeena-spektra/AWS-IoT-ML-GenAI-Bedrock-Lab/main/lab-guides/media/icons/AWSSecretsManager.png" alt="" width="24" height="24" style="width:24px;height:24px;border-radius:4px;"></span> **AWS Secrets Manager** | Securely stores, and controls access to, the InfluxDB admin token shared by three Lambda functions. |
+| <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;"><img class="psb-svc" src="https://raw.githubusercontent.com/fardeena-spektra/AWS-IoT-ML-GenAI-Bedrock-Lab/main/lab-guides/media/icons/AmazonCloudWatch.png" alt="" width="24" height="24" style="width:24px;height:24px;border-radius:4px;"></span> **Amazon CloudWatch** | Collects logs and metrics, applies retention, and raises alarms on defined thresholds. |
+| <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;"><img class="psb-svc" src="https://raw.githubusercontent.com/fardeena-spektra/AWS-IoT-ML-GenAI-Bedrock-Lab/main/lab-guides/media/icons/AWSIdentityandAccessManagement.png" alt="" width="24" height="24" style="width:24px;height:24px;border-radius:4px;"></span> **AWS IAM** | Provides the least-privilege service roles that let each component do exactly what it needs and nothing more. |
 
 </div>
 
 <div class="psb-panel" style="background:#ffffff;border:1px solid #d5dbe3;border-radius:16px;padding:18px 16px;margin:24px 0;">
 
-## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">📦</span>Pre-provisioned Resources
+## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧪</span>Labs
 
-These are already created for you:
+| Lab | Title | Timing | Points |
+|:---:|---|---|:---:|
+| 01 | Provision the IoT Device Identity and Connect the Simulated Raspberry Pi | 45 min | 10 |
+| 02 | Route Telemetry with the IoT Rules Engine to Timestream for InfluxDB and Amazon S3 | 65 min | 16 |
+| 03 | Build the Serverless Data API with AWS Lambda and Amazon API Gateway | 55 min | 10 |
+| 04 | Secure the API with Amazon Cognito | 40 min | 10 |
+| 05 | Deploy the React Dashboard on AWS Amplify Hosting | 45 min | 9 |
+| 06 | Train an Anomaly-Detection Model with Amazon SageMaker AI | 70 min | 15 |
+| 07 | Serve Predictions and Close the Loop | 50 min | 12 |
+| 08 | Build a Natural-Language Assistant with Amazon Bedrock | 60 min | 13 |
+| 09 | Observability, Secrets Hygiene and Cost Control | 40 min | 5 |
+| | **Total** | **7 h 50 min** | **100** |
 
-| Resource | Name / Value |
-|---|---|
-| <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🌍</span>**Region** | <inject key="LabRegion" enableCopy="true"/> |
-| <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🪣</span>**Amazon S3 bucket** (empty) | <inject key="LabBucketName" enableCopy="true"/> |
-| <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧪</span>**Amazon SageMaker AI domain** | <inject key="SageMakerDomainName" enableCopy="true"/> |
-| <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">👤</span>**SageMaker AI user profile** | **psb-lab-user** |
-| <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🔑</span>**SageMaker AI execution role** | **psb-lab-sagemaker-exec-<inject key="DeploymentID" enableCopy="false"/>** (read/write on the lab bucket) |
-| <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">💻</span>**Lab VM** | **windowsvm-<inject key="DeploymentID" enableCopy="false"/>** with Chrome, Edge, VS Code, AWS CLI v2, Python 3.12, Node.js LTS and Git |
+</div>
 
-> ℹ️ **Info:** You create the **raw/**, **curated/** and **model/** folders in Lab 02, and the SageMaker AI space **psb-lab-space** in Lab 06.
+<div class="psb-panel" style="background:#ffffff;border:1px solid #d5dbe3;border-radius:16px;padding:18px 16px;margin:24px 0;">
 
-### <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">📁</span>Lab Assets (C:\psb-lab-assets)
+## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">📦</span>Lab Assets
 
-Also available from the **psb-lab-assets** desktop shortcut:
+A folder named **psb-lab-assets** has been placed on your Lab VM desktop. It contains every script and configuration file this lab asks you to use, so you never need to type long code blocks by hand:
 
-| Folder | Contents |
-|---|---|
-| <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🛰️</span>**simulator** | **simulate_pi.py**, **requirements.txt** and **certs** (device certificates, Lab 01) |
-| <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">⚡</span>**lambdas** | Code for **psb-ingest-telemetry**, **psb-query-telemetry**, **psb-score-telemetry** and **psb-assistant** |
-| <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧪</span>**test-events** | **sample-reading**, **direct-query**, **manual-run** and **ask-question** JSON events |
-| <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🔐</span>**policies** | IAM and AWS IoT policy documents |
-| <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">📊</span>**dashboard** | React dashboard source and prebuilt **dist.zip** |
-| <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">📓</span>**notebook** | **psb-anomaly-detection.ipynb** for SageMaker AI |
-
-> ℹ️ **Info:** The assistant in Lab 08 uses **Amazon Nova Lite** (**apac.amazon.nova-lite-v1:0**) through the Bedrock **Converse API**. To use an Anthropic Claude model instead, change **MODEL_ID** and the model ARNs in the IAM policy.
+```text
+psb-lab-assets\
+├── simulator\
+│   ├── simulate_pi.py
+│   └── requirements.txt
+├── lambda\
+│   ├── psb-ingest-telemetry.py
+│   ├── psb-query-telemetry.py
+│   ├── psb-score-telemetry.py
+│   └── psb-assistant.py
+├── dashboard\
+│   ├── src\
+│   ├── package.json
+│   └── dist.zip            (pre-built fallback)
+├── notebook\
+│   └── psb-anomaly-detection.ipynb
+└── policies\
+    ├── iot-device-policy.json
+    ├── iot-rule-role-policy.json
+    └── lambda-execution-policy.json
+```
 
 Click **Next** to begin **Lab 01**.
 
