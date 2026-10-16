@@ -1,0 +1,434 @@
+<style>@keyframes psbBreathe{0%,100%{opacity:.55;transform:scale(1)}50%{opacity:1;transform:scale(1.07)}}
+@keyframes psbPanel{0%,100%{box-shadow:0 8px 24px rgba(0,0,0,.55)}50%{box-shadow:0 0 30px rgba(255,153,0,.16),0 8px 24px rgba(0,0,0,.55)}}
+@keyframes psbShot{0%,100%{box-shadow:0 0 0 rgba(79,195,247,0);border-color:#223042}50%{box-shadow:0 0 22px rgba(79,195,247,.20);border-color:rgba(79,195,247,.45)}}
+@media (prefers-reduced-motion:reduce){.psb-root *,.psb-glow{animation:none!important}}</style>
+<div class="psb-root" style="position:relative;overflow:hidden;background:#05070c;color:#d7dee8;border-radius:18px;padding:26px clamp(12px,2.5vw,26px) 34px;"><div class="psb-glow" style="position:absolute;top:-25%;left:-25%;right:-25%;bottom:-25%;z-index:0;pointer-events:none;background:radial-gradient(closest-side at 18% 10%,rgba(255,153,0,.22),transparent),radial-gradient(closest-side at 85% 45%,rgba(79,195,247,.17),transparent),radial-gradient(closest-side at 30% 85%,rgba(155,110,255,.13),transparent);animation:psbBreathe 9s ease-in-out infinite;"></div><div style="position:relative;z-index:1;">
+<h1 align="center" style="color:#ffffff;text-align:center;margin:0 0 6px;border:0;background:transparent;">🚀 Getting Started: AWS Demo || Bedrock with Claude</h1>
+<p align="center" style="color:#9aa7b8;text-align:center;margin:0 0 22px;background:transparent;"><b style="color:#ffffff;background:transparent;">AWS Demo || Bedrock with Claude</b> | ⏱️ <b style="color:#ffffff;background:transparent;">Estimated Timing: 8 Hours 10 Minutes</b> | 🏆 <b style="color:#ffffff;background:transparent;">Total Points: 100</b></p>
+<div class="psb-panel" style="background:#0d121b;border:1px solid #223042;border-radius:16px;padding:22px clamp(14px,3vw,28px);margin:20px 0;animation:psbPanel 7s ease-in-out infinite;"><h2 style="color:#ffffff;margin:0 0 14px;padding-bottom:10px;border:0;border-bottom:1px solid #223042;background:transparent;">🎯 About This Lab</h2>
+<p style="color:#d7dee8;background:transparent;">In this hands-on lab, you build a complete <strong style="color:#ffffff;background:transparent;">IoT to Machine Learning to Generative AI</strong> solution on AWS. A simulated sensor device streams telemetry (temperature, humidity, CO₂ and vibration) into <strong style="color:#ffffff;background:transparent;">AWS IoT Core</strong>. The data is stored in <strong style="color:#ffffff;background:transparent;">Amazon Timestream for InfluxDB</strong> and <strong style="color:#ffffff;background:transparent;">Amazon S3</strong>, served through <strong style="color:#ffffff;background:transparent;">AWS Lambda</strong> and <strong style="color:#ffffff;background:transparent;">Amazon API Gateway</strong>, secured with <strong style="color:#ffffff;background:transparent;">Amazon Cognito</strong>, and shown on a dashboard hosted on <strong style="color:#ffffff;background:transparent;">AWS Amplify</strong>. You then train an anomaly detection model in <strong style="color:#ffffff;background:transparent;">Amazon SageMaker AI</strong>, score live data automatically, and finish with a natural language assistant powered by <strong style="color:#ffffff;background:transparent;">Amazon Bedrock</strong>.</p>
+<p style="color:#d7dee8;background:transparent;"><strong style="color:#ffffff;background:transparent;">The lab is organised in three phases:</strong></p>
+<div style="overflow-x:auto;margin:14px 0;"><table style="width:100%;border-collapse:collapse;background:transparent;margin:0;">
+<thead style="background:transparent;">
+<tr style="background:transparent;">
+<th style="color:#ff9900;background:rgba(255,153,0,.08);padding:10px 12px;border:0;border-bottom:1px solid #223042;text-align:left;">Phase</th>
+<th style="color:#ff9900;background:rgba(255,153,0,.08);padding:10px 12px;border:0;border-bottom:1px solid #223042;text-align:left;">Labs</th>
+<th style="color:#ff9900;background:rgba(255,153,0,.08);padding:10px 12px;border:0;border-bottom:1px solid #223042;text-align:left;">Focus</th>
+</tr>
+</thead>
+<tbody style="background:transparent;">
+<tr style="background:transparent;">
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">🔌 <strong style="color:#ffffff;background:transparent;">Phase I</strong></td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">Labs 01 to 05</td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">Connect, ingest, serve (IoT Core, InfluxDB, S3, Lambda, API Gateway, Cognito, Amplify)</td>
+</tr>
+<tr style="background:transparent;">
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">🧠 <strong style="color:#ffffff;background:transparent;">Phase II</strong></td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">Labs 06 to 07</td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">Machine learning (SageMaker Random Cut Forest anomaly model + scoring pipeline)</td>
+</tr>
+<tr style="background:transparent;">
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">🤖 <strong style="color:#ffffff;background:transparent;">Phase III</strong></td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">Labs 08 to 09</td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">Generative AI + operations (Bedrock assistant, CloudWatch, teardown)</td>
+</tr>
+</tbody>
+</table></div>
+<h3 style="color:#ffffff;margin:24px 0 10px;background:transparent;">🗺️ Labs Overview</h3>
+<div style="overflow-x:auto;margin:14px 0;"><table style="width:100%;border-collapse:collapse;background:transparent;margin:0;">
+<thead style="background:transparent;">
+<tr style="background:transparent;">
+<th style="color:#ff9900;background:rgba(255,153,0,.08);padding:10px 12px;border:0;border-bottom:1px solid #223042;text-align:left;text-align: center;">Lab</th>
+<th style="color:#ff9900;background:rgba(255,153,0,.08);padding:10px 12px;border:0;border-bottom:1px solid #223042;text-align:left;">Title</th>
+<th style="color:#ff9900;background:rgba(255,153,0,.08);padding:10px 12px;border:0;border-bottom:1px solid #223042;text-align:left;text-align: center;">Phase</th>
+<th style="color:#ff9900;background:rgba(255,153,0,.08);padding:10px 12px;border:0;border-bottom:1px solid #223042;text-align:left;text-align: center;">⏱️ Timing</th>
+<th style="color:#ff9900;background:rgba(255,153,0,.08);padding:10px 12px;border:0;border-bottom:1px solid #223042;text-align:left;text-align: center;">🏆 Points</th>
+</tr>
+</thead>
+<tbody style="background:transparent;">
+<tr style="background:transparent;">
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;text-align: center;">01</td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">🛰️ IoT Identity and Device Simulator</td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;text-align: center;">I</td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;text-align: center;">45 min</td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;text-align: center;">10</td>
+</tr>
+<tr style="background:transparent;">
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;text-align: center;">02</td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">🔀 Rules Engine to InfluxDB and S3</td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;text-align: center;">I</td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;text-align: center;">65 min</td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;text-align: center;">16</td>
+</tr>
+<tr style="background:transparent;">
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;text-align: center;">03</td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">🔎 Query Lambda and HTTP API</td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;text-align: center;">I</td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;text-align: center;">55 min</td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;text-align: center;">10</td>
+</tr>
+<tr style="background:transparent;">
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;text-align: center;">04</td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">🔐 Cognito Authentication</td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;text-align: center;">I</td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;text-align: center;">40 min</td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;text-align: center;">10</td>
+</tr>
+<tr style="background:transparent;">
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;text-align: center;">05</td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">📊 Amplify Dashboard</td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;text-align: center;">I</td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;text-align: center;">45 min</td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;text-align: center;">9</td>
+</tr>
+<tr style="background:transparent;">
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;text-align: center;">06</td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">🧪 SageMaker Anomaly Model</td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;text-align: center;">II</td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;text-align: center;">70 min</td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;text-align: center;">15</td>
+</tr>
+<tr style="background:transparent;">
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;text-align: center;">07</td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">⚙️ Automated Scoring Pipeline</td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;text-align: center;">II</td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;text-align: center;">50 min</td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;text-align: center;">12</td>
+</tr>
+<tr style="background:transparent;">
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;text-align: center;">08</td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">🤖 Bedrock Assistant</td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;text-align: center;">III</td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;text-align: center;">60 min</td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;text-align: center;">13</td>
+</tr>
+<tr style="background:transparent;">
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;text-align: center;">09</td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">📈 Observability and Teardown</td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;text-align: center;">III</td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;text-align: center;">40 min</td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;text-align: center;">5</td>
+</tr>
+<tr style="background:transparent;">
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;text-align: center;"></td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;"><strong style="color:#ffffff;background:transparent;">Total</strong></td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;text-align: center;"></td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;text-align: center;"><strong style="color:#ffffff;background:transparent;">8 h 10 min</strong></td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;text-align: center;"><strong style="color:#ffffff;background:transparent;">100</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h3 style="color:#ffffff;margin:24px 0 10px;background:transparent;">🏗️ What you build</h3>
+<pre style="background:#070a10;color:#bfe7ff;border:1px solid #223042;border-radius:12px;padding:16px;overflow-x:auto;margin:12px 0;"><code class="language-text" style="background:transparent;color:#bfe7ff;">Sensor simulator (VM) ──MQTT/TLS──&gt; AWS IoT Core ──Rule──&gt; Lambda ──&gt; Timestream for InfluxDB
+                                                   └──────&gt; Amazon S3 (raw/)
+InfluxDB ──&gt; Query Lambda ──&gt; API Gateway (Cognito JWT) ──&gt; Amplify dashboard
+S3 raw/ ──&gt; SageMaker RCF model ──&gt; Serverless endpoint &lt;── Score Lambda (every 5 min)
+Dashboard chat ──&gt; Assistant Lambda ──&gt; Amazon Bedrock (Converse API + tool use)
+</code></pre>
+</div><div class="psb-panel" style="background:#0d121b;border:1px solid #223042;border-radius:16px;padding:22px clamp(14px,3vw,28px);margin:20px 0;animation:psbPanel 7s ease-in-out infinite;animation-delay:-3.5s;"><h2 style="color:#ffffff;margin:0 0 14px;padding-bottom:10px;border:0;border-bottom:1px solid #223042;background:transparent;">🖥️ Lab Environment</h2>
+<p style="color:#d7dee8;background:transparent;">The lab window is split into two parts:</p>
+<ul style="background:transparent;">
+<li style="color:#d7dee8;background:transparent;"><strong style="color:#ffffff;background:transparent;">Left side:</strong> your lab virtual machine (VM), a Windows Server 2022 workstation.</li>
+<li style="color:#d7dee8;background:transparent;"><strong style="color:#ffffff;background:transparent;">Right side:</strong> the lab guide, with the steps to complete each task.</li>
+</ul>
+<p style="color:#d7dee8;background:transparent;">Your lab window looks like this:</p>
+<div class="psb-shot" style="margin:16px 0 22px;padding:10px;border-radius:14px;background:#0a0f17;border:1px solid #223042;animation:psbShot 6s ease-in-out infinite;"><img src="./media/gs-01.png" alt="Lab environment" style="display:block;max-width:100%;height:auto;margin:0 auto;border-radius:8px;"><div style="text-align:center;color:#9aa7b8;font-size:.85em;margin-top:8px;">Lab environment</div></div>
+<h3 style="color:#ffffff;margin:24px 0 10px;background:transparent;">📦 Pre-provisioned Resources</h3>
+<p style="color:#d7dee8;background:transparent;">The following resources are already created for you. You do <strong style="color:#ffffff;background:transparent;">not</strong> need to create them.</p>
+<div style="overflow-x:auto;margin:14px 0;"><table style="width:100%;border-collapse:collapse;background:transparent;margin:0;">
+<thead style="background:transparent;">
+<tr style="background:transparent;">
+<th style="color:#ff9900;background:rgba(255,153,0,.08);padding:10px 12px;border:0;border-bottom:1px solid #223042;text-align:left;">Resource</th>
+<th style="color:#ff9900;background:rgba(255,153,0,.08);padding:10px 12px;border:0;border-bottom:1px solid #223042;text-align:left;">Name / Value</th>
+</tr>
+</thead>
+<tbody style="background:transparent;">
+<tr style="background:transparent;">
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">🌍 <strong style="color:#ffffff;background:transparent;">Region</strong></td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;"><inject key="LabRegion" enableCopy="true"/> (Asia Pacific (Singapore))</td>
+</tr>
+<tr style="background:transparent;">
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">🪣 <strong style="color:#ffffff;background:transparent;">S3 bucket</strong> (empty)</td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;"><inject key="LabBucketName" enableCopy="true"/></td>
+</tr>
+<tr style="background:transparent;">
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">🧪 <strong style="color:#ffffff;background:transparent;">SageMaker Studio domain</strong></td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;"><inject key="SageMakerDomainName" enableCopy="true"/></td>
+</tr>
+<tr style="background:transparent;">
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">👤 <strong style="color:#ffffff;background:transparent;">SageMaker user profile</strong></td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;"><strong style="color:#ffffff;background:transparent;">psb-lab-user</strong></td>
+</tr>
+<tr style="background:transparent;">
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">🔑 <strong style="color:#ffffff;background:transparent;">SageMaker execution role</strong></td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;"><strong style="color:#ffffff;background:transparent;">psb-lab-sagemaker-exec-<inject key="DeploymentID" enableCopy="false"/></strong> (can read and write the lab bucket)</td>
+</tr>
+<tr style="background:transparent;">
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">💻 <strong style="color:#ffffff;background:transparent;">Lab VM</strong></td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;"><strong style="color:#ffffff;background:transparent;">windowsvm-<inject key="DeploymentID" enableCopy="false"/></strong> (t3.medium)</td>
+</tr>
+<tr style="background:transparent;">
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">🧰 <strong style="color:#ffffff;background:transparent;">VM tooling</strong></td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">Chrome, Edge, VS Code, AWS CLI v2, Python 3.12 (python + pip on PATH), Node.js LTS (node / npm), Git</td>
+</tr>
+<tr style="background:transparent;">
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">📁 <strong style="color:#ffffff;background:transparent;">Lab assets</strong></td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;"><strong style="color:#ffffff;background:transparent;">C:\psb-lab-assets</strong> + desktop shortcut <strong style="color:#ffffff;background:transparent;">psb-lab-assets</strong></td>
+</tr>
+<tr style="background:transparent;">
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">📄 <strong style="color:#ffffff;background:transparent;">Desktop files</strong></td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;"><strong style="color:#ffffff;background:transparent;">aws credentials.txt</strong> and the <strong style="color:#ffffff;background:transparent;">AWS Console</strong> shortcut</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote style="margin:16px 0;padding:12px 16px;border:0;border-left:3px solid #4fc3f7;background:rgba(79,195,247,.08);border-radius:0 10px 10px 0;color:#d7dee8;">
+<p style="color:#d7dee8;background:transparent;">ℹ️ <strong style="color:#ffffff;background:transparent;">Info:</strong> In Lab 02 you create the <strong style="color:#ffffff;background:transparent;">raw/</strong>, <strong style="color:#ffffff;background:transparent;">curated/</strong> and <strong style="color:#ffffff;background:transparent;">model/</strong> folders in the S3 bucket. In Lab 06 you create the SageMaker space <strong style="color:#ffffff;background:transparent;">psb-lab-space</strong>.</p>
+</blockquote>
+<h3 style="color:#ffffff;margin:24px 0 10px;background:transparent;">📁 Lab Assets Folder</h3>
+<p style="color:#d7dee8;background:transparent;">The <strong style="color:#ffffff;background:transparent;">psb-lab-assets</strong> folder on the desktop (<strong style="color:#ffffff;background:transparent;">C:\psb-lab-assets</strong>) contains everything you need:</p>
+<div style="overflow-x:auto;margin:14px 0;"><table style="width:100%;border-collapse:collapse;background:transparent;margin:0;">
+<thead style="background:transparent;">
+<tr style="background:transparent;">
+<th style="color:#ff9900;background:rgba(255,153,0,.08);padding:10px 12px;border:0;border-bottom:1px solid #223042;text-align:left;">Folder / File</th>
+<th style="color:#ff9900;background:rgba(255,153,0,.08);padding:10px 12px;border:0;border-bottom:1px solid #223042;text-align:left;">Contents</th>
+</tr>
+</thead>
+<tbody style="background:transparent;">
+<tr style="background:transparent;">
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">🛰️ <strong style="color:#ffffff;background:transparent;">simulator\</strong></td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;"><strong style="color:#ffffff;background:transparent;">simulate_pi.py</strong> device simulator, <strong style="color:#ffffff;background:transparent;">requirements.txt</strong>, and <strong style="color:#ffffff;background:transparent;">certs\</strong> (device certificates go here in Lab 01)</td>
+</tr>
+<tr style="background:transparent;">
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">⚡ <strong style="color:#ffffff;background:transparent;">lambdas\</strong></td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">The 4 Lambda functions: <strong style="color:#ffffff;background:transparent;">psb-ingest-telemetry</strong>, <strong style="color:#ffffff;background:transparent;">psb-query-telemetry</strong>, <strong style="color:#ffffff;background:transparent;">psb-score-telemetry</strong>, <strong style="color:#ffffff;background:transparent;">psb-assistant</strong> (each with <strong style="color:#ffffff;background:transparent;">lambda_function.py</strong>)</td>
+</tr>
+<tr style="background:transparent;">
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">🧪 <strong style="color:#ffffff;background:transparent;">test-events\</strong></td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;"><strong style="color:#ffffff;background:transparent;">sample-reading.json</strong>, <strong style="color:#ffffff;background:transparent;">direct-query.json</strong>, <strong style="color:#ffffff;background:transparent;">manual-run.json</strong>, <strong style="color:#ffffff;background:transparent;">ask-question.json</strong></td>
+</tr>
+<tr style="background:transparent;">
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">🔐 <strong style="color:#ffffff;background:transparent;">policies\</strong></td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">IAM and IoT policy files (device policy, IoT rule trust and S3 write, Influx token read, score policy, assistant policy)</td>
+</tr>
+<tr style="background:transparent;">
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">📊 <strong style="color:#ffffff;background:transparent;">dashboard\</strong></td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">React dashboard source (Vite + React 18) and prebuilt fallback <strong style="color:#ffffff;background:transparent;">dist.zip</strong></td>
+</tr>
+<tr style="background:transparent;">
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">📓 <strong style="color:#ffffff;background:transparent;">notebook\</strong></td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">SageMaker notebook <strong style="color:#ffffff;background:transparent;">psb-anomaly-detection.ipynb</strong></td>
+</tr>
+<tr style="background:transparent;">
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">📝 <strong style="color:#ffffff;background:transparent;">README.txt</strong></td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">Short description of the folder</td>
+</tr>
+</tbody>
+</table></div>
+<h3 style="color:#ffffff;margin:24px 0 10px;background:transparent;">🤖 About Bedrock and Claude</h3>
+<blockquote style="margin:16px 0;padding:12px 16px;border:0;border-left:3px solid #4fc3f7;background:rgba(79,195,247,.08);border-radius:0 10px 10px 0;color:#d7dee8;">
+<p style="color:#d7dee8;background:transparent;">ℹ️ <strong style="color:#ffffff;background:transparent;">Info:</strong> The lab title says <strong style="color:#ffffff;background:transparent;">Claude</strong>. The assistant you build in Lab 08 uses <strong style="color:#ffffff;background:transparent;">Amazon Nova Lite</strong> (APAC inference profile <strong style="color:#ffffff;background:transparent;">apac.amazon.nova-lite-v1:0</strong>) through the same Amazon Bedrock <strong style="color:#ffffff;background:transparent;">Converse API</strong>. Claude models can be swapped in by changing the <strong style="color:#ffffff;background:transparent;">MODEL_ID</strong> environment variable of the assistant Lambda function (and the model ARNs in its IAM policy). No code change is needed.</p>
+</blockquote>
+</div><div class="psb-panel" style="background:#0d121b;border:1px solid #223042;border-radius:16px;padding:22px clamp(14px,3vw,28px);margin:20px 0;animation:psbPanel 7s ease-in-out infinite;"><h2 style="color:#ffffff;margin:0 0 14px;padding-bottom:10px;border:0;border-bottom:1px solid #223042;background:transparent;">🧭 Lab Window Controls</h2>
+<p style="color:#d7dee8;background:transparent;">The top bar and the lab guide menu give you these controls:</p>
+<div class="psb-shot" style="margin:16px 0 22px;padding:10px;border-radius:14px;background:#0a0f17;border:1px solid #223042;animation:psbShot 6s ease-in-out infinite;"><img src="./media/gs-topbar.png" alt="Lab window controls" style="display:block;max-width:100%;height:auto;margin:0 auto;border-radius:8px;"><div style="text-align:center;color:#9aa7b8;font-size:.85em;margin-top:8px;">Lab window controls</div></div>
+<div style="overflow-x:auto;margin:14px 0;"><table style="width:100%;border-collapse:collapse;background:transparent;margin:0;">
+<thead style="background:transparent;">
+<tr style="background:transparent;">
+<th style="color:#ff9900;background:rgba(255,153,0,.08);padding:10px 12px;border:0;border-bottom:1px solid #223042;text-align:left;text-align: center;">#</th>
+<th style="color:#ff9900;background:rgba(255,153,0,.08);padding:10px 12px;border:0;border-bottom:1px solid #223042;text-align:left;">Control</th>
+<th style="color:#ff9900;background:rgba(255,153,0,.08);padding:10px 12px;border:0;border-bottom:1px solid #223042;text-align:left;">Use</th>
+</tr>
+</thead>
+<tbody style="background:transparent;">
+<tr style="background:transparent;">
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;text-align: center;">1</td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;"><strong style="color:#ffffff;background:transparent;">VM name</strong></td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">Shows the lab VM you are connected to.</td>
+</tr>
+<tr style="background:transparent;">
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;text-align: center;">2</td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;"><strong style="color:#ffffff;background:transparent;">Timer</strong></td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">Time remaining in your lab session.</td>
+</tr>
+<tr style="background:transparent;">
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;text-align: center;">3</td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;"><strong style="color:#ffffff;background:transparent;">Progress bar</strong></td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">Your progress through the lab.</td>
+</tr>
+<tr style="background:transparent;">
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;text-align: center;">4</td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;"><strong style="color:#ffffff;background:transparent;">A↕</strong></td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">Change the text size of the lab guide.</td>
+</tr>
+<tr style="background:transparent;">
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;text-align: center;">5</td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;"><strong style="color:#ffffff;background:transparent;">Refresh</strong></td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">Reconnect the VM if the screen stops responding.</td>
+</tr>
+<tr style="background:transparent;">
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;text-align: center;">6</td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;"><strong style="color:#ffffff;background:transparent;">More (...)</strong></td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">Language, Delete and VM Native Clipboard options.</td>
+</tr>
+<tr style="background:transparent;">
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;text-align: center;">7</td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;"><strong style="color:#ffffff;background:transparent;">Lab guide menu</strong></td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">Guide, Environment, Progress, Resources and Help.</td>
+</tr>
+<tr style="background:transparent;">
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;text-align: center;">8</td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;"><strong style="color:#ffffff;background:transparent;">Split window</strong></td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">Split the lab guide and the VM into separate windows.</td>
+</tr>
+</tbody>
+</table></div>
+<h3 style="color:#ffffff;margin:24px 0 10px;background:transparent;">6️⃣ More Options</h3>
+<p style="color:#d7dee8;background:transparent;">Select <strong style="color:#ffffff;background:transparent;">More (...)</strong> in the top bar to open these options:</p>
+<div class="psb-shot" style="margin:16px 0 22px;padding:10px;border-radius:14px;background:#0a0f17;border:1px solid #223042;animation:psbShot 6s ease-in-out infinite;"><img src="./media/gs-more-menu.png" alt="More options" style="display:block;max-width:100%;height:auto;margin:0 auto;border-radius:8px;"><div style="text-align:center;color:#9aa7b8;font-size:.85em;margin-top:8px;">More options</div></div>
+<div style="overflow-x:auto;margin:14px 0;"><table style="width:100%;border-collapse:collapse;background:transparent;margin:0;">
+<thead style="background:transparent;">
+<tr style="background:transparent;">
+<th style="color:#ff9900;background:rgba(255,153,0,.08);padding:10px 12px;border:0;border-bottom:1px solid #223042;text-align:left;">Option</th>
+<th style="color:#ff9900;background:rgba(255,153,0,.08);padding:10px 12px;border:0;border-bottom:1px solid #223042;text-align:left;">Use</th>
+</tr>
+</thead>
+<tbody style="background:transparent;">
+<tr style="background:transparent;">
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">🌍 <strong style="color:#ffffff;background:transparent;">Language</strong></td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">Switch the lab language, if multi-language support is enabled.</td>
+</tr>
+<tr style="background:transparent;">
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">🗑️ <strong style="color:#ffffff;background:transparent;">Delete</strong></td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">Delete the environment once your lab is complete.</td>
+</tr>
+<tr style="background:transparent;">
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">📋 <strong style="color:#ffffff;background:transparent;">VM Native Clipboard</strong></td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">Allows copying files within the VM. While it is on, text copied from your local PC cannot be pasted into the VM using keyboard shortcuts. You can turn it off at any time from <strong style="color:#ffffff;background:transparent;">More (...)</strong>.</td>
+</tr>
+</tbody>
+</table></div>
+<h3 style="color:#ffffff;margin:24px 0 10px;background:transparent;">7️⃣ Lab Guide Menu</h3>
+<p style="color:#d7dee8;background:transparent;">Use the tabs at the top of the lab guide to move between its sections:</p>
+<div class="psb-shot" style="margin:16px 0 22px;padding:10px;border-radius:14px;background:#0a0f17;border:1px solid #223042;animation:psbShot 6s ease-in-out infinite;"><img src="./media/gs-menu.png" alt="Lab guide menu" style="display:block;max-width:100%;height:auto;margin:0 auto;border-radius:8px;"><div style="text-align:center;color:#9aa7b8;font-size:.85em;margin-top:8px;">Lab guide menu</div></div>
+<div style="overflow-x:auto;margin:14px 0;"><table style="width:100%;border-collapse:collapse;background:transparent;margin:0;">
+<thead style="background:transparent;">
+<tr style="background:transparent;">
+<th style="color:#ff9900;background:rgba(255,153,0,.08);padding:10px 12px;border:0;border-bottom:1px solid #223042;text-align:left;">Option</th>
+<th style="color:#ff9900;background:rgba(255,153,0,.08);padding:10px 12px;border:0;border-bottom:1px solid #223042;text-align:left;">Use</th>
+</tr>
+</thead>
+<tbody style="background:transparent;">
+<tr style="background:transparent;">
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">📖 <strong style="color:#ffffff;background:transparent;">Guide</strong></td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">All tasks and lab information.</td>
+</tr>
+<tr style="background:transparent;">
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">🔑 <strong style="color:#ffffff;background:transparent;">Environment</strong></td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">AWS console credentials and lab details.</td>
+</tr>
+<tr style="background:transparent;">
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">📈 <strong style="color:#ffffff;background:transparent;">Progress</strong></td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">Your points for validations.</td>
+</tr>
+<tr style="background:transparent;">
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">⚙️ <strong style="color:#ffffff;background:transparent;">Resources</strong></td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">Start, stop or restart the lab VM.</td>
+</tr>
+<tr style="background:transparent;">
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">❓ <strong style="color:#ffffff;background:transparent;">Help</strong></td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">Support information.</td>
+</tr>
+</tbody>
+</table></div>
+<h3 style="color:#ffffff;margin:24px 0 10px;background:transparent;">📈 Progress</h3>
+<p style="color:#d7dee8;background:transparent;">The <strong style="color:#ffffff;background:transparent;">Progress</strong> tab shows your overall points and the status of each <strong style="color:#ffffff;background:transparent;">Validation</strong> check. Each lab has one validation, and its points are shown in the lab header:</p>
+<div class="psb-shot" style="margin:16px 0 22px;padding:10px;border-radius:14px;background:#0a0f17;border:1px solid #223042;animation:psbShot 6s ease-in-out infinite;"><img src="./media/gs-progress.png" alt="Progress tab" style="display:block;max-width:100%;height:auto;margin:0 auto;border-radius:8px;"><div style="text-align:center;color:#9aa7b8;font-size:.85em;margin-top:8px;">Progress tab</div></div>
+<h3 style="color:#ffffff;margin:24px 0 10px;background:transparent;">🔑 Exploring Your Resources</h3>
+<p style="color:#d7dee8;background:transparent;">To view your AWS console credentials and resource details, navigate to the <strong style="color:#ffffff;background:transparent;">Environment</strong> tab:</p>
+<div class="psb-shot" style="margin:16px 0 22px;padding:10px;border-radius:14px;background:#0a0f17;border:1px solid #223042;animation:psbShot 6s ease-in-out infinite;"><img src="./media/gs-02.png" alt="Environment tab" style="display:block;max-width:100%;height:auto;margin:0 auto;border-radius:8px;"><div style="text-align:center;color:#9aa7b8;font-size:.85em;margin-top:8px;">Environment tab</div></div>
+<h3 style="color:#ffffff;margin:24px 0 10px;background:transparent;">🪟 Utilizing the Split Window Feature</h3>
+<p style="color:#d7dee8;background:transparent;">For convenience, you can open the lab guide in a separate window by selecting the <strong style="color:#ffffff;background:transparent;">Split Window</strong> button from the top-right corner:</p>
+<div class="psb-shot" style="margin:16px 0 22px;padding:10px;border-radius:14px;background:#0a0f17;border:1px solid #223042;animation:psbShot 6s ease-in-out infinite;"><img src="./media/gs-05.png" alt="Split window" style="display:block;max-width:100%;height:auto;margin:0 auto;border-radius:8px;"><div style="text-align:center;color:#9aa7b8;font-size:.85em;margin-top:8px;">Split window</div></div>
+<h3 style="color:#ffffff;margin:24px 0 10px;background:transparent;">🖥️ Managing Your Virtual Machine</h3>
+<p style="color:#d7dee8;background:transparent;">You can start, stop or restart your virtual machine as needed from the <strong style="color:#ffffff;background:transparent;">Resources</strong> tab:</p>
+<div class="psb-shot" style="margin:16px 0 22px;padding:10px;border-radius:14px;background:#0a0f17;border:1px solid #223042;animation:psbShot 6s ease-in-out infinite;"><img src="./media/gs-06.png" alt="Resources tab" style="display:block;max-width:100%;height:auto;margin:0 auto;border-radius:8px;"><div style="text-align:center;color:#9aa7b8;font-size:.85em;margin-top:8px;">Resources tab</div></div>
+<h3 style="color:#ffffff;margin:24px 0 10px;background:transparent;">📄 Page Navigation</h3>
+<p style="color:#d7dee8;background:transparent;">Use <strong style="color:#ffffff;background:transparent;">Previous</strong>, the page numbers and <strong style="color:#ffffff;background:transparent;">Next</strong> at the bottom of the guide to move between pages:</p>
+<div class="psb-shot" style="margin:16px 0 22px;padding:10px;border-radius:14px;background:#0a0f17;border:1px solid #223042;animation:psbShot 6s ease-in-out infinite;"><img src="./media/gs-next.png" alt="Page navigation" style="display:block;max-width:100%;height:auto;margin:0 auto;border-radius:8px;"><div style="text-align:center;color:#9aa7b8;font-size:.85em;margin-top:8px;">Page navigation</div></div>
+</div><div class="psb-panel" style="background:#0d121b;border:1px solid #223042;border-radius:16px;padding:22px clamp(14px,3vw,28px);margin:20px 0;animation:psbPanel 7s ease-in-out infinite;animation-delay:-3.5s;"><h2 style="color:#ffffff;margin:0 0 14px;padding-bottom:10px;border:0;border-bottom:1px solid #223042;background:transparent;">✅ Validate Your Work</h2>
+<p style="color:#d7dee8;background:transparent;">Each lab ends with a <strong style="color:#ffffff;background:transparent;">Validation Check</strong> that checks your work. Complete all tasks in the lab, scroll to the <strong style="color:#ffffff;background:transparent;">Validation Check</strong> at the end of the last task, and click <strong style="color:#ffffff;background:transparent;">Validate</strong>:</p>
+<div class="psb-shot" style="margin:16px 0 22px;padding:10px;border-radius:14px;background:#0a0f17;border:1px solid #223042;animation:psbShot 6s ease-in-out infinite;"><img src="./media/gs-validate.png" alt="Validate button" style="display:block;max-width:100%;height:auto;margin:0 auto;border-radius:8px;"><div style="text-align:center;color:#9aa7b8;font-size:.85em;margin-top:8px;">Validate button</div></div>
+<ul style="background:transparent;">
+<li style="color:#d7dee8;background:transparent;">On success, the status shows <strong style="color:#ffffff;background:transparent;">Success</strong> and the points are added to your <strong style="color:#ffffff;background:transparent;">Progress</strong>.</li>
+<li style="color:#d7dee8;background:transparent;">If a check fails, read the message, fix the issue and click <strong style="color:#ffffff;background:transparent;">Validate</strong> again.</li>
+</ul>
+<blockquote style="margin:16px 0;padding:12px 16px;border:0;border-left:3px solid #4fc3f7;background:rgba(79,195,247,.08);border-radius:0 10px 10px 0;color:#d7dee8;">
+<p style="color:#d7dee8;background:transparent;">💡 <strong style="color:#ffffff;background:transparent;">Tip:</strong> Validate as often as you like. There is no penalty and no limit.</p>
+</blockquote>
+</div><div class="psb-panel" style="background:#0d121b;border:1px solid #223042;border-radius:16px;padding:22px clamp(14px,3vw,28px);margin:20px 0;animation:psbPanel 7s ease-in-out infinite;"><h2 style="color:#ffffff;margin:0 0 14px;padding-bottom:10px;border:0;border-bottom:1px solid #223042;background:transparent;">🔐 Sign In to the AWS Console</h2>
+<p style="color:#d7dee8;background:transparent;"><strong style="color:#ffffff;background:transparent;">Step 1:</strong> On the lab VM desktop, double-click the <strong style="color:#ffffff;background:transparent;">AWS Console</strong> shortcut, or open the sign-in URL below in the browser:</p>
+<div style="overflow-x:auto;margin:14px 0;"><table style="width:100%;border-collapse:collapse;background:transparent;margin:0;">
+<thead style="background:transparent;">
+<tr style="background:transparent;">
+<th style="color:#ff9900;background:rgba(255,153,0,.08);padding:10px 12px;border:0;border-bottom:1px solid #223042;text-align:left;">Detail</th>
+<th style="color:#ff9900;background:rgba(255,153,0,.08);padding:10px 12px;border:0;border-bottom:1px solid #223042;text-align:left;">Value</th>
+</tr>
+</thead>
+<tbody style="background:transparent;">
+<tr style="background:transparent;">
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">🔗 <strong style="color:#ffffff;background:transparent;">Sign-in URL</strong></td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;"><inject key="SignInUrl" enableCopy="true"/></td>
+</tr>
+<tr style="background:transparent;">
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">👤 <strong style="color:#ffffff;background:transparent;">IAM username</strong></td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;"><inject key="AWSUserName" enableCopy="true"/></td>
+</tr>
+<tr style="background:transparent;">
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">🔒 <strong style="color:#ffffff;background:transparent;">Password</strong></td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;"><inject key="AWSPassword" enableCopy="true"/></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote style="margin:16px 0;padding:12px 16px;border:0;border-left:3px solid #4fc3f7;background:rgba(79,195,247,.08);border-radius:0 10px 10px 0;color:#d7dee8;">
+<p style="color:#d7dee8;background:transparent;">💡 <strong style="color:#ffffff;background:transparent;">Tip:</strong> The same credentials are also saved in the <strong style="color:#ffffff;background:transparent;">aws credentials.txt</strong> file on the VM desktop.</p>
+</blockquote>
+<p style="color:#d7dee8;background:transparent;"><strong style="color:#ffffff;background:transparent;">Step 2:</strong> Enter the <strong style="color:#ffffff;background:transparent;">IAM username (1)</strong> and <strong style="color:#ffffff;background:transparent;">Password (2)</strong>, then click <strong style="color:#ffffff;background:transparent;">Sign in (3)</strong>:</p>
+<div class="psb-shot" style="margin:16px 0 22px;padding:10px;border-radius:14px;background:#0a0f17;border:1px solid #223042;animation:psbShot 6s ease-in-out infinite;"><img src="./media/gs-03.png" alt="AWS sign-in" style="display:block;max-width:100%;height:auto;margin:0 auto;border-radius:8px;"><div style="text-align:center;color:#9aa7b8;font-size:.85em;margin-top:8px;">AWS sign-in</div></div>
+<p style="color:#d7dee8;background:transparent;"><strong style="color:#ffffff;background:transparent;">Step 3:</strong> In the top-right corner of the console, open the <strong style="color:#ffffff;background:transparent;">Region</strong> selector and choose <strong style="color:#ffffff;background:transparent;">Asia Pacific (Singapore) ap-southeast-1</strong>:</p>
+<div class="psb-shot" style="margin:16px 0 22px;padding:10px;border-radius:14px;background:#0a0f17;border:1px solid #223042;animation:psbShot 6s ease-in-out infinite;"><img src="./media/gs-04.png" alt="Region selector" style="display:block;max-width:100%;height:auto;margin:0 auto;border-radius:8px;"><div style="text-align:center;color:#9aa7b8;font-size:.85em;margin-top:8px;">Region selector</div></div>
+<blockquote style="margin:16px 0;padding:12px 16px;border:0;border-left:3px solid #4fc3f7;background:rgba(79,195,247,.08);border-radius:0 10px 10px 0;color:#d7dee8;">
+<p style="color:#d7dee8;background:transparent;">⚠️ <strong style="color:#ffffff;background:transparent;">Note:</strong> Create <strong style="color:#ffffff;background:transparent;">every</strong> resource in <strong style="color:#ffffff;background:transparent;">Asia Pacific (Singapore) ap-southeast-1</strong>. The pre-provisioned resources and the validation checks only look in this region. If something "disappears" from a console page, check the region selector first.</p>
+</blockquote>
+</div><div class="psb-panel" style="background:#0d121b;border:1px solid #223042;border-radius:16px;padding:22px clamp(14px,3vw,28px);margin:20px 0;animation:psbPanel 7s ease-in-out infinite;animation-delay:-3.5s;"><h2 style="color:#ffffff;margin:0 0 14px;padding-bottom:10px;border:0;border-bottom:1px solid #223042;background:transparent;">🔌 Connect Using RDP (Optional)</h2>
+<p style="color:#d7dee8;background:transparent;">To use your own RDP client instead of the browser-based VM, connect with these details:</p>
+<div style="overflow-x:auto;margin:14px 0;"><table style="width:100%;border-collapse:collapse;background:transparent;margin:0;">
+<thead style="background:transparent;">
+<tr style="background:transparent;">
+<th style="color:#ff9900;background:rgba(255,153,0,.08);padding:10px 12px;border:0;border-bottom:1px solid #223042;text-align:left;">Detail</th>
+<th style="color:#ff9900;background:rgba(255,153,0,.08);padding:10px 12px;border:0;border-bottom:1px solid #223042;text-align:left;">Value</th>
+</tr>
+</thead>
+<tbody style="background:transparent;">
+<tr style="background:transparent;">
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">💻 <strong style="color:#ffffff;background:transparent;">Computer</strong></td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;"><inject key="WindowsVMPublicIP" enableCopy="true"/></td>
+</tr>
+<tr style="background:transparent;">
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">👤 <strong style="color:#ffffff;background:transparent;">Username</strong></td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;"><inject key="windowsvmAdminUsername" enableCopy="true"/></td>
+</tr>
+<tr style="background:transparent;">
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;">🔒 <strong style="color:#ffffff;background:transparent;">Password</strong></td>
+<td style="color:#d7dee8;background:transparent;padding:10px 12px;border:0;border-bottom:1px solid #223042;vertical-align:top;"><inject key="WindowsVMPassword" enableCopy="true"/></td>
+</tr>
+</tbody>
+</table></div>
+</div><div class="psb-panel" style="background:#0d121b;border:1px solid #223042;border-radius:16px;padding:22px clamp(14px,3vw,28px);margin:20px 0;animation:psbPanel 7s ease-in-out infinite;"><h2 style="color:#ffffff;margin:0 0 14px;padding-bottom:10px;border:0;border-bottom:1px solid #223042;background:transparent;">🆘 Support Contact</h2>
+<p style="color:#d7dee8;background:transparent;">The CloudLabs support team is available 24/7 via email and live chat.</p>
+<ul style="background:transparent;">
+<li style="color:#d7dee8;background:transparent;">📧 <strong style="color:#ffffff;background:transparent;">Email:</strong> <a href="mailto:cloudlabs-support@spektrasystems.com" style="color:#4fc3f7;">cloudlabs-support@spektrasystems.com</a></li>
+<li style="color:#d7dee8;background:transparent;">💬 <strong style="color:#ffffff;background:transparent;">Live chat:</strong> <a href="https://support.cloudlabs.ai/isv" style="color:#4fc3f7;">https://support.cloudlabs.ai/isv</a></li>
+</ul>
+<p style="color:#d7dee8;background:transparent;">Click <strong style="color:#ffffff;background:transparent;">Next</strong> to begin the lab.</p>
+</div><div class="psb-panel" style="background:#0d121b;border:1px solid #223042;border-radius:16px;padding:22px clamp(14px,3vw,28px);margin:20px 0;animation:psbPanel 7s ease-in-out infinite;animation-delay:-3.5s;"><h2 style="color:#ffffff;margin:0 0 14px;padding-bottom:10px;border:0;border-bottom:1px solid #223042;background:transparent;">🎉 Happy Learning!</h2></div>
+</div></div>
