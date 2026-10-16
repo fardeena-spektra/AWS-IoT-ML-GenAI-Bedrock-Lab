@@ -16,7 +16,10 @@
 .psbgs .psb-hero{background-size:300% 300%!important;animation:psbAurora 14s ease infinite,psbDrop .6s ease-out both;box-shadow:0 12px 32px rgba(15,27,45,.30)}
 .psbgs .psb-hero::before{content:"";position:absolute;width:280px;height:280px;left:-70px;top:-100px;border-radius:50%;background:radial-gradient(closest-side,rgba(255,153,0,.38),transparent);animation:psbOrb 9s ease-in-out infinite;pointer-events:none}
 .psbgs .psb-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 35%,rgba(255,255,255,.12) 50%,transparent 65%);background-size:250% 100%;animation:psbSweep 6s ease-in-out infinite;pointer-events:none}
-.psbgs .psb-title{font-size:1.9em!important;color:#ffffff!important}
+.psbgs .psb-title{color:#ffffff!important;text-align:center!important}
+.psbgs .psb-hero>div{position:relative;z-index:2}
+.psbgs .psb-hero::before{z-index:0}
+.psbgs .psb-hero::after{z-index:1}
 .psbgs .psb-line{animation:psbLine 4s ease-in-out infinite}
 .psbgs .psb-chip{transition:transform .2s ease;cursor:default}
 .psbgs .psb-chip *{color:#ffffff!important;-webkit-text-fill-color:#ffffff!important}
@@ -28,7 +31,7 @@
   box-shadow:0 6px 20px rgba(15,27,45,.08);animation:psbRise .6s cubic-bezier(.2,.8,.2,1) both,psbSpin 10s linear infinite;transition:transform .25s ease}
 .psbgs .psb-panel:nth-of-type(2){animation-delay:.08s,-1.5s}.psbgs .psb-panel:nth-of-type(3){animation-delay:.16s,-3s}.psbgs .psb-panel:nth-of-type(4){animation-delay:.24s,-4.5s}
 .psbgs .psb-panel:nth-of-type(5){animation-delay:.32s,-6s}.psbgs .psb-panel:nth-of-type(6){animation-delay:.4s,-7.5s}.psbgs .psb-panel:nth-of-type(7){animation-delay:.48s,-9s}
-.psbgs .psb-panel:hover{transform:translateY(-3px);animation:psbRise .6s both,psbSpin 3s linear infinite,psbRGB 2.4s linear infinite}
+.psbgs .psb-panel:hover{transform:translateY(-2px);animation:psbRise .6s both,psbSpin 3s linear infinite}
 /* headings */
 .psbgs h2{border:0!important;padding-bottom:12px!important;position:relative;color:#16191f!important;font-weight:700!important}
 .psbgs h2::after{content:"";position:absolute;left:0;bottom:0;height:3px;width:100%;border-radius:3px;background:linear-gradient(90deg,#ff9900,#ffc266,#232f3e,#0972d3,#ff9900);background-size:200% 100%;animation:psbBar 4s linear infinite}
@@ -52,7 +55,7 @@
   animation:psbSpin 6s linear infinite;transition:transform .25s ease}
 .psbgs .psb-shot p{margin:0!important}
 .psbgs .psb-shot img{display:block;max-width:100%;height:auto;margin:0 auto;border:0!important;border-radius:9px;box-shadow:none!important}
-.psbgs .psb-shot:hover{transform:translateY(-3px);animation:psbSpin 2s linear infinite,psbRGB 1.8s linear infinite}
+.psbgs .psb-shot:hover{transform:translateY(-2px);animation:psbSpin 2s linear infinite}
 .psbgs .psb-shot:active{transform:scale(.99);animation:psbSpin 2s linear infinite,psbBurst .55s ease-out}
 /* links */
 .psbgs a{color:#0972d3!important;font-weight:600;transition:color .2s ease}
@@ -66,31 +69,19 @@
 @media (prefers-reduced-motion:reduce){.psbgs *,.psbgs *::before,.psbgs *::after{animation:none!important;transition:none!important}}
 </style>
 
-<div class="psbgs" style="background:linear-gradient(180deg,#f7f9fc 0%,#eef3f9 100%);border:1px solid #e3e9f1;border-radius:20px;padding:14px 10px 22px;margin:0 -20px;">
+<div class="psbgs">
 
-<div class="psb-hero" style="position:relative;overflow:hidden;border-radius:18px;padding:30px 20px 26px;margin:0 0 6px;text-align:center;color:#ffffff;background:linear-gradient(120deg,#161e2d,#232f3e,#1b3a5c,#232f3e);">
-<div class="psb-badge" style="display:inline-block;padding:4px 14px;border-radius:999px;background:rgba(255,153,0,.16);border:1px solid rgba(255,153,0,.6);color:#ffb84d;font-weight:700;letter-spacing:.14em;font-size:.76em;">GUIDED LAB</div>
-<h1 class="psb-title" style="color:#ffffff;margin:14px 0 6px;border:0;line-height:1.25;">Getting Started</h1>
-<div class="psb-sub" style="color:#d5dbe3;font-weight:600;">Your lab environment, navigation and sign-in</div>
-<div class="psb-line" style="width:90px;height:3px;margin:14px auto 8px;border-radius:3px;background:#ff9900;"></div>
-<div class="psb-chips" style="margin-top:8px;">
-<span class="psb-chip" style="display:inline-block;margin:4px;padding:7px 14px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.30);color:#ffffff;font-weight:600;">🖥️ Lab VM</span>
-<span class="psb-chip" style="display:inline-block;margin:4px;padding:7px 14px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.30);color:#ffffff;font-weight:600;">📑 Lab Guide</span>
-<span class="psb-chip" style="display:inline-block;margin:4px;padding:7px 14px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.30);color:#ffffff;font-weight:600;">✅ Validation</span>
-<span class="psb-chip" style="display:inline-block;margin:4px;padding:7px 14px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.30);color:#ffffff;font-weight:600;">🔐 AWS Console</span>
-</div>
+<div class="psb-hero" style="position:relative;overflow:hidden;border-radius:16px;padding:28px 20px 24px;margin:0 0 6px;text-align:center;color:#ffffff;background:linear-gradient(120deg,#161e2d,#232f3e,#1b3a5c,#232f3e);">
+<div class="psb-title" style="color:#ffffff;font-size:1.6em;font-weight:700;line-height:1.3;text-align:center;">Building an End-to-End IoT, Machine Learning and Generative AI Solution on AWS</div>
+<div class="psb-line" style="width:90px;height:3px;margin:14px auto 12px;border-radius:3px;background:#ff9900;"></div>
+<div class="psb-sub" style="color:#ffb84d;font-weight:700;letter-spacing:.06em;text-align:center;">Getting Started</div>
 </div>
 
 <div class="psb-panel" style="background:#ffffff;border:1px solid #d5dbe3;border-radius:16px;padding:18px 16px;margin:24px 0;">
 
 ## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🖥️</span>Lab Environment
 
-The lab window is split into two parts:
-
-- **Left side:** your lab virtual machine (VM), a Windows Server 2022 workstation.
-- **Right side:** the lab guide, with the steps to complete each task.
-
-Your lab window looks like this:
+The lab window has two parts: your **lab VM** (Windows Server 2022) on the left and the **lab guide** on the right.
 
 <div class="psb-shot">
 
@@ -104,8 +95,6 @@ Your lab window looks like this:
 
 ## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧭</span>Lab Window Controls
 
-The top bar and the lab guide menu give you these controls:
-
 <div class="psb-shot">
 
 ![Lab window controls](./media/gs-topbar.png)
@@ -114,18 +103,16 @@ The top bar and the lab guide menu give you these controls:
 
 | # | Control | Use |
 |:---:|---|---|
-| 1 | **VM name** | Shows the lab VM you are connected to. |
-| 2 | **Timer** | Time remaining in your lab session. |
+| 1 | **VM name** | The lab VM you are connected to. |
+| 2 | **Timer** | Time remaining in your session. |
 | 3 | **Progress bar** | Your progress through the lab. |
-| 4 | **A↕** | Change the text size of the lab guide. |
+| 4 | **A↕** | Change the text size of the guide. |
 | 5 | **Refresh** | Reconnect the VM if the screen stops responding. |
-| 6 | **More (...)** | Language, Delete and VM Native Clipboard options. |
-| 7 | **Lab guide menu** | Guide, Environment, Progress, Resources and Help. |
-| 8 | **Split window** | Split the lab guide and the VM into separate windows. |
+| 6 | **More (...)** | Language, Delete and VM Native Clipboard. |
+| 7 | **Guide menu** | Guide, Environment, Progress, Resources and Help. |
+| 8 | **Split window** | Open the guide in a separate window. |
 
 ### <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">⚙️</span>More Options
-
-Select **More (...)** in the top bar to open these options:
 
 <div class="psb-shot">
 
@@ -135,25 +122,23 @@ Select **More (...)** in the top bar to open these options:
 
 | Option | Use |
 |---|---|
-| <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🌍</span>**Language** | Switch the lab language, if multi-language support is enabled. |
-| <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🗑️</span>**Delete** | Delete the environment once your lab is complete. |
-| <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">📋</span>**VM Native Clipboard** | Allows copying files within the VM. While it is on, text copied from your local PC cannot be pasted into the VM using keyboard shortcuts. You can turn it off at any time from **More (...)**. |
+| <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🌍</span>**Language** | Switch the lab language, if enabled. |
+| <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🗑️</span>**Delete** | Delete the environment when you finish. |
+| <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">📋</span>**VM Native Clipboard** | Copy files within the VM. While it is on, text copied on your PC cannot be pasted into the VM with keyboard shortcuts. Turn it off from **More (...)**. |
 
-### <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">📑</span>Lab Guide Menu
-
-Use the tabs at the top of the lab guide to move between its sections:
+### <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">📑</span>Guide Menu
 
 <div class="psb-shot">
 
-![Lab guide menu](./media/gs-menu.png)
+![Guide menu](./media/gs-menu.png)
 
 </div>
 
-| Option | Use |
+| Tab | Use |
 |---|---|
-| <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">📖</span>**Guide** | All tasks and lab information. |
-| <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🔑</span>**Environment** | Cloud console credentials and lab details. |
-| <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">📈</span>**Progress** | Your points for validations. |
+| <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">📖</span>**Guide** | Tasks and lab information. |
+| <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🔑</span>**Environment** | Credentials and lab details. |
+| <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">📈</span>**Progress** | Your validation points. |
 | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">⚙️</span>**Resources** | Start, stop or restart the lab VM. |
 | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">❓</span>**Help** | Support information. |
 
@@ -163,9 +148,7 @@ Use the tabs at the top of the lab guide to move between its sections:
 
 ## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🧰</span>Working in the Lab
 
-### <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">📈</span>Progress
-
-The **Progress** tab shows your overall points and the status of each validation check:
+**Progress:** shows your overall points and the status of each validation:
 
 <div class="psb-shot">
 
@@ -173,9 +156,7 @@ The **Progress** tab shows your overall points and the status of each validation
 
 </div>
 
-### <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🔑</span>Exploring Your Resources
-
-To view your credentials and resource details, navigate to the **Environment** tab:
+**Environment:** shows your credentials and resource details:
 
 <div class="psb-shot">
 
@@ -183,9 +164,7 @@ To view your credentials and resource details, navigate to the **Environment** t
 
 </div>
 
-### <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🪟</span>Split Window
-
-To open the lab guide in a separate window, select the **Split Window** button in the top-right corner:
+**Split Window:** opens the guide in a separate window:
 
 <div class="psb-shot">
 
@@ -193,9 +172,7 @@ To open the lab guide in a separate window, select the **Split Window** button i
 
 </div>
 
-### <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🖥️</span>Managing Your Virtual Machine
-
-You can start, stop or restart your virtual machine from the **Resources** tab:
+**Resources:** start, stop or restart the lab VM:
 
 <div class="psb-shot">
 
@@ -203,9 +180,7 @@ You can start, stop or restart your virtual machine from the **Resources** tab:
 
 </div>
 
-### <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">📄</span>Page Navigation
-
-Use **Previous**, the page numbers and **Next** at the bottom of the guide to move between pages:
+**Page navigation:** use **Previous**, the page numbers and **Next** at the bottom of the guide:
 
 <div class="psb-shot">
 
@@ -219,7 +194,7 @@ Use **Previous**, the page numbers and **Next** at the bottom of the guide to mo
 
 ## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">✅</span>Validate Your Work
 
-Each lab ends with a **Validation Check**. Complete all tasks in the lab, scroll to the **Validation Check** at the end of the last task, and click **Validate**:
+At the end of each lab, scroll to the **Validation Check** and click **Validate**:
 
 <div class="psb-shot">
 
@@ -227,10 +202,8 @@ Each lab ends with a **Validation Check**. Complete all tasks in the lab, scroll
 
 </div>
 
-- On success, the status shows **Success** and the points are added to your **Progress**.
-- If a check fails, read the message, fix the issue and click **Validate** again.
-
-> <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">💡</span>**Tip:** Validate as often as you like. There is no penalty and no limit.
+- **Success:** the points are added to your **Progress**.
+- **Failed:** read the message, fix the issue and validate again. There is no limit.
 
 </div>
 
@@ -238,7 +211,7 @@ Each lab ends with a **Validation Check**. Complete all tasks in the lab, scroll
 
 ## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🔐</span>Sign In to the AWS Management Console
 
-**Step 1:** On the lab VM desktop, double-click the **AWS Console** shortcut, or open the sign-in URL below in the browser:
+**Step 1:** On the lab VM, double-click the **AWS Console** shortcut, or open the sign-in URL:
 
 | Detail | Value |
 |---|---|
@@ -246,7 +219,7 @@ Each lab ends with a **Validation Check**. Complete all tasks in the lab, scroll
 | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">👤</span>**IAM username** | <inject key="AWSUserName" enableCopy="true"/> |
 | <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🔒</span>**Password** | <inject key="AWSPassword" enableCopy="true"/> |
 
-> <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">💡</span>**Tip:** The same credentials are also saved in the **aws credentials.txt** file on the VM desktop.
+These are also saved in **aws credentials.txt** on the VM desktop.
 
 **Step 2:** Enter the **IAM username (1)** and **Password (2)**, then click **Sign in (3)**:
 
@@ -256,7 +229,7 @@ Each lab ends with a **Validation Check**. Complete all tasks in the lab, scroll
 
 </div>
 
-**Step 3:** In the top-right corner of the console, open the **Region** selector and choose **<inject key="LabRegion" enableCopy="false"/>**:
+**Step 3:** In the top-right corner, set the **Region** to **<inject key="LabRegion" enableCopy="false"/>**:
 
 <div class="psb-shot">
 
@@ -264,15 +237,13 @@ Each lab ends with a **Validation Check**. Complete all tasks in the lab, scroll
 
 </div>
 
-> <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">⚠️</span>**Note:** Create **every** resource in **<inject key="LabRegion" enableCopy="false"/>**. The pre-provisioned resources and the validation checks only look in this Region. If a resource seems to be missing, check the Region selector first.
+> ⚠️ **Note:** Create every resource in **<inject key="LabRegion" enableCopy="false"/>**. Validation checks only look in this Region.
 
 </div>
 
 <div class="psb-panel" style="background:#ffffff;border:1px solid #d5dbe3;border-radius:16px;padding:18px 16px;margin:24px 0;">
 
 ## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🔌</span>Connect Using RDP (Optional)
-
-To use your own RDP client instead of the browser-based VM, connect with these details:
 
 | Detail | Value |
 |---|---|
@@ -284,12 +255,12 @@ To use your own RDP client instead of the browser-based VM, connect with these d
 
 <div class="psb-panel" style="background:#ffffff;border:1px solid #d5dbe3;border-radius:16px;padding:18px 16px;margin:24px 0;">
 
-## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🆘</span>Support Contact
+## <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">🆘</span>Support
 
-The CloudLabs support team is available 24/7 via email and live chat.
+The CloudLabs support team is available 24/7.
 
-- <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">📧</span>**Email:** <a href="mailto:cloudlabs-support@spektrasystems.com">cloudlabs-support@spektrasystems.com</a>
-- <span class="psb-ico" style="display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:9px;margin-right:8px;vertical-align:middle;border:1px solid #dfe5ee;background:#ffffff;">💬</span>**Live chat:** <a href="https://support.cloudlabs.ai/isv">https://support.cloudlabs.ai/isv</a>
+**Email:** <a href="mailto:cloudlabs-support@spektrasystems.com">cloudlabs-support@spektrasystems.com</a><br>
+**Live chat:** <a href="https://support.cloudlabs.ai/isv">https://support.cloudlabs.ai/isv</a>
 
 Click **Next** to view the **Lab Overview**.
 
