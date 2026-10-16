@@ -127,7 +127,7 @@ PS
 fi
 
 sec "5. Amazon S3 lab bucket"
-if q s3api head-bucket --bucket "$BUCKET"; then
+if q s3api head-bucket --bucket "$BUCKET" >/dev/null; then
   pass "Bucket $BUCKET exists"
   LOC=$(q s3api get-bucket-location --bucket "$BUCKET" --query LocationConstraint --output text)
   [ "$LOC" = "$REGION" ] && pass "Bucket region $LOC" || fail "Bucket region is $LOC (expected $REGION)"
@@ -160,7 +160,7 @@ for MID in amazon.nova-lite-v1:0 apac.amazon.nova-lite-v1:0; do
   R_OUT=$(aws bedrock-runtime converse --model-id "$MID" --messages '[{"role":"user","content":[{"text":"Say OK and nothing else."}]}]' \
           --inference-config maxTokens=5 --query "output.message.content[0].text" --output text 2>&1)
   if [ $? -eq 0 ]; then pass "Converse works with $MID (reply: $R_OUT)"
-  else warn "Converse with $MID failed: $(echo "$R_OUT" | tail -1 | cut -c1-160)"; fi
+  else info "Converse with $MID not usable here (optional): $(echo "$R_OUT" | tail -1 | cut -c1-160)"; fi
 done
 info "Lab 08 uses amazon.nova-lite-v1:0. If only the apac. ID works, use MODEL_ID=apac.amazon.nova-lite-v1:0."
 
@@ -172,7 +172,7 @@ chkq(){ local pat="$1" need="$2" label="$3" v
   elif awk "BEGIN{exit !($v >= $need)}"; then pass "$label = $v"
   else fail "$label = $v (need $need)"; fi; }
 chkq "^ml\.m5\.large for training job usage" 1 "Training ml.m5.large"
-chkq "^ml\.t3\.medium for JupyterLab spaces running on Studio" 1 "Studio JupyterLab ml.t3.medium"
+chkq "JupyterLab.*ml\.t3\.medium" 1 "Studio JupyterLab ml.t3.medium"
 chkq "^Maximum total concurrency that can be allocated across all serverless endpoints" 5 "Serverless endpoint total concurrency"
 
 sec "9. Lab resources that must NOT exist yet (fresh environment)"
