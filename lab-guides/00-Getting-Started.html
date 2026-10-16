@@ -1,52 +1,43 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Getting Started Preview</title>
 <style>
-:root{--bg:#05070c;--card:#0d121b;--line:#1d2633;--text:#e6ebf2;--muted:#9aa7b8;--accent:#ff9900;--accent2:#4fc3f7}
-*{box-sizing:border-box}
-html,body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 "Segoe UI",system-ui,-apple-system,sans-serif}
-body::before,body::after{content:"";position:fixed;inset:-20vmax;z-index:-1;pointer-events:none;
-  background:radial-gradient(40vmax 40vmax at 20% 15%,rgba(255,153,0,.16),transparent 60%),
-             radial-gradient(45vmax 45vmax at 85% 80%,rgba(79,195,247,.13),transparent 60%);
-  animation:breathe 9s ease-in-out infinite}
-body::after{background:radial-gradient(35vmax 35vmax at 70% 20%,rgba(155,110,255,.10),transparent 60%);animation-delay:-4.5s}
-@keyframes breathe{0%,100%{opacity:.55;transform:scale(1)}50%{opacity:1;transform:scale(1.08)}}
-main{max-width:980px;margin:0 auto;padding:40px 16px 80px}
-h1{font-size:clamp(26px,4vw,38px);margin:0 0 6px;text-align:center;letter-spacing:.2px}
-h1+p{text-align:center;color:var(--muted);margin:0 0 28px}
-h2{font-size:24px;margin:0 0 14px;padding-bottom:10px;border-bottom:1px solid var(--line)}
-h3{font-size:19px;margin:28px 0 10px;color:#fff}
-p,li{color:#d4dbe5} b,strong{color:#fff}
-a{color:var(--accent2)}
-.card{background:linear-gradient(180deg,rgba(255,255,255,.025),rgba(255,255,255,0)) ,var(--card);
-  border:1px solid var(--line);border-radius:16px;padding:26px clamp(16px,3vw,32px);margin:22px 0;
-  animation:cardglow 7s ease-in-out infinite}
-.card:nth-child(even){animation-delay:-3.5s}
-@keyframes cardglow{0%,100%{box-shadow:0 0 0 rgba(255,153,0,0),0 10px 30px rgba(0,0,0,.45)}
-  50%{box-shadow:0 0 28px rgba(255,153,0,.10),0 10px 30px rgba(0,0,0,.45)}}
-.tbl{overflow-x:auto;margin:14px 0} table{width:100%;border-collapse:collapse;font-size:15px}
-th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
-th{color:var(--accent);font-weight:600;background:rgba(255,153,0,.06)}
-tr:hover td{background:rgba(255,255,255,.02)}
-pre{background:#070a10;border:1px solid var(--line);border-radius:12px;padding:16px;overflow-x:auto;font-size:13.5px;color:#bfe7ff}
-code{font-family:"Cascadia Code",Consolas,monospace}
-blockquote{margin:16px 0;padding:12px 16px;border-left:3px solid var(--accent2);background:rgba(79,195,247,.06);border-radius:0 10px 10px 0}
-blockquote p{margin:0}
-.inject{display:inline-block;padding:1px 9px;border-radius:999px;background:rgba(255,153,0,.12);
-  border:1px solid rgba(255,153,0,.35);color:#ffd08a;font-size:.92em;white-space:nowrap}
-.inject i{font-style:normal;opacity:.7;margin-left:4px}
-figure.shot{margin:16px 0 22px;padding:10px;border-radius:14px;background:#0a0f17;border:1px solid var(--line);
-  animation:shotbreathe 6s ease-in-out infinite}
-figure.shot img{display:block;max-width:100%;height:auto;margin:0 auto;border-radius:8px}
-figure.shot figcaption{text-align:center;color:var(--muted);font-size:13px;margin-top:8px}
-@keyframes shotbreathe{0%,100%{box-shadow:0 0 0 rgba(79,195,247,0);border-color:var(--line)}
-  50%{box-shadow:0 0 22px rgba(79,195,247,.16);border-color:rgba(79,195,247,.35)}}
-.banner{position:sticky;top:0;z-index:2;text-align:center;font-size:12.5px;color:var(--muted);padding:6px;
-  background:rgba(5,7,12,.85);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
-@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important}}
-</style></head><body>
-
-<main><h1 align="center">🚀 Getting Started: AWS Demo || Bedrock with Claude</h1>
+.psbgs{--bg:#05070c;--card:#0d121b;--line:#1f2a38;--text:#e6ebf2;--muted:#9aa7b8;--accent:#ff9900;--accent2:#4fc3f7;
+  position:relative;overflow:hidden;isolation:isolate;background:var(--bg)!important;color:var(--text)!important;
+  border-radius:18px;padding:28px clamp(14px,3vw,30px) 40px;font-family:"Segoe UI",system-ui,sans-serif;line-height:1.65}
+.psbgs .glow{position:absolute;inset:-30%;z-index:-1;pointer-events:none;
+  background:radial-gradient(closest-side at 20% 12%,rgba(255,153,0,.20),transparent),
+             radial-gradient(closest-side at 85% 55%,rgba(79,195,247,.16),transparent),
+             radial-gradient(closest-side at 30% 90%,rgba(155,110,255,.12),transparent);
+  animation:psbBreathe 9s ease-in-out infinite}
+@keyframes psbBreathe{0%,100%{opacity:.55;transform:scale(1)}50%{opacity:1;transform:scale(1.07)}}
+.psbgs *{color:inherit;background-color:transparent}
+.psbgs h1{font-size:clamp(24px,3.6vw,34px)!important;text-align:center;margin:0 0 6px!important;color:#fff!important;border:0!important}
+.psbgs h1+p{text-align:center;color:var(--muted)!important;margin:0 0 24px}
+.psbgs h2{font-size:23px!important;margin:0 0 14px!important;padding-bottom:10px;border-bottom:1px solid var(--line)!important;color:#fff!important}
+.psbgs h3{font-size:18px!important;margin:26px 0 10px!important;color:#fff!important}
+.psbgs p,.psbgs li,.psbgs td{color:#d4dbe5!important}
+.psbgs b,.psbgs strong{color:#fff!important}
+.psbgs a{color:var(--accent2)!important}
+.psbgs .card{background:var(--card)!important;border:1px solid var(--line);border-radius:16px;padding:24px clamp(14px,3vw,28px);
+  margin:20px 0;animation:psbCard 7s ease-in-out infinite}
+.psbgs .card:nth-of-type(even){animation-delay:-3.5s}
+@keyframes psbCard{0%,100%{box-shadow:0 8px 26px rgba(0,0,0,.5)}50%{box-shadow:0 0 30px rgba(255,153,0,.13),0 8px 26px rgba(0,0,0,.5)}}
+.psbgs .tbl{overflow-x:auto;margin:14px 0}
+.psbgs table{width:100%;border-collapse:collapse;font-size:15px;background:transparent!important}
+.psbgs th,.psbgs td{padding:10px 12px!important;border:0!important;border-bottom:1px solid var(--line)!important;text-align:left;background:transparent!important}
+.psbgs th{color:var(--accent)!important;background:rgba(255,153,0,.07)!important;font-weight:600}
+.psbgs tr,.psbgs tr:nth-child(even),.psbgs tbody tr{background:transparent!important}
+.psbgs pre{background:#070a10!important;border:1px solid var(--line);border-radius:12px;padding:16px;overflow-x:auto;font-size:13.5px}
+.psbgs pre,.psbgs pre code{color:#bfe7ff!important;background:#070a10!important}
+.psbgs blockquote{margin:16px 0;padding:12px 16px;border-left:3px solid var(--accent2)!important;background:rgba(79,195,247,.07)!important;border-radius:0 10px 10px 0}
+.psbgs blockquote p{margin:0}
+.psbgs figure.shot{margin:16px 0 22px;padding:10px;border-radius:14px;background:#0a0f17!important;border:1px solid var(--line);
+  animation:psbShot 6s ease-in-out infinite}
+.psbgs figure.shot img{display:block;max-width:100%;height:auto;margin:0 auto;border-radius:8px}
+.psbgs figcaption{text-align:center;color:var(--muted)!important;font-size:13px;margin-top:8px}
+@keyframes psbShot{0%,100%{box-shadow:0 0 0 rgba(79,195,247,0)}50%{box-shadow:0 0 22px rgba(79,195,247,.18)}}
+@media (prefers-reduced-motion:reduce){.psbgs *, .psbgs .glow{animation:none!important}}
+</style>
+<div class="psbgs"><div class="glow"></div>
+<h1 align="center">🚀 Getting Started: AWS Demo || Bedrock with Claude</h1>
 <p align="center"><b>AWS Demo || Bedrock with Claude</b> | ⏱️ <b>Estimated Timing: 8 Hours 10 Minutes</b> | 🏆 <b>Total Points: 100</b></p>
 
 
@@ -178,7 +169,7 @@ Dashboard chat ──&gt; Assistant Lambda ──&gt; Amazon Bedrock (Converse A
 <li><strong>Right side:</strong> the lab guide, with the steps to complete each task.</li>
 </ul>
 <p>Your lab window looks like this:</p>
-<figure class="shot"><img src="./media/gs-01.png" alt="Lab environment" loading="lazy"><figcaption>Lab environment</figcaption></figure>
+<figure class="shot"><img src="./media/gs-01.png" alt="Lab environment"><figcaption>Lab environment</figcaption></figure>
 <h3>📦 Pre-provisioned Resources</h3>
 <p>The following resources are already created for you. You do <strong>not</strong> need to create them.</p>
 <div class="tbl"><table>
@@ -277,7 +268,7 @@ Dashboard chat ──&gt; Assistant Lambda ──&gt; Amazon Bedrock (Converse A
 
 </section><section class="card"><h2>🧭 Lab Window Controls</h2>
 <p>The top bar and the lab guide menu give you these controls:</p>
-<figure class="shot"><img src="./media/gs-topbar.png" alt="Lab window controls" loading="lazy"><figcaption>Lab window controls</figcaption></figure>
+<figure class="shot"><img src="./media/gs-topbar.png" alt="Lab window controls"><figcaption>Lab window controls</figcaption></figure>
 <div class="tbl"><table>
 <thead>
 <tr>
@@ -331,7 +322,7 @@ Dashboard chat ──&gt; Assistant Lambda ──&gt; Amazon Bedrock (Converse A
 </table></div>
 <h3>6️⃣ More Options</h3>
 <p>Select <strong>More (...)</strong> in the top bar to open these options:</p>
-<figure class="shot"><img src="./media/gs-more-menu.png" alt="More options" loading="lazy"><figcaption>More options</figcaption></figure>
+<figure class="shot"><img src="./media/gs-more-menu.png" alt="More options"><figcaption>More options</figcaption></figure>
 <div class="tbl"><table>
 <thead>
 <tr>
@@ -356,7 +347,7 @@ Dashboard chat ──&gt; Assistant Lambda ──&gt; Amazon Bedrock (Converse A
 </table></div>
 <h3>7️⃣ Lab Guide Menu</h3>
 <p>Use the tabs at the top of the lab guide to move between its sections:</p>
-<figure class="shot"><img src="./media/gs-menu.png" alt="Lab guide menu" loading="lazy"><figcaption>Lab guide menu</figcaption></figure>
+<figure class="shot"><img src="./media/gs-menu.png" alt="Lab guide menu"><figcaption>Lab guide menu</figcaption></figure>
 <div class="tbl"><table>
 <thead>
 <tr>
@@ -389,23 +380,23 @@ Dashboard chat ──&gt; Assistant Lambda ──&gt; Amazon Bedrock (Converse A
 </table></div>
 <h3>📈 Progress</h3>
 <p>The <strong>Progress</strong> tab shows your overall points and the status of each <strong>Validation</strong> check. Each lab has one validation, and its points are shown in the lab header:</p>
-<figure class="shot"><img src="./media/gs-progress.png" alt="Progress tab" loading="lazy"><figcaption>Progress tab</figcaption></figure>
+<figure class="shot"><img src="./media/gs-progress.png" alt="Progress tab"><figcaption>Progress tab</figcaption></figure>
 <h3>🔑 Exploring Your Resources</h3>
 <p>To view your AWS console credentials and resource details, navigate to the <strong>Environment</strong> tab:</p>
-<figure class="shot"><img src="./media/gs-02.png" alt="Environment tab" loading="lazy"><figcaption>Environment tab</figcaption></figure>
+<figure class="shot"><img src="./media/gs-02.png" alt="Environment tab"><figcaption>Environment tab</figcaption></figure>
 <h3>🪟 Utilizing the Split Window Feature</h3>
 <p>For convenience, you can open the lab guide in a separate window by selecting the <strong>Split Window</strong> button from the top-right corner:</p>
-<figure class="shot"><img src="./media/gs-05.png" alt="Split window" loading="lazy"><figcaption>Split window</figcaption></figure>
+<figure class="shot"><img src="./media/gs-05.png" alt="Split window"><figcaption>Split window</figcaption></figure>
 <h3>🖥️ Managing Your Virtual Machine</h3>
 <p>You can start, stop or restart your virtual machine as needed from the <strong>Resources</strong> tab:</p>
-<figure class="shot"><img src="./media/gs-06.png" alt="Resources tab" loading="lazy"><figcaption>Resources tab</figcaption></figure>
+<figure class="shot"><img src="./media/gs-06.png" alt="Resources tab"><figcaption>Resources tab</figcaption></figure>
 <h3>📄 Page Navigation</h3>
 <p>Use <strong>Previous</strong>, the page numbers and <strong>Next</strong> at the bottom of the guide to move between pages:</p>
-<figure class="shot"><img src="./media/gs-next.png" alt="Page navigation" loading="lazy"><figcaption>Page navigation</figcaption></figure>
+<figure class="shot"><img src="./media/gs-next.png" alt="Page navigation"><figcaption>Page navigation</figcaption></figure>
 
 </section><section class="card"><h2>✅ Validate Your Work</h2>
 <p>Each lab ends with a <strong>Validation Check</strong> that checks your work. Complete all tasks in the lab, scroll to the <strong>Validation Check</strong> at the end of the last task, and click <strong>Validate</strong>:</p>
-<figure class="shot"><img src="./media/gs-validate.png" alt="Validate button" loading="lazy"><figcaption>Validate button</figcaption></figure>
+<figure class="shot"><img src="./media/gs-validate.png" alt="Validate button"><figcaption>Validate button</figcaption></figure>
 <ul>
 <li>On success, the status shows <strong>Success</strong> and the points are added to your <strong>Progress</strong>.</li>
 <li>If a check fails, read the message, fix the issue and click <strong>Validate</strong> again.</li>
@@ -442,9 +433,9 @@ Dashboard chat ──&gt; Assistant Lambda ──&gt; Amazon Bedrock (Converse A
 <p>💡 <strong>Tip:</strong> The same credentials are also saved in the <strong>aws credentials.txt</strong> file on the VM desktop.</p>
 </blockquote>
 <p><strong>Step 2:</strong> Enter the <strong>IAM username (1)</strong> and <strong>Password (2)</strong>, then click <strong>Sign in (3)</strong>:</p>
-<figure class="shot"><img src="./media/gs-03.png" alt="AWS sign-in" loading="lazy"><figcaption>AWS sign-in</figcaption></figure>
+<figure class="shot"><img src="./media/gs-03.png" alt="AWS sign-in"><figcaption>AWS sign-in</figcaption></figure>
 <p><strong>Step 3:</strong> In the top-right corner of the console, open the <strong>Region</strong> selector and choose <strong>Asia Pacific (Singapore) ap-southeast-1</strong>:</p>
-<figure class="shot"><img src="./media/gs-04.png" alt="Region selector" loading="lazy"><figcaption>Region selector</figcaption></figure>
+<figure class="shot"><img src="./media/gs-04.png" alt="Region selector"><figcaption>Region selector</figcaption></figure>
 <blockquote>
 <p>⚠️ <strong>Note:</strong> Create <strong>every</strong> resource in <strong>Asia Pacific (Singapore) ap-southeast-1</strong>. The pre-provisioned resources and the validation checks only look in this region. If something "disappears" from a console page, check the region selector first.</p>
 </blockquote>
@@ -482,4 +473,5 @@ Dashboard chat ──&gt; Assistant Lambda ──&gt; Amazon Bedrock (Converse A
 </ul>
 
 <p>Click <strong>Next</strong> to begin the lab.</p>
-</section><section class="card"><h2>🎉 Happy Learning!</h2></section></main></body></html>
+</section><section class="card"><h2>🎉 Happy Learning!</h2></section>
+</div>
