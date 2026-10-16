@@ -26,11 +26,14 @@ export AWS_DEFAULT_REGION="$REGION"
 PASS=0; FAIL=0; WARN=0
 G=$'\e[32m'; R=$'\e[31m'; Y=$'\e[33m'; B=$'\e[36m'; N=$'\e[0m'
 pass(){ echo "  ${G}[PASS]${N} $*"; PASS=$((PASS+1)); }
-fail(){ echo "  ${R}[FAIL]${N} $*"; FAIL=$((FAIL+1)); }
+ERR=/tmp/psb-err; : > $ERR
+fail(){ echo "  ${R}[FAIL]${N} $*"; FAIL=$((FAIL+1))
+  if grep -qiE 'AccessDenied|UnauthorizedOperation|not authorized' $ERR; then
+    echo "         ${R}reason: ACCESS DENIED for this user:${N} $(grep -oiE 'User: .*|not authorized to perform: [a-z0-9:-]+[A-Za-z]+' $ERR | head -1 | cut -c1-200)"; fi; : > $ERR; }
 warn(){ echo "  ${Y}[WARN]${N} $*"; WARN=$((WARN+1)); }
 info(){ echo "  ${B}[INFO]${N} $*"; }
 sec(){ echo; echo "${B}=== $* ===${N}"; }
-q(){ aws "$@" 2>/dev/null; }
+q(){ aws "$@" 2>$ERR; }
 
 sec "0. Identity and Region"
 ID_JSON=$(q sts get-caller-identity)
