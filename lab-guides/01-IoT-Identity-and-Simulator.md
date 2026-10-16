@@ -67,6 +67,24 @@
 .psbgs td img:not([class^=psb]),.psbgs td svg,.psbgs td i,.psbgs td button,.psbgs [class*=copy],.psbgs [class*=Copy],.psbgs [title*=opy]{cursor:pointer;border-radius:6px;transition:transform .15s ease}
 .psbgs td img:not([class^=psb]):hover,.psbgs td svg:hover,.psbgs td i:hover,.psbgs td button:hover,.psbgs [class*=copy]:hover,.psbgs [class*=Copy]:hover,.psbgs [title*=opy]:hover{transform:scale(1.2);animation:psbRGB 1.2s linear infinite}
 .psbgs td img:not([class^=psb]):active,.psbgs td svg:active,.psbgs td i:active,.psbgs td button:active,.psbgs [class*=copy]:active,.psbgs [class*=Copy]:active,.psbgs [title*=opy]:active{animation:psbHit .3s ease,psbBurst .5s ease-out}
+/* compact, uniform spacing */
+.psbgs p{margin:0 0 8px!important}
+.psbgs ol,.psbgs ul{padding-left:1.35em!important;margin:4px 0 8px!important}
+.psbgs li{margin:0 0 6px!important}
+.psbgs li>p{margin:0 0 6px!important}
+.psbgs li>*:last-child{margin-bottom:0!important}
+.psbgs table{width:100%!important;margin:6px 0 10px!important}
+.psbgs th,.psbgs td{padding:7px 10px!important}
+.psbgs blockquote{margin:6px 0 10px!important;padding:8px 12px!important}
+.psbgs blockquote p{margin:0!important}
+.psbgs pre{margin:6px 0 10px!important}
+.psbgs h2{margin:0 0 10px!important}
+.psbgs h3{margin:14px 0 6px!important}
+.psbgs h4{margin:12px 0 6px!important}
+.psbgs .psb-panel>*:last-child{margin-bottom:0!important}
+.psbgs .psb-panel{padding:14px 12px!important;margin:14px 0!important}
+.psbgs .psb-shot{margin:6px 0 10px!important;padding:3px!important}
+.psbgs .psb-ico{width:1.7em!important;height:1.7em!important;margin-right:6px!important}
 @media (prefers-reduced-motion:reduce){.psbgs *,.psbgs *::before,.psbgs *::after{animation:none!important;transition:none!important}}
 </style>
 
@@ -132,7 +150,7 @@ Sample telemetry message:
 
 🎯 **Goal:** Create the thing **psb-lab-sensor-01**, its certificate, and download the connection kit.
 
-1. In the AWS console search bar, type **IoT Core** and open **IoT Core**. Confirm the region is **Asia Pacific (Singapore)**.
+1. In the AWS console search bar, type **IoT Core** and open **IoT Core**. Confirm the Region is **<inject key="LabRegion" enableCopy="false"/>**.
 
 1. On the IoT Core home page, under **Connect**, select **Connect one device** (or from the left menu choose **Connect** > **Connect one device**).
 
