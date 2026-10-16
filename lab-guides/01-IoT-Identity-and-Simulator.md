@@ -106,6 +106,9 @@
 .psbgs .psb-shot{margin:4px 0 8px!important;padding:2px!important}
 .psbgs h2{margin:0 0 8px!important;padding-bottom:8px!important}
 .psbgs h3{margin:10px 0 4px!important}
+/* inject values stay on one line, no extra space around them */
+.psbgs p [class]:not([class^=psb]):not(pre):not(code):not(pre *):not(code *):not(:has(pre)),.psbgs li [class]:not([class^=psb]):not(pre):not(code):not(pre *):not(code *):not(:has(pre)),.psbgs td [class]:not([class^=psb]):not(pre):not(code):not(pre *):not(code *):not(:has(pre)){white-space:nowrap!important;margin:0!important;padding:0!important;min-width:0!important;width:auto!important;letter-spacing:normal!important;word-break:normal!important;overflow-wrap:normal!important}
+.psbgs p [class*=copy],.psbgs li [class*=copy],.psbgs td [class*=copy],.psbgs p [class*=Copy],.psbgs li [class*=Copy],.psbgs td [class*=Copy]{margin-left:3px!important}
 @media (prefers-reduced-motion:reduce){.psbgs *,.psbgs *::before,.psbgs *::after{animation:none!important;transition:none!important}}
 </style>
 
@@ -216,7 +219,7 @@ A certificate proves who the device is. An IoT policy decides what it may do. In
 
 1. Under **Policy document**, click the **JSON** tab.
 
-1. Replace the entire contents of the editor with the policy below. Replace `<AWS-REGION>` with **<inject key="LabRegion" enableCopy="false"/>** and `<AWS-ACCOUNT-ID>` with your account ID from the **Environment** tab (**<inject key="AWSAccountId" enableCopy="true"/>**).
+1. Replace the entire contents of the editor with the policy below. Replace `<AWS-REGION>` with **<inject key="LabRegion" enableCopy="false"/>** and `<AWS-ACCOUNT-ID>` with your account ID from the **Environment** tab.
 
    ```json
    {

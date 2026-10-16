@@ -106,6 +106,9 @@
 .psbgs .psb-shot{margin:4px 0 8px!important;padding:2px!important}
 .psbgs h2{margin:0 0 8px!important;padding-bottom:8px!important}
 .psbgs h3{margin:10px 0 4px!important}
+/* inject values stay on one line, no extra space around them */
+.psbgs p [class]:not([class^=psb]):not(pre):not(code):not(pre *):not(code *):not(:has(pre)),.psbgs li [class]:not([class^=psb]):not(pre):not(code):not(pre *):not(code *):not(:has(pre)),.psbgs td [class]:not([class^=psb]):not(pre):not(code):not(pre *):not(code *):not(:has(pre)){white-space:nowrap!important;margin:0!important;padding:0!important;min-width:0!important;width:auto!important;letter-spacing:normal!important;word-break:normal!important;overflow-wrap:normal!important}
+.psbgs p [class*=copy],.psbgs li [class*=copy],.psbgs td [class*=copy],.psbgs p [class*=Copy],.psbgs li [class*=Copy],.psbgs td [class*=Copy]{margin-left:3px!important}
 @media (prefers-reduced-motion:reduce){.psbgs *,.psbgs *::before,.psbgs *::after{animation:none!important;transition:none!important}}
 </style>
 
@@ -353,7 +356,7 @@ You will be able to complete the following tasks:
 
    > **Note:** **WINDOW_MINUTES** is 6 while the schedule is every 5 minutes. The one-minute overlap means a reading that arrives right on a boundary is scored rather than skipped. Writing the same point twice in InfluxDB is harmless: a point with the same measurement, tag set and timestamp is overwritten, not duplicated.
 
-1. Open **Configuration** → **Permissions**, click the **Role name** link, and add an inline policy. Click **Add permissions** → **Create inline policy** → **JSON**, and paste the following, replacing the three placeholders (`<SECRET-ARN>`, `<AWS-ACCOUNT-ID>` with **<inject key="AWSAccountId" enableCopy="true"/>**, and `<S3-BUCKET>` with **<inject key="LabBucketName" enableCopy="true"/>**):
+1. Open **Configuration** → **Permissions**, click the **Role name** link, and add an inline policy. Click **Add permissions** → **Create inline policy** → **JSON**, and paste the following, replacing the three placeholders (`<SECRET-ARN>`, `<AWS-ACCOUNT-ID>`, and `<S3-BUCKET>` with **<inject key="LabBucketName" enableCopy="true"/>**):
 
    ```json
    {
