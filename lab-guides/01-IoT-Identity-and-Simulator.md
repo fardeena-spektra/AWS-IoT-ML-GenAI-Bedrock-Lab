@@ -70,9 +70,8 @@
 <div class="psbgs">
 
 <div class="psb-hero" style="position:relative;overflow:hidden;border-radius:16px;padding:28px 20px 24px;margin:0 0 6px;text-align:center;color:#ffffff;background:linear-gradient(120deg,#070b1a,#121a3a,#0d2b36,#16123a);">
-<div class="psb-title" style="color:#ffffff;font-size:1.6em;font-weight:700;line-height:1.3;text-align:center;">Building an End-to-End IoT, Machine Learning and Generative AI Solution on AWS</div>
+<div class="psb-title" style="color:#ffffff;font-size:1.6em;font-weight:700;line-height:1.3;text-align:center;">Lab 01: IoT Identity and Device Simulator</div>
 <div class="psb-line" style="width:90px;height:3px;margin:14px auto 12px;border-radius:3px;background:linear-gradient(90deg,#e9b949,#14b8a6);"></div>
-<div class="psb-sub" style="color:#f2cc6b;font-weight:700;letter-spacing:.08em;text-align:center;">Lab 01: IoT Identity and Device Simulator</div>
 <div class="psb-meta" style="color:#d5dbe3;margin-top:6px;text-align:center;">45 Minutes&nbsp;&nbsp;|&nbsp;&nbsp;10 Points</div>
 </div>
 
