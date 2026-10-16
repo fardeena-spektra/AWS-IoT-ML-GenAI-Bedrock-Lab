@@ -1,7 +1,31 @@
+<style>
+@keyframes psbBreathe{0%,100%{box-shadow:inset 0 0 60px rgba(255,153,0,.06),0 0 0 rgba(255,153,0,0)}50%{box-shadow:inset 0 0 140px rgba(255,153,0,.16),0 0 34px rgba(79,195,247,.18)}}
+@keyframes psbPanel{0%,100%{box-shadow:0 8px 24px rgba(0,0,0,.55)}50%{box-shadow:0 0 28px rgba(255,153,0,.16),0 8px 24px rgba(0,0,0,.55)}}
+@keyframes psbShot{0%,100%{box-shadow:0 0 0 rgba(79,195,247,0)}50%{box-shadow:0 0 22px rgba(79,195,247,.28)}}
+.psbgs{animation:psbBreathe 8s ease-in-out infinite}
+.psbgs .psb-panel{animation:psbPanel 7s ease-in-out infinite}
+.psbgs .psb-panel:nth-of-type(even){animation-delay:-3.5s}
+.psbgs h1,.psbgs h2,.psbgs h3,.psbgs h4,.psbgs strong,.psbgs b{color:#ffffff!important;background:transparent!important}
+.psbgs h2{border-bottom:1px solid #223042!important;padding-bottom:8px!important}
+.psbgs p,.psbgs li,.psbgs td,.psbgs span{color:#d7dee8!important}
+.psbgs h1+p,.psbgs h1+p b{color:#ffd08a!important}
+.psbgs a{color:#4fc3f7!important}
+.psbgs table,.psbgs thead,.psbgs tbody,.psbgs tr,.psbgs tr:nth-child(even),.psbgs tr:nth-child(odd),.psbgs td{background:transparent!important}
+.psbgs th{color:#ff9900!important;background:rgba(255,153,0,.10)!important}
+.psbgs th,.psbgs td{border-color:#223042!important}
+.psbgs blockquote{background:rgba(79,195,247,.08)!important;border-left:3px solid #4fc3f7!important;border-radius:0 10px 10px 0}
+.psbgs pre,.psbgs pre code,.psbgs code{background:#070a10!important;color:#bfe7ff!important;border-color:#223042!important}
+.psbgs pre{overflow-x:auto!important;max-width:100%;padding:14px!important;border-radius:12px}
+.psbgs img{border-radius:10px;border:1px solid #223042;animation:psbShot 6s ease-in-out infinite;max-width:100%}
+@media (prefers-reduced-motion:reduce){.psbgs,.psbgs *{animation:none!important}}
+</style>
+
+<div class="psbgs" style="background:#05070c;color:#d7dee8;border-radius:18px;padding:24px 18px 30px;border:1px solid #1a2230;">
+
 <h1 align="center">🚀 Getting Started: AWS Demo || Bedrock with Claude</h1>
 <p align="center"><b>AWS Demo || Bedrock with Claude</b> | ⏱️ <b>Estimated Timing: 8 Hours 10 Minutes</b> | 🏆 <b>Total Points: 100</b></p>
 
----
+<div class="psb-panel" style="background:#0d121b;border:1px solid #223042;border-radius:16px;padding:20px 24px;margin:20px 0;color:#d7dee8;">
 
 ## 🎯 About This Lab
 
@@ -40,7 +64,9 @@ S3 raw/ ──> SageMaker RCF model ──> Serverless endpoint <── Score La
 Dashboard chat ──> Assistant Lambda ──> Amazon Bedrock (Converse API + tool use)
 ```
 
----
+</div>
+
+<div class="psb-panel" style="background:#0d121b;border:1px solid #223042;border-radius:16px;padding:20px 24px;margin:20px 0;color:#d7dee8;">
 
 ## 🖥️ Lab Environment
 
@@ -89,7 +115,9 @@ The **psb-lab-assets** folder on the desktop (**C:\psb-lab-assets**) contains ev
 
 > ℹ️ **Info:** The lab title says **Claude**. The assistant you build in Lab 08 uses **Amazon Nova Lite** (APAC inference profile **apac.amazon.nova-lite-v1:0**) through the same Amazon Bedrock **Converse API**. Claude models can be swapped in by changing the **MODEL_ID** environment variable of the assistant Lambda function (and the model ARNs in its IAM policy). No code change is needed.
 
----
+</div>
+
+<div class="psb-panel" style="background:#0d121b;border:1px solid #223042;border-radius:16px;padding:20px 24px;margin:20px 0;color:#d7dee8;">
 
 ## 🧭 Lab Window Controls
 
@@ -164,7 +192,9 @@ Use **Previous**, the page numbers and **Next** at the bottom of the guide to mo
 
 ![Page navigation](./media/gs-next.png)
 
----
+</div>
+
+<div class="psb-panel" style="background:#0d121b;border:1px solid #223042;border-radius:16px;padding:20px 24px;margin:20px 0;color:#d7dee8;">
 
 ## ✅ Validate Your Work
 
@@ -177,7 +207,9 @@ Each lab ends with a **Validation Check** that checks your work. Complete all ta
 
 > 💡 **Tip:** Validate as often as you like. There is no penalty and no limit.
 
----
+</div>
+
+<div class="psb-panel" style="background:#0d121b;border:1px solid #223042;border-radius:16px;padding:20px 24px;margin:20px 0;color:#d7dee8;">
 
 ## 🔐 Sign In to the AWS Console
 
@@ -201,7 +233,9 @@ Each lab ends with a **Validation Check** that checks your work. Complete all ta
 
 > ⚠️ **Note:** Create **every** resource in **Asia Pacific (Singapore) ap-southeast-1**. The pre-provisioned resources and the validation checks only look in this region. If something "disappears" from a console page, check the region selector first.
 
----
+</div>
+
+<div class="psb-panel" style="background:#0d121b;border:1px solid #223042;border-radius:16px;padding:20px 24px;margin:20px 0;color:#d7dee8;">
 
 ## 🔌 Connect Using RDP (Optional)
 
@@ -213,7 +247,9 @@ To use your own RDP client instead of the browser-based VM, connect with these d
 | 👤 **Username** | <inject key="windowsvmAdminUsername" enableCopy="true"/> |
 | 🔒 **Password** | <inject key="WindowsVMPassword" enableCopy="true"/> |
 
----
+</div>
+
+<div class="psb-panel" style="background:#0d121b;border:1px solid #223042;border-radius:16px;padding:20px 24px;margin:20px 0;color:#d7dee8;">
 
 ## 🆘 Support Contact
 
@@ -222,8 +258,15 @@ The CloudLabs support team is available 24/7 via email and live chat.
 - 📧 **Email:** <a href="mailto:cloudlabs-support@spektrasystems.com">cloudlabs-support@spektrasystems.com</a>
 - 💬 **Live chat:** <a href="https://support.cloudlabs.ai/isv">https://support.cloudlabs.ai/isv</a>
 
----
 
 Click **Next** to begin the lab.
 
+</div>
+
+<div class="psb-panel" style="background:#0d121b;border:1px solid #223042;border-radius:16px;padding:20px 24px;margin:20px 0;color:#d7dee8;">
+
 ## 🎉 Happy Learning!
+
+</div>
+
+</div>
