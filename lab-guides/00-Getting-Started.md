@@ -1,47 +1,93 @@
 <style>
-@keyframes psbBreathe{0%,100%{background-position:0% 0%,100% 100%;box-shadow:0 0 0 rgba(255,153,0,0)}50%{background-position:30% 20%,70% 80%;box-shadow:0 0 36px rgba(255,153,0,.10)}}
-@keyframes psbPanel{0%,100%{box-shadow:0 4px 14px rgba(20,40,70,.06);border-color:#e3e9f1}50%{box-shadow:0 6px 26px rgba(255,153,0,.16);border-color:#ffd9a3}}
-@keyframes psbCorner{0%,100%{width:26px;height:26px;opacity:.75}50%{width:46px;height:46px;opacity:1}}
-@keyframes psbPop{0%{transform:scale(1)}40%{transform:scale(1.25)}100%{transform:scale(1)}}
-.psbgs{background-size:220% 220%,220% 220%!important;animation:psbBreathe 9s ease-in-out infinite}
-.psbgs .psb-panel{animation:psbPanel 7s ease-in-out infinite;transition:transform .25s ease}
-.psbgs .psb-panel:nth-of-type(even){animation-delay:-3.5s}
-.psbgs .psb-panel:hover{transform:translateY(-2px)}
-.psbgs h1,.psbgs h2,.psbgs h3{color:#16202e!important}
-.psbgs h2{border-bottom:2px solid transparent!important;border-image:linear-gradient(90deg,#ff9900,#4fc3f7) 1!important;padding-bottom:8px!important}
-.psbgs h1+p,.psbgs h1+p b{color:#b35c00!important}
-.psbgs table{border-radius:10px;overflow:hidden}
-.psbgs th{color:#9a4f00!important;background:#fff3e2!important}
-.psbgs tr{transition:background .2s ease}
-.psbgs tbody tr:hover{background:#f4f9fd!important}
-.psbgs blockquote{background:#eef8fd!important;border-left:4px solid #4fc3f7!important;border-radius:0 10px 10px 0}
-.psbgs pre{background:#0f1724!important;border-radius:12px;padding:14px!important;overflow-x:auto!important;max-width:100%}
-.psbgs pre,.psbgs pre code{color:#bfe7ff!important;background:#0f1724!important}
-.psbgs .psb-shot{position:relative;margin:14px 0 20px;padding:8px;border-radius:12px;background:#f7f9fc;border:1px solid #e3e9f1}
+@property --psbA{syntax:'<angle>';inherits:false;initial-value:0deg}
+@keyframes psbAurora{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+@keyframes psbShine{0%{background-position:-200% 0}60%,100%{background-position:200% 0}}
+@keyframes psbFloat{0%{transform:translateY(0) rotate(0)}100%{transform:translateY(-140px) rotate(25deg)}}
+@keyframes psbDrop{0%{opacity:0;transform:translateY(-14px) scale(.96)}100%{opacity:1;transform:none}}
+@keyframes psbRise{0%{opacity:0;transform:translateY(22px) scale(.98)}100%{opacity:1;transform:none}}
+@keyframes psbSpin{to{--psbA:360deg}}
+@keyframes psbPulse{0%,100%{box-shadow:0 6px 18px rgba(123,92,255,.10)}50%{box-shadow:0 10px 34px rgba(255,61,119,.22)}}
+@keyframes psbCorner{0%,100%{width:22px;height:22px;filter:drop-shadow(0 0 0 transparent)}50%{width:48px;height:48px;filter:drop-shadow(0 0 6px currentColor)}}
+@keyframes psbHit{0%{transform:scale(1)}30%{transform:scale(1.35)}60%{transform:scale(.9)}100%{transform:scale(1)}}
+@keyframes psbWave{0%{box-shadow:0 0 0 0 rgba(255,61,119,.75)}100%{box-shadow:0 0 0 18px rgba(255,61,119,0)}}
+@keyframes psbChip{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@keyframes psbGlow{0%,100%{text-shadow:0 0 8px rgba(255,255,255,.35),0 2px 10px rgba(80,20,120,.35)}50%{text-shadow:0 0 22px rgba(255,255,255,.95),0 0 40px rgba(255,214,120,.7)}}
+@keyframes psbBar{0%{background-position:0% 0}100%{background-position:200% 0}}
+
+.psbgs{position:relative}
+/* hero */
+.psbgs .psb-hero{background-size:300% 300%!important;animation:psbAurora 10s ease infinite,psbDrop .7s ease-out both;box-shadow:0 14px 40px rgba(123,92,255,.35)}
+.psbgs .psb-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.35) 50%,transparent 70%);background-size:200% 100%;animation:psbShine 4.5s ease-in-out infinite;pointer-events:none}
+.psbgs .psb-title{font-size:2.1em!important;color:#ffffff!important;animation:psbGlow 3s ease-in-out infinite}
+.psbgs .psb-chip{animation:psbChip 3s ease-in-out infinite;backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,.45);transition:transform .2s ease,background .2s ease}
+.psbgs .psb-chip:nth-child(2){animation-delay:-.75s}.psbgs .psb-chip:nth-child(3){animation-delay:-1.5s}.psbgs .psb-chip:nth-child(4){animation-delay:-2.25s}
+.psbgs .psb-chip:hover{background:rgba(255,255,255,.38)!important;transform:translateY(-4px) scale(1.06)}
+.psbgs .psb-chip:active{animation:psbHit .35s ease}
+.psbgs .psb-sparks,.psbgs .psb-sparks::before,.psbgs .psb-sparks::after{position:absolute;left:0;top:100%;width:6px;height:6px;border-radius:50%;background:#fff;pointer-events:none;
+  box-shadow:40px 10px 0 -1px rgba(255,255,255,.9),120px 40px 0 -2px rgba(255,255,255,.7),210px 0 0 0 rgba(255,255,255,.8),300px 30px 0 -2px rgba(255,255,255,.6),380px 15px 0 -1px rgba(255,255,255,.9),460px 45px 0 -2px rgba(255,255,255,.7),540px 5px 0 0 rgba(255,255,255,.8);
+  animation:psbFloat 6s linear infinite;opacity:.8}
+.psbgs .psb-sparks::before{content:"";top:30px;left:20px;animation-duration:8s;opacity:.6}
+.psbgs .psb-sparks::after{content:"";top:60px;left:70px;animation-duration:10s;opacity:.5}
+
+/* cards: slide in one after another, rotating neon border */
+.psbgs .psb-panel{position:relative;background:linear-gradient(#fff,#fff) padding-box,conic-gradient(from var(--psbA),#ff7a18,#ff3d77,#7b5cff,#00c2ff,#ff7a18) border-box!important;border:2px solid transparent!important;
+  animation:psbRise .7s cubic-bezier(.2,.8,.2,1) both,psbSpin 8s linear infinite,psbPulse 6s ease-in-out infinite;transition:transform .25s ease}
+.psbgs .psb-panel:nth-of-type(2){animation-delay:.1s,0s,0s}.psbgs .psb-panel:nth-of-type(3){animation-delay:.2s,-1s,-1s}.psbgs .psb-panel:nth-of-type(4){animation-delay:.3s,-2s,-2s}
+.psbgs .psb-panel:nth-of-type(5){animation-delay:.4s,-3s,-3s}.psbgs .psb-panel:nth-of-type(6){animation-delay:.5s,-4s,-4s}.psbgs .psb-panel:nth-of-type(7){animation-delay:.6s,-5s,-5s}
+.psbgs .psb-panel:hover{transform:translateY(-3px)}
+/* headings */
+.psbgs h2{border:0!important;padding-bottom:10px!important;position:relative;color:#4c1d95!important;font-weight:700!important;text-shadow:0 1px 0 rgba(255,255,255,.8)}
+.psbgs h2::after{content:"";position:absolute;left:0;bottom:0;height:3px;width:100%;border-radius:3px;background:linear-gradient(90deg,#ff7a18,#ff3d77,#7b5cff,#00c2ff,#ff7a18);background-size:200% 100%;animation:psbBar 3s linear infinite}
+.psbgs h3{color:#2a1f5c!important;font-weight:700!important}
+/* tables */
+.psbgs table{border-radius:12px;overflow:hidden;box-shadow:0 4px 16px rgba(123,92,255,.08)}
+.psbgs th{color:#ffffff!important;background:linear-gradient(90deg,#ff7a18,#ff3d77,#7b5cff)!important;border-color:transparent!important}
+.psbgs td{transition:background .2s ease}
+.psbgs tbody tr{transition:transform .2s ease,box-shadow .2s ease}
+.psbgs tbody tr:hover{background:linear-gradient(90deg,rgba(255,122,24,.08),rgba(123,92,255,.08))!important;box-shadow:inset 4px 0 0 #ff3d77}
+/* tips */
+.psbgs blockquote{background:linear-gradient(90deg,rgba(0,194,255,.10),rgba(123,92,255,.06))!important;border-left:4px solid #7b5cff!important;border-radius:0 12px 12px 0;transition:transform .2s ease}
+.psbgs blockquote:hover{transform:translateX(4px)}
+/* code */
+.psbgs pre{background:#14102b!important;border-radius:14px;padding:14px!important;overflow-x:auto!important;max-width:100%;box-shadow:0 0 0 1px #2e2563,0 8px 24px rgba(20,16,43,.35)}
+.psbgs pre,.psbgs pre code{color:#a8f0ff!important;background:#14102b!important}
+/* screenshots: neon brackets, hover zoom, click hit */
+.psbgs .psb-shot{position:relative;margin:14px 4px 22px;padding:8px;border-radius:14px;background:#faf8ff;border:1px solid #ece7ff;transition:transform .25s ease,box-shadow .25s ease}
 .psbgs .psb-shot p{margin:0!important}
-.psbgs .psb-shot::before,.psbgs .psb-shot::after{content:"";position:absolute;width:26px;height:26px;pointer-events:none;animation:psbCorner 3.2s ease-in-out infinite}
-.psbgs .psb-shot::before{top:-2px;left:-2px;border-top:3px solid #ff9900;border-left:3px solid #ff9900;border-top-left-radius:12px}
-.psbgs .psb-shot::after{bottom:-2px;right:-2px;border-bottom:3px solid #4fc3f7;border-right:3px solid #4fc3f7;border-bottom-right-radius:12px;animation-delay:-1.6s}
-.psbgs .psb-shot img{display:block;max-width:100%;height:auto;margin:0 auto;border-radius:8px;transition:transform .25s ease,box-shadow .25s ease}
-.psbgs .psb-shot img:hover{box-shadow:0 8px 24px rgba(20,40,70,.18)}
-.psbgs .psb-shot img:active{transform:scale(.98)}
-.psbgs a{color:#0b7fc0!important;transition:color .2s ease}
-.psbgs a:hover{color:#ff8a00!important}
-.psbgs a:active{animation:psbPop .35s ease}
-/* CloudLabs inject values and copy buttons */
-.psbgs [class]:not(.psb-panel):not(.psb-shot):not([class*=language]):not(code){color:#9a4f00!important;-webkit-text-fill-color:#9a4f00!important}
-.psbgs img:not([src*="media/"]),.psbgs svg,.psbgs i,.psbgs button,.psbgs [class*=copy],.psbgs [class*=Copy],.psbgs [title*=opy]{cursor:pointer;transition:transform .15s ease,filter .15s ease}
-.psbgs img:not([src*="media/"]):hover,.psbgs svg:hover,.psbgs i:hover,.psbgs button:hover,.psbgs [class*=copy]:hover,.psbgs [class*=Copy]:hover,.psbgs [title*=opy]:hover{transform:scale(1.15);filter:drop-shadow(0 0 4px rgba(255,153,0,.6))}
-.psbgs img:not([src*="media/"]):active,.psbgs svg:active,.psbgs i:active,.psbgs button:active,.psbgs [class*=copy]:active,.psbgs [class*=Copy]:active,.psbgs [title*=opy]:active{animation:psbPop .35s ease;filter:drop-shadow(0 0 8px rgba(255,153,0,.9))}
-@media (prefers-reduced-motion:reduce){.psbgs,.psbgs *,.psbgs .psb-shot::before,.psbgs .psb-shot::after{animation:none!important;transition:none!important}}
+.psbgs .psb-shot::before,.psbgs .psb-shot::after{content:"";position:absolute;pointer-events:none;animation:psbCorner 2.6s ease-in-out infinite}
+.psbgs .psb-shot::before{top:-3px;left:-3px;color:#ff3d77;border-top:3px solid #ff3d77;border-left:3px solid #ff3d77;border-top-left-radius:14px}
+.psbgs .psb-shot::after{bottom:-3px;right:-3px;color:#00c2ff;border-bottom:3px solid #00c2ff;border-right:3px solid #00c2ff;border-bottom-right-radius:14px;animation-delay:-1.3s}
+.psbgs .psb-shot img{display:block;max-width:100%;height:auto;margin:0 auto;border-radius:9px}
+.psbgs .psb-shot:hover{transform:translateY(-3px) scale(1.01);box-shadow:0 14px 34px rgba(123,92,255,.25)}
+.psbgs .psb-shot:active{animation:psbWave .45s ease-out;transform:scale(.985)}
+/* links */
+.psbgs a{color:#7b5cff!important;font-weight:600;transition:color .2s ease}
+.psbgs a:hover{color:#ff3d77!important}
+.psbgs a:active{display:inline-block;animation:psbHit .35s ease}
+/* CloudLabs inject values + copy buttons: vivid, with a hit effect on click */
+.psbgs [class]:not([class^=psb]):not([class*=language]):not(code){color:#d6336c!important;-webkit-text-fill-color:#d6336c!important;font-weight:600}
+.psbgs img:not([src*="media/"]),.psbgs svg,.psbgs i,.psbgs button,.psbgs [class*=copy],.psbgs [class*=Copy],.psbgs [title*=opy]{cursor:pointer;border-radius:6px;transition:transform .15s ease,filter .15s ease}
+.psbgs img:not([src*="media/"]):hover,.psbgs svg:hover,.psbgs i:hover,.psbgs button:hover,.psbgs [class*=copy]:hover,.psbgs [class*=Copy]:hover,.psbgs [title*=opy]:hover{transform:scale(1.2) rotate(-6deg);filter:drop-shadow(0 0 5px rgba(255,61,119,.7))}
+.psbgs img:not([src*="media/"]):active,.psbgs svg:active,.psbgs i:active,.psbgs button:active,.psbgs [class*=copy]:active,.psbgs [class*=Copy]:active,.psbgs [title*=opy]:active{animation:psbHit .35s ease,psbWave .45s ease-out;filter:drop-shadow(0 0 10px rgba(255,61,119,1))}
+@media (prefers-reduced-motion:reduce){.psbgs *,.psbgs *::before,.psbgs *::after{animation:none!important;transition:none!important}}
 </style>
 
-<div class="psbgs" style="background:radial-gradient(circle at 15% 10%,rgba(255,153,0,.06),transparent 45%),radial-gradient(circle at 85% 90%,rgba(79,195,247,.08),transparent 45%),#fbfcfe;border:1px solid #e6ebf2;border-radius:18px;padding:20px 10px 24px;margin:0 -20px;">
+<div class="psbgs" style="background:linear-gradient(180deg,#fff7f2 0%,#f7f4ff 45%,#f0fbff 100%);border:1px solid #ece7ff;border-radius:20px;padding:14px 10px 22px;margin:0 -20px;">
 
-<h1 align="center">🚀 Getting Started: AWS Demo || Bedrock with Claude</h1>
-<p align="center"><b>AWS Demo || Bedrock with Claude</b> | ⏱️ <b>Estimated Timing: 8 Hours 10 Minutes</b> | 🏆 <b>Total Points: 100</b></p>
+<div class="psb-hero" style="position:relative;overflow:hidden;border-radius:20px;padding:30px 18px 26px;margin:0 0 18px;text-align:center;color:#ffffff;background:linear-gradient(120deg,#ff7a18,#ff3d77,#7b5cff,#00c2ff);">
+<div class="psb-sparks"></div>
+<div class="psb-badge" style="display:inline-block;padding:4px 12px;border-radius:999px;background:rgba(255,255,255,.22);color:#ffffff;font-weight:700;letter-spacing:.12em;font-size:.78em;">🎮 MISSION BRIEFING</div>
+<h1 class="psb-title" style="color:#ffffff;margin:12px 0 4px;border:0;">🚀 Getting Started</h1>
+<div class="psb-sub" style="color:#ffffff;font-weight:600;opacity:.95;">AWS Demo || Bedrock with Claude</div>
+<div class="psb-chips" style="margin-top:16px;">
+<span class="psb-chip" style="display:inline-block;margin:4px;padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.2);color:#ffffff;font-weight:600;">⏱️ 8 Hours 10 Minutes</span>
+<span class="psb-chip" style="display:inline-block;margin:4px;padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.2);color:#ffffff;font-weight:600;">🏆 100 Points</span>
+<span class="psb-chip" style="display:inline-block;margin:4px;padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.2);color:#ffffff;font-weight:600;">🧩 9 Labs</span>
+<span class="psb-chip" style="display:inline-block;margin:4px;padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.2);color:#ffffff;font-weight:600;">🌏 Singapore</span>
+</div>
+</div>
 
-<div class="psb-panel" style="background:#ffffff;border:1px solid #e3e9f1;border-radius:16px;padding:16px 14px;margin:16px 0;">
+<div class="psb-panel" style="background:#ffffff;border:2px solid #ece7ff;border-radius:18px;padding:16px 14px;margin:18px 0;">
 
 ## 🎯 About This Lab
 
@@ -82,7 +128,7 @@ Dashboard chat ──> Assistant Lambda ──> Amazon Bedrock (Converse API + t
 
 </div>
 
-<div class="psb-panel" style="background:#ffffff;border:1px solid #e3e9f1;border-radius:16px;padding:16px 14px;margin:16px 0;">
+<div class="psb-panel" style="background:#ffffff;border:2px solid #ece7ff;border-radius:18px;padding:16px 14px;margin:18px 0;">
 
 ## 🖥️ Lab Environment
 
@@ -137,7 +183,7 @@ The **psb-lab-assets** folder on the desktop (**C:\psb-lab-assets**) contains ev
 
 </div>
 
-<div class="psb-panel" style="background:#ffffff;border:1px solid #e3e9f1;border-radius:16px;padding:16px 14px;margin:16px 0;">
+<div class="psb-panel" style="background:#ffffff;border:2px solid #ece7ff;border-radius:18px;padding:16px 14px;margin:18px 0;">
 
 ## 🧭 Lab Window Controls
 
@@ -246,7 +292,7 @@ Use **Previous**, the page numbers and **Next** at the bottom of the guide to mo
 
 </div>
 
-<div class="psb-panel" style="background:#ffffff;border:1px solid #e3e9f1;border-radius:16px;padding:16px 14px;margin:16px 0;">
+<div class="psb-panel" style="background:#ffffff;border:2px solid #ece7ff;border-radius:18px;padding:16px 14px;margin:18px 0;">
 
 ## ✅ Validate Your Work
 
@@ -265,7 +311,7 @@ Each lab ends with a **Validation Check** that checks your work. Complete all ta
 
 </div>
 
-<div class="psb-panel" style="background:#ffffff;border:1px solid #e3e9f1;border-radius:16px;padding:16px 14px;margin:16px 0;">
+<div class="psb-panel" style="background:#ffffff;border:2px solid #ece7ff;border-radius:18px;padding:16px 14px;margin:18px 0;">
 
 ## 🔐 Sign In to the AWS Console
 
@@ -299,7 +345,7 @@ Each lab ends with a **Validation Check** that checks your work. Complete all ta
 
 </div>
 
-<div class="psb-panel" style="background:#ffffff;border:1px solid #e3e9f1;border-radius:16px;padding:16px 14px;margin:16px 0;">
+<div class="psb-panel" style="background:#ffffff;border:2px solid #ece7ff;border-radius:18px;padding:16px 14px;margin:18px 0;">
 
 ## 🔌 Connect Using RDP (Optional)
 
@@ -313,7 +359,7 @@ To use your own RDP client instead of the browser-based VM, connect with these d
 
 </div>
 
-<div class="psb-panel" style="background:#ffffff;border:1px solid #e3e9f1;border-radius:16px;padding:16px 14px;margin:16px 0;">
+<div class="psb-panel" style="background:#ffffff;border:2px solid #ece7ff;border-radius:18px;padding:16px 14px;margin:18px 0;">
 
 ## 🆘 Support Contact
 
@@ -327,7 +373,7 @@ Click **Next** to begin the lab.
 
 </div>
 
-<div class="psb-panel" style="background:#ffffff;border:1px solid #e3e9f1;border-radius:16px;padding:16px 14px;margin:16px 0;">
+<div class="psb-panel" style="background:#ffffff;border:2px solid #ece7ff;border-radius:18px;padding:16px 14px;margin:18px 0;">
 
 ## 🎉 Happy Learning!
 
