@@ -47,7 +47,7 @@ Every resource carries the tag `aws-apn-id = pc:7finjv2fdluw3t9gvedjkgubj`, exce
 1. Deploy the stack in **ap-southeast-1**.
 1. Attach `deployment/learner-iam-policy.json` (or equivalent) to the learner IAM user.
 1. Make sure the lab accounts have:
-   - **Bedrock:** Amazon Nova Lite through the APAC inference profile `apac.amazon.nova-lite-v1:0`. Nova Lite has no in-Region endpoint in Singapore, so the lab uses the `apac.` profile everywhere.
+   - **Bedrock:** Lab 08 uses `amazon.nova-lite-v1:0` in ap-southeast-1, as in the original guide. Test it once in a lab account: if Singapore only serves Nova Lite through the APAC profile, set `MODEL_ID` to `apac.amazon.nova-lite-v1:0` and add the profile ARN to `psb-lab-assistant-policy` (the Lab 08 validator accepts both).
    - **SageMaker quotas:** `ml.m5.large` for training job usage (1), Studio JupyterLab `ml.t3.medium` (1), serverless endpoint concurrency (at least 5).
    - **InfluxDB:** a **default VPC** in ap-southeast-1 (Lab 02 creates the InfluxDB instance there).
 1. Create one validation per lab in CloudLabs using `validation/*.ps1`. Replace the placeholder `<validation step="..."/>` GUIDs in the guides with the CloudLabs step IDs (table in `validation/README.md`).
