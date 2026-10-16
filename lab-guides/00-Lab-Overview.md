@@ -53,6 +53,8 @@
 .psbgs .psb-shot img{display:block;max-width:100%;height:auto;margin:0 auto;border:0!important;border-radius:9px;box-shadow:none!important}
 .psbgs .psb-shot:hover{transform:translateY(-2px);animation:psbSpin 2s linear infinite,psbRGB 1.8s linear infinite}
 .psbgs .psb-shot:active{transform:scale(.99);animation:psbSpin 2s linear infinite,psbBurst .55s ease-out}
+.psbgs pre{max-width:100%;overflow-x:auto}
+.psbgs td,.psbgs th{overflow-wrap:anywhere}
 /* links */
 .psbgs a{color:#0f766e!important;font-weight:600;transition:color .2s ease}
 .psbgs a:hover{color:#b7791f!important}
