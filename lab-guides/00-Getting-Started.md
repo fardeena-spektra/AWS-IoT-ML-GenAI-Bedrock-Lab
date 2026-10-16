@@ -49,6 +49,10 @@ The lab window is split into two parts:
 - **Left side:** your lab virtual machine (VM), a Windows Server 2022 workstation.
 - **Right side:** the lab guide, with the steps to complete each task.
 
+Your lab window looks like this:
+
+![Lab environment](./media/gs-01.png)
+
 ### 📦 Pre-provisioned Resources
 
 The following resources are already created for you. You do **not** need to create them.
@@ -89,9 +93,7 @@ The **psb-lab-assets** folder on the desktop (**C:\psb-lab-assets**) contains ev
 
 ## 🧭 Lab Window Controls
 
-Your lab VM (left) and the lab **Guide** (right) open together in your web browser.
-
-![Lab environment](./media/gs-01.png)
+The top bar and the lab guide menu give you these controls:
 
 ![Lab window controls](./media/gs-topbar.png)
 
@@ -108,6 +110,8 @@ Your lab VM (left) and the lab **Guide** (right) open together in your web brows
 
 ### 6️⃣ More Options
 
+Select **More (...)** in the top bar to open these options:
+
 ![More options](./media/gs-more-menu.png)
 
 | Option | Use |
@@ -117,6 +121,8 @@ Your lab VM (left) and the lab **Guide** (right) open together in your web brows
 | 📋 **VM Native Clipboard** | Allows copying files within the VM. While it is on, text copied from your local PC cannot be pasted into the VM using keyboard shortcuts. You can turn it off at any time from **More (...)**. |
 
 ### 7️⃣ Lab Guide Menu
+
+Use the tabs at the top of the lab guide to move between its sections:
 
 ![Lab guide menu](./media/gs-menu.png)
 
@@ -130,31 +136,31 @@ Your lab VM (left) and the lab **Guide** (right) open together in your web brows
 
 ### 📈 Progress
 
-The **Progress** tab shows your overall points and the status of each **Validation** check. Each lab has one validation, and its points are shown in the lab header.
+The **Progress** tab shows your overall points and the status of each **Validation** check. Each lab has one validation, and its points are shown in the lab header:
 
 ![Progress tab](./media/gs-progress.png)
 
 ### 🔑 Exploring Your Resources
 
-To view your AWS console credentials and resource details, navigate to the **Environment** tab.
+To view your AWS console credentials and resource details, navigate to the **Environment** tab:
 
 ![Environment tab](./media/gs-02.png)
 
 ### 🪟 Utilizing the Split Window Feature
 
-For convenience, you can open the lab guide in a separate window by selecting the **Split Window** button from the top-right corner.
+For convenience, you can open the lab guide in a separate window by selecting the **Split Window** button from the top-right corner:
 
 ![Split window](./media/gs-05.png)
 
 ### 🖥️ Managing Your Virtual Machine
 
-You can start, stop or restart your virtual machine as needed from the **Resources** tab.
+You can start, stop or restart your virtual machine as needed from the **Resources** tab:
 
 ![Resources tab](./media/gs-06.png)
 
 ### 📄 Page Navigation
 
-Use **Previous**, the page numbers and **Next** at the bottom of the guide to move between pages.
+Use **Previous**, the page numbers and **Next** at the bottom of the guide to move between pages:
 
 ![Page navigation](./media/gs-next.png)
 
@@ -162,13 +168,9 @@ Use **Previous**, the page numbers and **Next** at the bottom of the guide to mo
 
 ## ✅ Validate Your Work
 
-Each lab ends with a **Validate** button that checks your work.
+Each lab ends with a **Validation Check** that checks your work. Complete all tasks in the lab, scroll to the **Validation Check** at the end of the last task, and click **Validate**:
 
-1. Complete all tasks in the lab.
-1. Scroll to the **Validation Check** at the end of the last task.
-1. Click **Validate**.
-
-    ![Validate button](./media/gs-validate.png)
+![Validate button](./media/gs-validate.png)
 
 - On success, the status shows **Success** and the points are added to your **Progress**.
 - If a check fails, read the message, fix the issue and click **Validate** again.
@@ -179,23 +181,23 @@ Each lab ends with a **Validate** button that checks your work.
 
 ## 🔐 Sign In to the AWS Console
 
-1. On the lab VM desktop, double-click the **AWS Console** shortcut, or open the sign-in URL below in the browser:
+**Step 1:** On the lab VM desktop, double-click the **AWS Console** shortcut, or open the sign-in URL below in the browser:
 
-    | Detail | Value |
-    |---|---|
-    | 🔗 **Sign-in URL** | <inject key="SignInUrl" enableCopy="true"/> |
-    | 👤 **IAM username** | <inject key="AWSUserName" enableCopy="true"/> |
-    | 🔒 **Password** | <inject key="AWSPassword" enableCopy="true"/> |
+| Detail | Value |
+|---|---|
+| 🔗 **Sign-in URL** | <inject key="SignInUrl" enableCopy="true"/> |
+| 👤 **IAM username** | <inject key="AWSUserName" enableCopy="true"/> |
+| 🔒 **Password** | <inject key="AWSPassword" enableCopy="true"/> |
 
-1. Enter the **IAM username (1)** and **Password (2)**, then click **Sign in (3)**.
+> 💡 **Tip:** The same credentials are also saved in the **aws credentials.txt** file on the VM desktop.
 
-    ![AWS sign-in](./media/gs-03.png)
+**Step 2:** Enter the **IAM username (1)** and **Password (2)**, then click **Sign in (3)**:
 
-    > 💡 **Tip:** The same credentials are also saved in the **aws credentials.txt** file on the VM desktop.
+![AWS sign-in](./media/gs-03.png)
 
-1. In the top-right corner of the console, open the **Region** selector and choose **Asia Pacific (Singapore) ap-southeast-1**.
+**Step 3:** In the top-right corner of the console, open the **Region** selector and choose **Asia Pacific (Singapore) ap-southeast-1**:
 
-    ![Region selector](./media/gs-04.png)
+![Region selector](./media/gs-04.png)
 
 > ⚠️ **Note:** Create **every** resource in **Asia Pacific (Singapore) ap-southeast-1**. The pre-provisioned resources and the validation checks only look in this region. If something "disappears" from a console page, check the region selector first.
 
