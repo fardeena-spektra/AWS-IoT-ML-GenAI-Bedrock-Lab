@@ -45,7 +45,7 @@ figure.shot figcaption{text-align:center;color:var(--muted);font-size:13px;margi
   background:rgba(5,7,12,.85);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important}}
 </style></head><body>
-<div class="banner">HTML preview of the Getting Started page · orange pills = inject keys (sample values)</div>
+
 <main><h1 align="center">🚀 Getting Started: AWS Demo || Bedrock with Claude</h1>
 <p align="center"><b>AWS Demo || Bedrock with Claude</b> | ⏱️ <b>Estimated Timing: 8 Hours 10 Minutes</b> | 🏆 <b>Total Points: 100</b></p>
 
@@ -191,15 +191,15 @@ Dashboard chat ──&gt; Assistant Lambda ──&gt; Amazon Bedrock (Converse A
 <tbody>
 <tr>
 <td>🌍 <strong>Region</strong></td>
-<td><span class="inject" title="inject key: LabRegion">ap-southeast-1 <i>⧉</i></span> (Asia Pacific (Singapore))</td>
+<td><inject key="LabRegion" enableCopy="true"/> (Asia Pacific (Singapore))</td>
 </tr>
 <tr>
 <td>🪣 <strong>S3 bucket</strong> (empty)</td>
-<td><span class="inject" title="inject key: LabBucketName">psb-lab-2402565 <i>⧉</i></span></td>
+<td><inject key="LabBucketName" enableCopy="true"/></td>
 </tr>
 <tr>
 <td>🧪 <strong>SageMaker Studio domain</strong></td>
-<td><span class="inject" title="inject key: SageMakerDomainName">psb-lab-domain <i>⧉</i></span></td>
+<td><inject key="SageMakerDomainName" enableCopy="true"/></td>
 </tr>
 <tr>
 <td>👤 <strong>SageMaker user profile</strong></td>
@@ -207,11 +207,11 @@ Dashboard chat ──&gt; Assistant Lambda ──&gt; Amazon Bedrock (Converse A
 </tr>
 <tr>
 <td>🔑 <strong>SageMaker execution role</strong></td>
-<td><strong>psb-lab-sagemaker-exec-<span class="inject" title="inject key: DeploymentID">2402565</span></strong> (can read and write the lab bucket)</td>
+<td><strong>psb-lab-sagemaker-exec-<inject key="DeploymentID" enableCopy="false"/></strong> (can read and write the lab bucket)</td>
 </tr>
 <tr>
 <td>💻 <strong>Lab VM</strong></td>
-<td><strong>windowsvm-<span class="inject" title="inject key: DeploymentID">2402565</span></strong> (t3.medium)</td>
+<td><strong>windowsvm-<inject key="DeploymentID" enableCopy="false"/></strong> (t3.medium)</td>
 </tr>
 <tr>
 <td>🧰 <strong>VM tooling</strong></td>
@@ -426,15 +426,15 @@ Dashboard chat ──&gt; Assistant Lambda ──&gt; Amazon Bedrock (Converse A
 <tbody>
 <tr>
 <td>🔗 <strong>Sign-in URL</strong></td>
-<td><span class="inject" title="inject key: SignInUrl">https://123456789012.signin.aws.amazon.com/console <i>⧉</i></span></td>
+<td><inject key="SignInUrl" enableCopy="true"/></td>
 </tr>
 <tr>
 <td>👤 <strong>IAM username</strong></td>
-<td><span class="inject" title="inject key: AWSUserName">odl_user_2402565 <i>⧉</i></span></td>
+<td><inject key="AWSUserName" enableCopy="true"/></td>
 </tr>
 <tr>
 <td>🔒 <strong>Password</strong></td>
-<td><span class="inject" title="inject key: AWSPassword">•••••••• <i>⧉</i></span></td>
+<td><inject key="AWSPassword" enableCopy="true"/></td>
 </tr>
 </tbody>
 </table></div>
@@ -461,15 +461,15 @@ Dashboard chat ──&gt; Assistant Lambda ──&gt; Amazon Bedrock (Converse A
 <tbody>
 <tr>
 <td>💻 <strong>Computer</strong></td>
-<td><span class="inject" title="inject key: WindowsVMPublicIP">13.229.xx.xx <i>⧉</i></span></td>
+<td><inject key="WindowsVMPublicIP" enableCopy="true"/></td>
 </tr>
 <tr>
 <td>👤 <strong>Username</strong></td>
-<td><span class="inject" title="inject key: windowsvmAdminUsername">labuser <i>⧉</i></span></td>
+<td><inject key="windowsvmAdminUsername" enableCopy="true"/></td>
 </tr>
 <tr>
 <td>🔒 <strong>Password</strong></td>
-<td><span class="inject" title="inject key: WindowsVMPassword">•••••••• <i>⧉</i></span></td>
+<td><inject key="WindowsVMPassword" enableCopy="true"/></td>
 </tr>
 </tbody>
 </table></div>
