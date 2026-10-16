@@ -1,0 +1,485 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Getting Started Preview</title>
+<style>
+:root{--bg:#05070c;--card:#0d121b;--line:#1d2633;--text:#e6ebf2;--muted:#9aa7b8;--accent:#ff9900;--accent2:#4fc3f7}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 "Segoe UI",system-ui,-apple-system,sans-serif}
+body::before,body::after{content:"";position:fixed;inset:-20vmax;z-index:-1;pointer-events:none;
+  background:radial-gradient(40vmax 40vmax at 20% 15%,rgba(255,153,0,.16),transparent 60%),
+             radial-gradient(45vmax 45vmax at 85% 80%,rgba(79,195,247,.13),transparent 60%);
+  animation:breathe 9s ease-in-out infinite}
+body::after{background:radial-gradient(35vmax 35vmax at 70% 20%,rgba(155,110,255,.10),transparent 60%);animation-delay:-4.5s}
+@keyframes breathe{0%,100%{opacity:.55;transform:scale(1)}50%{opacity:1;transform:scale(1.08)}}
+main{max-width:980px;margin:0 auto;padding:40px 16px 80px}
+h1{font-size:clamp(26px,4vw,38px);margin:0 0 6px;text-align:center;letter-spacing:.2px}
+h1+p{text-align:center;color:var(--muted);margin:0 0 28px}
+h2{font-size:24px;margin:0 0 14px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+h3{font-size:19px;margin:28px 0 10px;color:#fff}
+p,li{color:#d4dbe5} b,strong{color:#fff}
+a{color:var(--accent2)}
+.card{background:linear-gradient(180deg,rgba(255,255,255,.025),rgba(255,255,255,0)) ,var(--card);
+  border:1px solid var(--line);border-radius:16px;padding:26px clamp(16px,3vw,32px);margin:22px 0;
+  animation:cardglow 7s ease-in-out infinite}
+.card:nth-child(even){animation-delay:-3.5s}
+@keyframes cardglow{0%,100%{box-shadow:0 0 0 rgba(255,153,0,0),0 10px 30px rgba(0,0,0,.45)}
+  50%{box-shadow:0 0 28px rgba(255,153,0,.10),0 10px 30px rgba(0,0,0,.45)}}
+.tbl{overflow-x:auto;margin:14px 0} table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{color:var(--accent);font-weight:600;background:rgba(255,153,0,.06)}
+tr:hover td{background:rgba(255,255,255,.02)}
+pre{background:#070a10;border:1px solid var(--line);border-radius:12px;padding:16px;overflow-x:auto;font-size:13.5px;color:#bfe7ff}
+code{font-family:"Cascadia Code",Consolas,monospace}
+blockquote{margin:16px 0;padding:12px 16px;border-left:3px solid var(--accent2);background:rgba(79,195,247,.06);border-radius:0 10px 10px 0}
+blockquote p{margin:0}
+.inject{display:inline-block;padding:1px 9px;border-radius:999px;background:rgba(255,153,0,.12);
+  border:1px solid rgba(255,153,0,.35);color:#ffd08a;font-size:.92em;white-space:nowrap}
+.inject i{font-style:normal;opacity:.7;margin-left:4px}
+figure.shot{margin:16px 0 22px;padding:10px;border-radius:14px;background:#0a0f17;border:1px solid var(--line);
+  animation:shotbreathe 6s ease-in-out infinite}
+figure.shot img{display:block;max-width:100%;height:auto;margin:0 auto;border-radius:8px}
+figure.shot figcaption{text-align:center;color:var(--muted);font-size:13px;margin-top:8px}
+@keyframes shotbreathe{0%,100%{box-shadow:0 0 0 rgba(79,195,247,0);border-color:var(--line)}
+  50%{box-shadow:0 0 22px rgba(79,195,247,.16);border-color:rgba(79,195,247,.35)}}
+.banner{position:sticky;top:0;z-index:2;text-align:center;font-size:12.5px;color:var(--muted);padding:6px;
+  background:rgba(5,7,12,.85);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important}}
+</style></head><body>
+<div class="banner">HTML preview of the Getting Started page · orange pills = inject keys (sample values)</div>
+<main><h1 align="center">🚀 Getting Started: AWS Demo || Bedrock with Claude</h1>
+<p align="center"><b>AWS Demo || Bedrock with Claude</b> | ⏱️ <b>Estimated Timing: 8 Hours 10 Minutes</b> | 🏆 <b>Total Points: 100</b></p>
+
+
+<section class="card"><h2>🎯 About This Lab</h2>
+<p>In this hands-on lab, you build a complete <strong>IoT to Machine Learning to Generative AI</strong> solution on AWS. A simulated sensor device streams telemetry (temperature, humidity, CO₂ and vibration) into <strong>AWS IoT Core</strong>. The data is stored in <strong>Amazon Timestream for InfluxDB</strong> and <strong>Amazon S3</strong>, served through <strong>AWS Lambda</strong> and <strong>Amazon API Gateway</strong>, secured with <strong>Amazon Cognito</strong>, and shown on a dashboard hosted on <strong>AWS Amplify</strong>. You then train an anomaly detection model in <strong>Amazon SageMaker AI</strong>, score live data automatically, and finish with a natural language assistant powered by <strong>Amazon Bedrock</strong>.</p>
+<p><strong>The lab is organised in three phases:</strong></p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Labs</th>
+<th>Focus</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>🔌 <strong>Phase I</strong></td>
+<td>Labs 01 to 05</td>
+<td>Connect, ingest, serve (IoT Core, InfluxDB, S3, Lambda, API Gateway, Cognito, Amplify)</td>
+</tr>
+<tr>
+<td>🧠 <strong>Phase II</strong></td>
+<td>Labs 06 to 07</td>
+<td>Machine learning (SageMaker Random Cut Forest anomaly model + scoring pipeline)</td>
+</tr>
+<tr>
+<td>🤖 <strong>Phase III</strong></td>
+<td>Labs 08 to 09</td>
+<td>Generative AI + operations (Bedrock assistant, CloudWatch, teardown)</td>
+</tr>
+</tbody>
+</table></div>
+<h3>🗺️ Labs Overview</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th style="text-align: center;">Lab</th>
+<th>Title</th>
+<th style="text-align: center;">Phase</th>
+<th style="text-align: center;">⏱️ Timing</th>
+<th style="text-align: center;">🏆 Points</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">01</td>
+<td>🛰️ IoT Identity and Device Simulator</td>
+<td style="text-align: center;">I</td>
+<td style="text-align: center;">45 min</td>
+<td style="text-align: center;">10</td>
+</tr>
+<tr>
+<td style="text-align: center;">02</td>
+<td>🔀 Rules Engine to InfluxDB and S3</td>
+<td style="text-align: center;">I</td>
+<td style="text-align: center;">65 min</td>
+<td style="text-align: center;">16</td>
+</tr>
+<tr>
+<td style="text-align: center;">03</td>
+<td>🔎 Query Lambda and HTTP API</td>
+<td style="text-align: center;">I</td>
+<td style="text-align: center;">55 min</td>
+<td style="text-align: center;">10</td>
+</tr>
+<tr>
+<td style="text-align: center;">04</td>
+<td>🔐 Cognito Authentication</td>
+<td style="text-align: center;">I</td>
+<td style="text-align: center;">40 min</td>
+<td style="text-align: center;">10</td>
+</tr>
+<tr>
+<td style="text-align: center;">05</td>
+<td>📊 Amplify Dashboard</td>
+<td style="text-align: center;">I</td>
+<td style="text-align: center;">45 min</td>
+<td style="text-align: center;">9</td>
+</tr>
+<tr>
+<td style="text-align: center;">06</td>
+<td>🧪 SageMaker Anomaly Model</td>
+<td style="text-align: center;">II</td>
+<td style="text-align: center;">70 min</td>
+<td style="text-align: center;">15</td>
+</tr>
+<tr>
+<td style="text-align: center;">07</td>
+<td>⚙️ Automated Scoring Pipeline</td>
+<td style="text-align: center;">II</td>
+<td style="text-align: center;">50 min</td>
+<td style="text-align: center;">12</td>
+</tr>
+<tr>
+<td style="text-align: center;">08</td>
+<td>🤖 Bedrock Assistant</td>
+<td style="text-align: center;">III</td>
+<td style="text-align: center;">60 min</td>
+<td style="text-align: center;">13</td>
+</tr>
+<tr>
+<td style="text-align: center;">09</td>
+<td>📈 Observability and Teardown</td>
+<td style="text-align: center;">III</td>
+<td style="text-align: center;">40 min</td>
+<td style="text-align: center;">5</td>
+</tr>
+<tr>
+<td style="text-align: center;"></td>
+<td><strong>Total</strong></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"><strong>8 h 10 min</strong></td>
+<td style="text-align: center;"><strong>100</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h3>🏗️ What you build</h3>
+<pre><code class="language-text">Sensor simulator (VM) ──MQTT/TLS──&gt; AWS IoT Core ──Rule──&gt; Lambda ──&gt; Timestream for InfluxDB
+                                                   └──────&gt; Amazon S3 (raw/)
+InfluxDB ──&gt; Query Lambda ──&gt; API Gateway (Cognito JWT) ──&gt; Amplify dashboard
+S3 raw/ ──&gt; SageMaker RCF model ──&gt; Serverless endpoint &lt;── Score Lambda (every 5 min)
+Dashboard chat ──&gt; Assistant Lambda ──&gt; Amazon Bedrock (Converse API + tool use)
+</code></pre>
+
+</section><section class="card"><h2>🖥️ Lab Environment</h2>
+<p>The lab window is split into two parts:</p>
+<ul>
+<li><strong>Left side:</strong> your lab virtual machine (VM), a Windows Server 2022 workstation.</li>
+<li><strong>Right side:</strong> the lab guide, with the steps to complete each task.</li>
+</ul>
+<p>Your lab window looks like this:</p>
+<figure class="shot"><img src="./media/gs-01.png" alt="Lab environment" loading="lazy"><figcaption>Lab environment</figcaption></figure>
+<h3>📦 Pre-provisioned Resources</h3>
+<p>The following resources are already created for you. You do <strong>not</strong> need to create them.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Resource</th>
+<th>Name / Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>🌍 <strong>Region</strong></td>
+<td><span class="inject" title="inject key: LabRegion">ap-southeast-1 <i>⧉</i></span> (Asia Pacific (Singapore))</td>
+</tr>
+<tr>
+<td>🪣 <strong>S3 bucket</strong> (empty)</td>
+<td><span class="inject" title="inject key: LabBucketName">psb-lab-2402565 <i>⧉</i></span></td>
+</tr>
+<tr>
+<td>🧪 <strong>SageMaker Studio domain</strong></td>
+<td><span class="inject" title="inject key: SageMakerDomainName">psb-lab-domain <i>⧉</i></span></td>
+</tr>
+<tr>
+<td>👤 <strong>SageMaker user profile</strong></td>
+<td><strong>psb-lab-user</strong></td>
+</tr>
+<tr>
+<td>🔑 <strong>SageMaker execution role</strong></td>
+<td><strong>psb-lab-sagemaker-exec-<span class="inject" title="inject key: DeploymentID">2402565</span></strong> (can read and write the lab bucket)</td>
+</tr>
+<tr>
+<td>💻 <strong>Lab VM</strong></td>
+<td><strong>windowsvm-<span class="inject" title="inject key: DeploymentID">2402565</span></strong> (t3.medium)</td>
+</tr>
+<tr>
+<td>🧰 <strong>VM tooling</strong></td>
+<td>Chrome, Edge, VS Code, AWS CLI v2, Python 3.12 (python + pip on PATH), Node.js LTS (node / npm), Git</td>
+</tr>
+<tr>
+<td>📁 <strong>Lab assets</strong></td>
+<td><strong>C:\psb-lab-assets</strong> + desktop shortcut <strong>psb-lab-assets</strong></td>
+</tr>
+<tr>
+<td>📄 <strong>Desktop files</strong></td>
+<td><strong>aws credentials.txt</strong> and the <strong>AWS Console</strong> shortcut</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>ℹ️ <strong>Info:</strong> In Lab 02 you create the <strong>raw/</strong>, <strong>curated/</strong> and <strong>model/</strong> folders in the S3 bucket. In Lab 06 you create the SageMaker space <strong>psb-lab-space</strong>.</p>
+</blockquote>
+<h3>📁 Lab Assets Folder</h3>
+<p>The <strong>psb-lab-assets</strong> folder on the desktop (<strong>C:\psb-lab-assets</strong>) contains everything you need:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Folder / File</th>
+<th>Contents</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>🛰️ <strong>simulator\</strong></td>
+<td><strong>simulate_pi.py</strong> device simulator, <strong>requirements.txt</strong>, and <strong>certs\</strong> (device certificates go here in Lab 01)</td>
+</tr>
+<tr>
+<td>⚡ <strong>lambdas\</strong></td>
+<td>The 4 Lambda functions: <strong>psb-ingest-telemetry</strong>, <strong>psb-query-telemetry</strong>, <strong>psb-score-telemetry</strong>, <strong>psb-assistant</strong> (each with <strong>lambda_function.py</strong>)</td>
+</tr>
+<tr>
+<td>🧪 <strong>test-events\</strong></td>
+<td><strong>sample-reading.json</strong>, <strong>direct-query.json</strong>, <strong>manual-run.json</strong>, <strong>ask-question.json</strong></td>
+</tr>
+<tr>
+<td>🔐 <strong>policies\</strong></td>
+<td>IAM and IoT policy files (device policy, IoT rule trust and S3 write, Influx token read, score policy, assistant policy)</td>
+</tr>
+<tr>
+<td>📊 <strong>dashboard\</strong></td>
+<td>React dashboard source (Vite + React 18) and prebuilt fallback <strong>dist.zip</strong></td>
+</tr>
+<tr>
+<td>📓 <strong>notebook\</strong></td>
+<td>SageMaker notebook <strong>psb-anomaly-detection.ipynb</strong></td>
+</tr>
+<tr>
+<td>📝 <strong>README.txt</strong></td>
+<td>Short description of the folder</td>
+</tr>
+</tbody>
+</table></div>
+<h3>🤖 About Bedrock and Claude</h3>
+<blockquote>
+<p>ℹ️ <strong>Info:</strong> The lab title says <strong>Claude</strong>. The assistant you build in Lab 08 uses <strong>Amazon Nova Lite</strong> (APAC inference profile <strong>apac.amazon.nova-lite-v1:0</strong>) through the same Amazon Bedrock <strong>Converse API</strong>. Claude models can be swapped in by changing the <strong>MODEL_ID</strong> environment variable of the assistant Lambda function (and the model ARNs in its IAM policy). No code change is needed.</p>
+</blockquote>
+
+</section><section class="card"><h2>🧭 Lab Window Controls</h2>
+<p>The top bar and the lab guide menu give you these controls:</p>
+<figure class="shot"><img src="./media/gs-topbar.png" alt="Lab window controls" loading="lazy"><figcaption>Lab window controls</figcaption></figure>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th style="text-align: center;">#</th>
+<th>Control</th>
+<th>Use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">1</td>
+<td><strong>VM name</strong></td>
+<td>Shows the lab VM you are connected to.</td>
+</tr>
+<tr>
+<td style="text-align: center;">2</td>
+<td><strong>Timer</strong></td>
+<td>Time remaining in your lab session.</td>
+</tr>
+<tr>
+<td style="text-align: center;">3</td>
+<td><strong>Progress bar</strong></td>
+<td>Your progress through the lab.</td>
+</tr>
+<tr>
+<td style="text-align: center;">4</td>
+<td><strong>A↕</strong></td>
+<td>Change the text size of the lab guide.</td>
+</tr>
+<tr>
+<td style="text-align: center;">5</td>
+<td><strong>Refresh</strong></td>
+<td>Reconnect the VM if the screen stops responding.</td>
+</tr>
+<tr>
+<td style="text-align: center;">6</td>
+<td><strong>More (...)</strong></td>
+<td>Language, Delete and VM Native Clipboard options.</td>
+</tr>
+<tr>
+<td style="text-align: center;">7</td>
+<td><strong>Lab guide menu</strong></td>
+<td>Guide, Environment, Progress, Resources and Help.</td>
+</tr>
+<tr>
+<td style="text-align: center;">8</td>
+<td><strong>Split window</strong></td>
+<td>Split the lab guide and the VM into separate windows.</td>
+</tr>
+</tbody>
+</table></div>
+<h3>6️⃣ More Options</h3>
+<p>Select <strong>More (...)</strong> in the top bar to open these options:</p>
+<figure class="shot"><img src="./media/gs-more-menu.png" alt="More options" loading="lazy"><figcaption>More options</figcaption></figure>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>🌍 <strong>Language</strong></td>
+<td>Switch the lab language, if multi-language support is enabled.</td>
+</tr>
+<tr>
+<td>🗑️ <strong>Delete</strong></td>
+<td>Delete the environment once your lab is complete.</td>
+</tr>
+<tr>
+<td>📋 <strong>VM Native Clipboard</strong></td>
+<td>Allows copying files within the VM. While it is on, text copied from your local PC cannot be pasted into the VM using keyboard shortcuts. You can turn it off at any time from <strong>More (...)</strong>.</td>
+</tr>
+</tbody>
+</table></div>
+<h3>7️⃣ Lab Guide Menu</h3>
+<p>Use the tabs at the top of the lab guide to move between its sections:</p>
+<figure class="shot"><img src="./media/gs-menu.png" alt="Lab guide menu" loading="lazy"><figcaption>Lab guide menu</figcaption></figure>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>📖 <strong>Guide</strong></td>
+<td>All tasks and lab information.</td>
+</tr>
+<tr>
+<td>🔑 <strong>Environment</strong></td>
+<td>AWS console credentials and lab details.</td>
+</tr>
+<tr>
+<td>📈 <strong>Progress</strong></td>
+<td>Your points for validations.</td>
+</tr>
+<tr>
+<td>⚙️ <strong>Resources</strong></td>
+<td>Start, stop or restart the lab VM.</td>
+</tr>
+<tr>
+<td>❓ <strong>Help</strong></td>
+<td>Support information.</td>
+</tr>
+</tbody>
+</table></div>
+<h3>📈 Progress</h3>
+<p>The <strong>Progress</strong> tab shows your overall points and the status of each <strong>Validation</strong> check. Each lab has one validation, and its points are shown in the lab header:</p>
+<figure class="shot"><img src="./media/gs-progress.png" alt="Progress tab" loading="lazy"><figcaption>Progress tab</figcaption></figure>
+<h3>🔑 Exploring Your Resources</h3>
+<p>To view your AWS console credentials and resource details, navigate to the <strong>Environment</strong> tab:</p>
+<figure class="shot"><img src="./media/gs-02.png" alt="Environment tab" loading="lazy"><figcaption>Environment tab</figcaption></figure>
+<h3>🪟 Utilizing the Split Window Feature</h3>
+<p>For convenience, you can open the lab guide in a separate window by selecting the <strong>Split Window</strong> button from the top-right corner:</p>
+<figure class="shot"><img src="./media/gs-05.png" alt="Split window" loading="lazy"><figcaption>Split window</figcaption></figure>
+<h3>🖥️ Managing Your Virtual Machine</h3>
+<p>You can start, stop or restart your virtual machine as needed from the <strong>Resources</strong> tab:</p>
+<figure class="shot"><img src="./media/gs-06.png" alt="Resources tab" loading="lazy"><figcaption>Resources tab</figcaption></figure>
+<h3>📄 Page Navigation</h3>
+<p>Use <strong>Previous</strong>, the page numbers and <strong>Next</strong> at the bottom of the guide to move between pages:</p>
+<figure class="shot"><img src="./media/gs-next.png" alt="Page navigation" loading="lazy"><figcaption>Page navigation</figcaption></figure>
+
+</section><section class="card"><h2>✅ Validate Your Work</h2>
+<p>Each lab ends with a <strong>Validation Check</strong> that checks your work. Complete all tasks in the lab, scroll to the <strong>Validation Check</strong> at the end of the last task, and click <strong>Validate</strong>:</p>
+<figure class="shot"><img src="./media/gs-validate.png" alt="Validate button" loading="lazy"><figcaption>Validate button</figcaption></figure>
+<ul>
+<li>On success, the status shows <strong>Success</strong> and the points are added to your <strong>Progress</strong>.</li>
+<li>If a check fails, read the message, fix the issue and click <strong>Validate</strong> again.</li>
+</ul>
+<blockquote>
+<p>💡 <strong>Tip:</strong> Validate as often as you like. There is no penalty and no limit.</p>
+</blockquote>
+
+</section><section class="card"><h2>🔐 Sign In to the AWS Console</h2>
+<p><strong>Step 1:</strong> On the lab VM desktop, double-click the <strong>AWS Console</strong> shortcut, or open the sign-in URL below in the browser:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Detail</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>🔗 <strong>Sign-in URL</strong></td>
+<td><span class="inject" title="inject key: SignInUrl">https://123456789012.signin.aws.amazon.com/console <i>⧉</i></span></td>
+</tr>
+<tr>
+<td>👤 <strong>IAM username</strong></td>
+<td><span class="inject" title="inject key: AWSUserName">odl_user_2402565 <i>⧉</i></span></td>
+</tr>
+<tr>
+<td>🔒 <strong>Password</strong></td>
+<td><span class="inject" title="inject key: AWSPassword">•••••••• <i>⧉</i></span></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>💡 <strong>Tip:</strong> The same credentials are also saved in the <strong>aws credentials.txt</strong> file on the VM desktop.</p>
+</blockquote>
+<p><strong>Step 2:</strong> Enter the <strong>IAM username (1)</strong> and <strong>Password (2)</strong>, then click <strong>Sign in (3)</strong>:</p>
+<figure class="shot"><img src="./media/gs-03.png" alt="AWS sign-in" loading="lazy"><figcaption>AWS sign-in</figcaption></figure>
+<p><strong>Step 3:</strong> In the top-right corner of the console, open the <strong>Region</strong> selector and choose <strong>Asia Pacific (Singapore) ap-southeast-1</strong>:</p>
+<figure class="shot"><img src="./media/gs-04.png" alt="Region selector" loading="lazy"><figcaption>Region selector</figcaption></figure>
+<blockquote>
+<p>⚠️ <strong>Note:</strong> Create <strong>every</strong> resource in <strong>Asia Pacific (Singapore) ap-southeast-1</strong>. The pre-provisioned resources and the validation checks only look in this region. If something "disappears" from a console page, check the region selector first.</p>
+</blockquote>
+
+</section><section class="card"><h2>🔌 Connect Using RDP (Optional)</h2>
+<p>To use your own RDP client instead of the browser-based VM, connect with these details:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Detail</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>💻 <strong>Computer</strong></td>
+<td><span class="inject" title="inject key: WindowsVMPublicIP">13.229.xx.xx <i>⧉</i></span></td>
+</tr>
+<tr>
+<td>👤 <strong>Username</strong></td>
+<td><span class="inject" title="inject key: windowsvmAdminUsername">labuser <i>⧉</i></span></td>
+</tr>
+<tr>
+<td>🔒 <strong>Password</strong></td>
+<td><span class="inject" title="inject key: WindowsVMPassword">•••••••• <i>⧉</i></span></td>
+</tr>
+</tbody>
+</table></div>
+
+</section><section class="card"><h2>🆘 Support Contact</h2>
+<p>The CloudLabs support team is available 24/7 via email and live chat.</p>
+<ul>
+<li>📧 <strong>Email:</strong> <a href="mailto:cloudlabs-support@spektrasystems.com">cloudlabs-support@spektrasystems.com</a></li>
+<li>💬 <strong>Live chat:</strong> <a href="https://support.cloudlabs.ai/isv">https://support.cloudlabs.ai/isv</a></li>
+</ul>
+
+<p>Click <strong>Next</strong> to begin the lab.</p>
+</section><section class="card"><h2>🎉 Happy Learning!</h2></section></main></body></html>
