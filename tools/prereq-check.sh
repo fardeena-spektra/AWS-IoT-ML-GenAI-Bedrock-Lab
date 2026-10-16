@@ -8,8 +8,21 @@
 # Read-only, except one tiny Bedrock test call (a few tokens) and one SSM
 # Run Command on the lab VM that only reads files and versions.
 # =============================================================================
-REGION="${REGION:-ap-southeast-1}"
-export AWS_DEFAULT_REGION="$REGION" AWS_PAGER=""
+export AWS_PAGER=""
+LAB_REGION=ap-southeast-1
+if [ -z "${DEPLOYMENT_ID:-}" ]; then
+  DEPLOYMENT_ID=$(aws s3api list-buckets --query "Buckets[?starts_with(Name,'psb-lab-')].Name" --output text 2>/dev/null | tr '\t' '\n' | head -1 | sed 's/^psb-lab-//')
+fi
+if [ -z "${REGION:-}" ]; then
+  echo "Finding the region of windowsvm-$DEPLOYMENT_ID (scanning all regions) ..."
+  for r in $LAB_REGION $(aws ec2 describe-regions --query "Regions[].RegionName" --output text 2>/dev/null); do
+    v=$(aws --region "$r" ec2 describe-instances --filters "Name=tag:Name,Values=windowsvm-$DEPLOYMENT_ID" \
+        "Name=instance-state-name,Values=pending,running,stopping,stopped" --query "Reservations[0].Instances[0].InstanceId" --output text 2>/dev/null)
+    if [ -n "$v" ] && [ "$v" != "None" ]; then REGION="$r"; break; fi
+  done
+  REGION="${REGION:-$LAB_REGION}"
+fi
+export AWS_DEFAULT_REGION="$REGION"
 PASS=0; FAIL=0; WARN=0
 G=$'\e[32m'; R=$'\e[31m'; Y=$'\e[33m'; B=$'\e[36m'; N=$'\e[0m'
 pass(){ echo "  ${G}[PASS]${N} $*"; PASS=$((PASS+1)); }
@@ -23,7 +36,8 @@ sec "0. Identity and Region"
 ID_JSON=$(q sts get-caller-identity)
 [ -n "$ID_JSON" ] || { fail "Cannot call AWS (sts get-caller-identity). Check CloudShell credentials."; exit 1; }
 ACCOUNT=$(echo "$ID_JSON" | jq -r .Account); CALLER=$(echo "$ID_JSON" | jq -r .Arn)
-info "Account : $ACCOUNT"; info "Caller  : $CALLER"; info "Region  : $REGION"
+info "Account : $ACCOUNT"; info "Caller  : $CALLER"; info "Region  : $REGION (resources found here)"
+[ "$REGION" = "$LAB_REGION" ] && pass "Lab deployed in $LAB_REGION" || warn "Lab deployed in $REGION, the guides use $LAB_REGION. Checks below run in $REGION."
 [ "$(aws configure get region 2>/dev/null || echo "$AWS_REGION")" = "$REGION" ] || info "CloudShell default region differs; this script forces $REGION"
 
 sec "1. Deployment ID and CloudFormation stack"
@@ -98,7 +112,7 @@ $aw=(& aws --version 2>&1) -join ' '; Chk 'aws cli v2' ($aw -match 'aws-cli/2') 
 $code=(Test-Path 'C:\Program Files\Microsoft VS Code\Code.exe') -or (Test-Path 'C:\Users\*\AppData\Local\Programs\Microsoft VS Code\Code.exe'); Chk 'VS Code' $code ''
 $chrome=(Test-Path 'C:\Program Files\Google\Chrome\Application\chrome.exe') -or (Test-Path 'C:\Program Files (x86)\Google\Chrome\Application\chrome.exe'); Chk 'Google Chrome' $chrome ''
 Chk 'Microsoft Edge' (Test-Path 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe') ''
-$reg=[Environment]::GetEnvironmentVariable('AWS_DEFAULT_REGION','Machine'); Chk 'AWS_DEFAULT_REGION (machine)' ($reg -eq 'ap-southeast-1') $reg
+$reg=[Environment]::GetEnvironmentVariable('AWS_DEFAULT_REGION','Machine'); Chk 'AWS_DEFAULT_REGION (machine)' ($reg -eq '__REGION__') $reg
 $u=Get-LocalUser -Name 'labuser'; Chk 'local user labuser' ($null -ne $u) ''
 Chk 'bootstrap log C:\cloudlabs-bootstrap.log' (Test-Path 'C:\cloudlabs-bootstrap.log') ''
 $err=Select-String -Path 'C:\cloudlabs-bootstrap.log' -Pattern 'failed:|download attempt .* failed' -ErrorAction SilentlyContinue | Select-Object -Last 3
@@ -106,7 +120,7 @@ if($err){ $err | ForEach-Object { "WARN|bootstrap log|$($_.Line.Trim())" } }
 PS
   CMD_ID=$(aws ssm send-command --instance-ids "$IID" --document-name AWS-RunPowerShellScript \
     --comment "psb prereq check (read-only)" --timeout-seconds 120 \
-    --parameters "$(jq -n --rawfile s /tmp/psb-vmcheck.ps1 '{commands: ($s | split("\n"))}')" \
+    --parameters "$(sed -i "s/__REGION__/$REGION/" /tmp/psb-vmcheck.ps1; jq -n --rawfile s /tmp/psb-vmcheck.ps1 '{commands: ($s | split("\n"))}')" \
     --query Command.CommandId --output text 2>/dev/null)
   if [ -z "$CMD_ID" ]; then
     fail "Could not send the SSM command (missing ssm:SendCommand permission?)"
