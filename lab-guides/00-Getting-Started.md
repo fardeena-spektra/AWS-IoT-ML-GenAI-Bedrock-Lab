@@ -16,16 +16,17 @@
 .psbgs blockquote{background:rgba(79,195,247,.08)!important;border-left:3px solid #4fc3f7!important;border-radius:0 10px 10px 0}
 .psbgs pre,.psbgs pre code,.psbgs code{background:#070a10!important;color:#bfe7ff!important;border-color:#223042!important}
 .psbgs pre{overflow-x:auto!important;max-width:100%;padding:14px!important;border-radius:12px}
-.psbgs img{border-radius:10px;border:1px solid #223042;animation:psbShot 6s ease-in-out infinite;max-width:100%}
+.psbgs img[src*="media/"]{border-radius:10px;border:1px solid #223042;animation:psbShot 6s ease-in-out infinite;max-width:100%}
+.psbgs img:not([src*="media/"]),.psbgs svg,.psbgs i,.psbgs button,.psbgs [class*=copy],.psbgs [class*=Copy],.psbgs [title*=opy]{filter:invert(1) brightness(1.8)!important;opacity:1!important;background:transparent!important}
 @media (prefers-reduced-motion:reduce){.psbgs,.psbgs *{animation:none!important}}
 </style>
 
-<div class="psbgs" style="background:#05070c;color:#d7dee8;border-radius:18px;padding:24px 18px 30px;border:1px solid #1a2230;">
+<div class="psbgs" style="background:#05070c;color:#d7dee8;border-radius:18px;padding:20px 10px 24px;margin:0 -20px;border:1px solid #1a2230;">
 
 <h1 align="center">🚀 Getting Started: AWS Demo || Bedrock with Claude</h1>
 <p align="center"><b>AWS Demo || Bedrock with Claude</b> | ⏱️ <b>Estimated Timing: 8 Hours 10 Minutes</b> | 🏆 <b>Total Points: 100</b></p>
 
-<div class="psb-panel" style="background:#0d121b;border:1px solid #223042;border-radius:16px;padding:20px 24px;margin:20px 0;color:#d7dee8;">
+<div class="psb-panel" style="background:#0d121b;border:1px solid #223042;border-radius:16px;padding:16px 14px;margin:16px 0;color:#d7dee8;">
 
 ## 🎯 About This Lab
 
@@ -66,7 +67,7 @@ Dashboard chat ──> Assistant Lambda ──> Amazon Bedrock (Converse API + t
 
 </div>
 
-<div class="psb-panel" style="background:#0d121b;border:1px solid #223042;border-radius:16px;padding:20px 24px;margin:20px 0;color:#d7dee8;">
+<div class="psb-panel" style="background:#0d121b;border:1px solid #223042;border-radius:16px;padding:16px 14px;margin:16px 0;color:#d7dee8;">
 
 ## 🖥️ Lab Environment
 
@@ -117,7 +118,7 @@ The **psb-lab-assets** folder on the desktop (**C:\psb-lab-assets**) contains ev
 
 </div>
 
-<div class="psb-panel" style="background:#0d121b;border:1px solid #223042;border-radius:16px;padding:20px 24px;margin:20px 0;color:#d7dee8;">
+<div class="psb-panel" style="background:#0d121b;border:1px solid #223042;border-radius:16px;padding:16px 14px;margin:16px 0;color:#d7dee8;">
 
 ## 🧭 Lab Window Controls
 
@@ -194,7 +195,7 @@ Use **Previous**, the page numbers and **Next** at the bottom of the guide to mo
 
 </div>
 
-<div class="psb-panel" style="background:#0d121b;border:1px solid #223042;border-radius:16px;padding:20px 24px;margin:20px 0;color:#d7dee8;">
+<div class="psb-panel" style="background:#0d121b;border:1px solid #223042;border-radius:16px;padding:16px 14px;margin:16px 0;color:#d7dee8;">
 
 ## ✅ Validate Your Work
 
@@ -209,7 +210,7 @@ Each lab ends with a **Validation Check** that checks your work. Complete all ta
 
 </div>
 
-<div class="psb-panel" style="background:#0d121b;border:1px solid #223042;border-radius:16px;padding:20px 24px;margin:20px 0;color:#d7dee8;">
+<div class="psb-panel" style="background:#0d121b;border:1px solid #223042;border-radius:16px;padding:16px 14px;margin:16px 0;color:#d7dee8;">
 
 ## 🔐 Sign In to the AWS Console
 
@@ -235,7 +236,7 @@ Each lab ends with a **Validation Check** that checks your work. Complete all ta
 
 </div>
 
-<div class="psb-panel" style="background:#0d121b;border:1px solid #223042;border-radius:16px;padding:20px 24px;margin:20px 0;color:#d7dee8;">
+<div class="psb-panel" style="background:#0d121b;border:1px solid #223042;border-radius:16px;padding:16px 14px;margin:16px 0;color:#d7dee8;">
 
 ## 🔌 Connect Using RDP (Optional)
 
@@ -249,7 +250,7 @@ To use your own RDP client instead of the browser-based VM, connect with these d
 
 </div>
 
-<div class="psb-panel" style="background:#0d121b;border:1px solid #223042;border-radius:16px;padding:20px 24px;margin:20px 0;color:#d7dee8;">
+<div class="psb-panel" style="background:#0d121b;border:1px solid #223042;border-radius:16px;padding:16px 14px;margin:16px 0;color:#d7dee8;">
 
 ## 🆘 Support Contact
 
@@ -263,7 +264,7 @@ Click **Next** to begin the lab.
 
 </div>
 
-<div class="psb-panel" style="background:#0d121b;border:1px solid #223042;border-radius:16px;padding:20px 24px;margin:20px 0;color:#d7dee8;">
+<div class="psb-panel" style="background:#0d121b;border:1px solid #223042;border-radius:16px;padding:16px 14px;margin:16px 0;color:#d7dee8;">
 
 ## 🎉 Happy Learning!
 
