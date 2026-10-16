@@ -1,34 +1,47 @@
 <style>
-@keyframes psbBreathe{0%,100%{box-shadow:inset 0 0 60px rgba(255,153,0,.06),0 0 0 rgba(255,153,0,0)}50%{box-shadow:inset 0 0 140px rgba(255,153,0,.16),0 0 34px rgba(79,195,247,.18)}}
-@keyframes psbPanel{0%,100%{box-shadow:0 8px 24px rgba(0,0,0,.55)}50%{box-shadow:0 0 28px rgba(255,153,0,.16),0 8px 24px rgba(0,0,0,.55)}}
-@keyframes psbShot{0%,100%{box-shadow:0 0 0 rgba(79,195,247,0)}50%{box-shadow:0 0 22px rgba(79,195,247,.28)}}
-.psbgs{animation:psbBreathe 8s ease-in-out infinite}
-.psbgs .psb-panel{animation:psbPanel 7s ease-in-out infinite}
+@keyframes psbBreathe{0%,100%{background-position:0% 0%,100% 100%;box-shadow:0 0 0 rgba(255,153,0,0)}50%{background-position:30% 20%,70% 80%;box-shadow:0 0 36px rgba(255,153,0,.10)}}
+@keyframes psbPanel{0%,100%{box-shadow:0 4px 14px rgba(20,40,70,.06);border-color:#e3e9f1}50%{box-shadow:0 6px 26px rgba(255,153,0,.16);border-color:#ffd9a3}}
+@keyframes psbCorner{0%,100%{width:26px;height:26px;opacity:.75}50%{width:46px;height:46px;opacity:1}}
+@keyframes psbPop{0%{transform:scale(1)}40%{transform:scale(1.25)}100%{transform:scale(1)}}
+.psbgs{background-size:220% 220%,220% 220%!important;animation:psbBreathe 9s ease-in-out infinite}
+.psbgs .psb-panel{animation:psbPanel 7s ease-in-out infinite;transition:transform .25s ease}
 .psbgs .psb-panel:nth-of-type(even){animation-delay:-3.5s}
-.psbgs h1,.psbgs h2,.psbgs h3,.psbgs h4,.psbgs strong,.psbgs b{color:#ffffff!important;background:transparent!important}
-.psbgs h2{border-bottom:1px solid #223042!important;padding-bottom:8px!important}
-.psbgs p,.psbgs li,.psbgs td,.psbgs span{color:#d7dee8!important}
-.psbgs h1+p,.psbgs h1+p b{color:#ffd08a!important}
-.psbgs a{color:#4fc3f7!important}
-.psbgs table,.psbgs thead,.psbgs tbody,.psbgs tr,.psbgs tr:nth-child(even),.psbgs tr:nth-child(odd),.psbgs td{background:transparent!important}
-.psbgs th{color:#ff9900!important;background:rgba(255,153,0,.10)!important}
-.psbgs th,.psbgs td{border-color:#223042!important}
-.psbgs blockquote{background:rgba(79,195,247,.08)!important;border-left:3px solid #4fc3f7!important;border-radius:0 10px 10px 0}
-.psbgs pre,.psbgs pre code,.psbgs code{background:#070a10!important;color:#bfe7ff!important;border-color:#223042!important}
-.psbgs pre{overflow-x:auto!important;max-width:100%;padding:14px!important;border-radius:12px}
-.psbgs img[src*="media/"]{border-radius:10px;border:1px solid #223042;animation:psbShot 6s ease-in-out infinite;max-width:100%}
-.psbgs img:not([src*="media/"]),.psbgs svg,.psbgs i,.psbgs button,.psbgs [class*=copy],.psbgs [class*=Copy],.psbgs [title*=opy]{filter:invert(1) brightness(2.4)!important;opacity:1!important;background:transparent!important}
-/* CloudLabs inject values (copyable fields) */
-.psbgs [class]:not(.psb-panel):not([class*=language]):not(code),.psbgs input{color:#ffd08a!important;-webkit-text-fill-color:#ffd08a!important;background:transparent!important}
-@media (prefers-reduced-motion:reduce){.psbgs,.psbgs *{animation:none!important}}
+.psbgs .psb-panel:hover{transform:translateY(-2px)}
+.psbgs h1,.psbgs h2,.psbgs h3{color:#16202e!important}
+.psbgs h2{border-bottom:2px solid transparent!important;border-image:linear-gradient(90deg,#ff9900,#4fc3f7) 1!important;padding-bottom:8px!important}
+.psbgs h1+p,.psbgs h1+p b{color:#b35c00!important}
+.psbgs table{border-radius:10px;overflow:hidden}
+.psbgs th{color:#9a4f00!important;background:#fff3e2!important}
+.psbgs tr{transition:background .2s ease}
+.psbgs tbody tr:hover{background:#f4f9fd!important}
+.psbgs blockquote{background:#eef8fd!important;border-left:4px solid #4fc3f7!important;border-radius:0 10px 10px 0}
+.psbgs pre{background:#0f1724!important;border-radius:12px;padding:14px!important;overflow-x:auto!important;max-width:100%}
+.psbgs pre,.psbgs pre code{color:#bfe7ff!important;background:#0f1724!important}
+.psbgs .psb-shot{position:relative;margin:14px 0 20px;padding:8px;border-radius:12px;background:#f7f9fc;border:1px solid #e3e9f1}
+.psbgs .psb-shot p{margin:0!important}
+.psbgs .psb-shot::before,.psbgs .psb-shot::after{content:"";position:absolute;width:26px;height:26px;pointer-events:none;animation:psbCorner 3.2s ease-in-out infinite}
+.psbgs .psb-shot::before{top:-2px;left:-2px;border-top:3px solid #ff9900;border-left:3px solid #ff9900;border-top-left-radius:12px}
+.psbgs .psb-shot::after{bottom:-2px;right:-2px;border-bottom:3px solid #4fc3f7;border-right:3px solid #4fc3f7;border-bottom-right-radius:12px;animation-delay:-1.6s}
+.psbgs .psb-shot img{display:block;max-width:100%;height:auto;margin:0 auto;border-radius:8px;transition:transform .25s ease,box-shadow .25s ease}
+.psbgs .psb-shot img:hover{box-shadow:0 8px 24px rgba(20,40,70,.18)}
+.psbgs .psb-shot img:active{transform:scale(.98)}
+.psbgs a{color:#0b7fc0!important;transition:color .2s ease}
+.psbgs a:hover{color:#ff8a00!important}
+.psbgs a:active{animation:psbPop .35s ease}
+/* CloudLabs inject values and copy buttons */
+.psbgs [class]:not(.psb-panel):not(.psb-shot):not([class*=language]):not(code){color:#9a4f00!important;-webkit-text-fill-color:#9a4f00!important}
+.psbgs img:not([src*="media/"]),.psbgs svg,.psbgs i,.psbgs button,.psbgs [class*=copy],.psbgs [class*=Copy],.psbgs [title*=opy]{cursor:pointer;transition:transform .15s ease,filter .15s ease}
+.psbgs img:not([src*="media/"]):hover,.psbgs svg:hover,.psbgs i:hover,.psbgs button:hover,.psbgs [class*=copy]:hover,.psbgs [class*=Copy]:hover,.psbgs [title*=opy]:hover{transform:scale(1.15);filter:drop-shadow(0 0 4px rgba(255,153,0,.6))}
+.psbgs img:not([src*="media/"]):active,.psbgs svg:active,.psbgs i:active,.psbgs button:active,.psbgs [class*=copy]:active,.psbgs [class*=Copy]:active,.psbgs [title*=opy]:active{animation:psbPop .35s ease;filter:drop-shadow(0 0 8px rgba(255,153,0,.9))}
+@media (prefers-reduced-motion:reduce){.psbgs,.psbgs *,.psbgs .psb-shot::before,.psbgs .psb-shot::after{animation:none!important;transition:none!important}}
 </style>
 
-<div class="psbgs" style="background:#05070c;color:#d7dee8;border-radius:18px;padding:20px 10px 24px;margin:0 -20px;border:1px solid #1a2230;">
+<div class="psbgs" style="background:radial-gradient(circle at 15% 10%,rgba(255,153,0,.06),transparent 45%),radial-gradient(circle at 85% 90%,rgba(79,195,247,.08),transparent 45%),#fbfcfe;border:1px solid #e6ebf2;border-radius:18px;padding:20px 10px 24px;margin:0 -20px;">
 
 <h1 align="center">🚀 Getting Started: AWS Demo || Bedrock with Claude</h1>
 <p align="center"><b>AWS Demo || Bedrock with Claude</b> | ⏱️ <b>Estimated Timing: 8 Hours 10 Minutes</b> | 🏆 <b>Total Points: 100</b></p>
 
-<div class="psb-panel" style="background:#0d121b;border:1px solid #223042;border-radius:16px;padding:16px 14px;margin:16px 0;color:#d7dee8;">
+<div class="psb-panel" style="background:#ffffff;border:1px solid #e3e9f1;border-radius:16px;padding:16px 14px;margin:16px 0;">
 
 ## 🎯 About This Lab
 
@@ -69,7 +82,7 @@ Dashboard chat ──> Assistant Lambda ──> Amazon Bedrock (Converse API + t
 
 </div>
 
-<div class="psb-panel" style="background:#0d121b;border:1px solid #223042;border-radius:16px;padding:16px 14px;margin:16px 0;color:#d7dee8;">
+<div class="psb-panel" style="background:#ffffff;border:1px solid #e3e9f1;border-radius:16px;padding:16px 14px;margin:16px 0;">
 
 ## 🖥️ Lab Environment
 
@@ -80,7 +93,11 @@ The lab window is split into two parts:
 
 Your lab window looks like this:
 
+<div class="psb-shot">
+
 ![Lab environment](./media/gs-01.png)
+
+</div>
 
 ### 📦 Pre-provisioned Resources
 
@@ -120,13 +137,17 @@ The **psb-lab-assets** folder on the desktop (**C:\psb-lab-assets**) contains ev
 
 </div>
 
-<div class="psb-panel" style="background:#0d121b;border:1px solid #223042;border-radius:16px;padding:16px 14px;margin:16px 0;color:#d7dee8;">
+<div class="psb-panel" style="background:#ffffff;border:1px solid #e3e9f1;border-radius:16px;padding:16px 14px;margin:16px 0;">
 
 ## 🧭 Lab Window Controls
 
 The top bar and the lab guide menu give you these controls:
 
+<div class="psb-shot">
+
 ![Lab window controls](./media/gs-topbar.png)
+
+</div>
 
 | # | Control | Use |
 |:---:|---|---|
@@ -143,7 +164,11 @@ The top bar and the lab guide menu give you these controls:
 
 Select **More (...)** in the top bar to open these options:
 
+<div class="psb-shot">
+
 ![More options](./media/gs-more-menu.png)
+
+</div>
 
 | Option | Use |
 |---|---|
@@ -155,7 +180,11 @@ Select **More (...)** in the top bar to open these options:
 
 Use the tabs at the top of the lab guide to move between its sections:
 
+<div class="psb-shot">
+
 ![Lab guide menu](./media/gs-menu.png)
+
+</div>
 
 | Option | Use |
 |---|---|
@@ -169,41 +198,65 @@ Use the tabs at the top of the lab guide to move between its sections:
 
 The **Progress** tab shows your overall points and the status of each **Validation** check. Each lab has one validation, and its points are shown in the lab header:
 
+<div class="psb-shot">
+
 ![Progress tab](./media/gs-progress.png)
+
+</div>
 
 ### 🔑 Exploring Your Resources
 
 To view your AWS console credentials and resource details, navigate to the **Environment** tab:
 
+<div class="psb-shot">
+
 ![Environment tab](./media/gs-02.png)
+
+</div>
 
 ### 🪟 Utilizing the Split Window Feature
 
 For convenience, you can open the lab guide in a separate window by selecting the **Split Window** button from the top-right corner:
 
+<div class="psb-shot">
+
 ![Split window](./media/gs-05.png)
+
+</div>
 
 ### 🖥️ Managing Your Virtual Machine
 
 You can start, stop or restart your virtual machine as needed from the **Resources** tab:
 
+<div class="psb-shot">
+
 ![Resources tab](./media/gs-06.png)
+
+</div>
 
 ### 📄 Page Navigation
 
 Use **Previous**, the page numbers and **Next** at the bottom of the guide to move between pages:
 
+<div class="psb-shot">
+
 ![Page navigation](./media/gs-next.png)
 
 </div>
 
-<div class="psb-panel" style="background:#0d121b;border:1px solid #223042;border-radius:16px;padding:16px 14px;margin:16px 0;color:#d7dee8;">
+</div>
+
+<div class="psb-panel" style="background:#ffffff;border:1px solid #e3e9f1;border-radius:16px;padding:16px 14px;margin:16px 0;">
 
 ## ✅ Validate Your Work
 
 Each lab ends with a **Validation Check** that checks your work. Complete all tasks in the lab, scroll to the **Validation Check** at the end of the last task, and click **Validate**:
 
+<div class="psb-shot">
+
 ![Validate button](./media/gs-validate.png)
+
+</div>
 
 - On success, the status shows **Success** and the points are added to your **Progress**.
 - If a check fails, read the message, fix the issue and click **Validate** again.
@@ -212,7 +265,7 @@ Each lab ends with a **Validation Check** that checks your work. Complete all ta
 
 </div>
 
-<div class="psb-panel" style="background:#0d121b;border:1px solid #223042;border-radius:16px;padding:16px 14px;margin:16px 0;color:#d7dee8;">
+<div class="psb-panel" style="background:#ffffff;border:1px solid #e3e9f1;border-radius:16px;padding:16px 14px;margin:16px 0;">
 
 ## 🔐 Sign In to the AWS Console
 
@@ -228,17 +281,25 @@ Each lab ends with a **Validation Check** that checks your work. Complete all ta
 
 **Step 2:** Enter the **IAM username (1)** and **Password (2)**, then click **Sign in (3)**:
 
+<div class="psb-shot">
+
 ![AWS sign-in](./media/gs-03.png)
+
+</div>
 
 **Step 3:** In the top-right corner of the console, open the **Region** selector and choose **Asia Pacific (Singapore) ap-southeast-1**:
 
+<div class="psb-shot">
+
 ![Region selector](./media/gs-04.png)
+
+</div>
 
 > ⚠️ **Note:** Create **every** resource in **Asia Pacific (Singapore) ap-southeast-1**. The pre-provisioned resources and the validation checks only look in this region. If something "disappears" from a console page, check the region selector first.
 
 </div>
 
-<div class="psb-panel" style="background:#0d121b;border:1px solid #223042;border-radius:16px;padding:16px 14px;margin:16px 0;color:#d7dee8;">
+<div class="psb-panel" style="background:#ffffff;border:1px solid #e3e9f1;border-radius:16px;padding:16px 14px;margin:16px 0;">
 
 ## 🔌 Connect Using RDP (Optional)
 
@@ -252,7 +313,7 @@ To use your own RDP client instead of the browser-based VM, connect with these d
 
 </div>
 
-<div class="psb-panel" style="background:#0d121b;border:1px solid #223042;border-radius:16px;padding:16px 14px;margin:16px 0;color:#d7dee8;">
+<div class="psb-panel" style="background:#ffffff;border:1px solid #e3e9f1;border-radius:16px;padding:16px 14px;margin:16px 0;">
 
 ## 🆘 Support Contact
 
@@ -266,7 +327,7 @@ Click **Next** to begin the lab.
 
 </div>
 
-<div class="psb-panel" style="background:#0d121b;border:1px solid #223042;border-radius:16px;padding:16px 14px;margin:16px 0;color:#d7dee8;">
+<div class="psb-panel" style="background:#ffffff;border:1px solid #e3e9f1;border-radius:16px;padding:16px 14px;margin:16px 0;">
 
 ## 🎉 Happy Learning!
 
