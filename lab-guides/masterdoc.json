@@ -4,11 +4,11 @@
     "Language": "English",
     "Files": [
       {
-        "RawFilePath": "https://raw.githubusercontent.com/fardeena-spektra/AWS-IoT-ML-GenAI-Bedrock-Lab/4a9e6f031bf1ee6279c9680b20f4c942d4d99f69/lab-guides/00-Getting-Started.md",
+        "RawFilePath": "https://raw.githubusercontent.com/fardeena-spektra/AWS-IoT-ML-GenAI-Bedrock-Lab/9dac2d86303517181ada0d20937c7f14bf4b8c87/lab-guides/00-Getting-Started.md",
         "Order": 1
       },
       {
-        "RawFilePath": "https://raw.githubusercontent.com/fardeena-spektra/AWS-IoT-ML-GenAI-Bedrock-Lab/4a9e6f031bf1ee6279c9680b20f4c942d4d99f69/lab-guides/00-Lab-Overview.md",
+        "RawFilePath": "https://raw.githubusercontent.com/fardeena-spektra/AWS-IoT-ML-GenAI-Bedrock-Lab/9dac2d86303517181ada0d20937c7f14bf4b8c87/lab-guides/00-Lab-Overview.md",
         "Order": 2
       },
       {
