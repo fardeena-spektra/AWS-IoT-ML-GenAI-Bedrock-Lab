@@ -17,7 +17,9 @@
 .psbgs pre,.psbgs pre code,.psbgs code{background:#070a10!important;color:#bfe7ff!important;border-color:#223042!important}
 .psbgs pre{overflow-x:auto!important;max-width:100%;padding:14px!important;border-radius:12px}
 .psbgs img[src*="media/"]{border-radius:10px;border:1px solid #223042;animation:psbShot 6s ease-in-out infinite;max-width:100%}
-.psbgs img:not([src*="media/"]),.psbgs svg,.psbgs i,.psbgs button,.psbgs [class*=copy],.psbgs [class*=Copy],.psbgs [title*=opy]{filter:invert(1) brightness(1.8)!important;opacity:1!important;background:transparent!important}
+.psbgs img:not([src*="media/"]),.psbgs svg,.psbgs i,.psbgs button,.psbgs [class*=copy],.psbgs [class*=Copy],.psbgs [title*=opy]{filter:invert(1) brightness(2.4)!important;opacity:1!important;background:transparent!important}
+/* CloudLabs inject values (copyable fields) */
+.psbgs [class]:not(.psb-panel):not([class*=language]):not(code),.psbgs input{color:#ffd08a!important;-webkit-text-fill-color:#ffd08a!important;background:transparent!important}
 @media (prefers-reduced-motion:reduce){.psbgs,.psbgs *{animation:none!important}}
 </style>
 
