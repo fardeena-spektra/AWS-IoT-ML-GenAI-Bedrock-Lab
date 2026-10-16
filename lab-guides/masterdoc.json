@@ -4,44 +4,48 @@
     "Language": "English",
     "Files": [
       {
-        "RawFilePath": "https://raw.githubusercontent.com/fardeena-spektra/AWS-IoT-ML-GenAI-Bedrock-Lab/a8a9203ca49e77e91069ec05917f41024c77216b/lab-guides/00-Getting-Started.md",
+        "RawFilePath": "https://raw.githubusercontent.com/fardeena-spektra/AWS-IoT-ML-GenAI-Bedrock-Lab/2eecef0851a98349e712f727eaab65edef80260b/lab-guides/00-Getting-Started.md",
         "Order": 1
       },
       {
-        "RawFilePath": "https://raw.githubusercontent.com/fardeena-spektra/AWS-IoT-ML-GenAI-Bedrock-Lab/main/lab-guides/01-IoT-Identity-and-Simulator.md",
+        "RawFilePath": "https://raw.githubusercontent.com/fardeena-spektra/AWS-IoT-ML-GenAI-Bedrock-Lab/2eecef0851a98349e712f727eaab65edef80260b/lab-guides/00-Lab-Overview.md",
         "Order": 2
       },
       {
-        "RawFilePath": "https://raw.githubusercontent.com/fardeena-spektra/AWS-IoT-ML-GenAI-Bedrock-Lab/main/lab-guides/02-Rules-Engine-InfluxDB-S3.md",
+        "RawFilePath": "https://raw.githubusercontent.com/fardeena-spektra/AWS-IoT-ML-GenAI-Bedrock-Lab/main/lab-guides/01-IoT-Identity-and-Simulator.md",
         "Order": 3
       },
       {
-        "RawFilePath": "https://raw.githubusercontent.com/fardeena-spektra/AWS-IoT-ML-GenAI-Bedrock-Lab/main/lab-guides/03-Query-API.md",
+        "RawFilePath": "https://raw.githubusercontent.com/fardeena-spektra/AWS-IoT-ML-GenAI-Bedrock-Lab/main/lab-guides/02-Rules-Engine-InfluxDB-S3.md",
         "Order": 4
       },
       {
-        "RawFilePath": "https://raw.githubusercontent.com/fardeena-spektra/AWS-IoT-ML-GenAI-Bedrock-Lab/main/lab-guides/04-Cognito-Auth.md",
+        "RawFilePath": "https://raw.githubusercontent.com/fardeena-spektra/AWS-IoT-ML-GenAI-Bedrock-Lab/main/lab-guides/03-Query-API.md",
         "Order": 5
       },
       {
-        "RawFilePath": "https://raw.githubusercontent.com/fardeena-spektra/AWS-IoT-ML-GenAI-Bedrock-Lab/main/lab-guides/05-Amplify-Dashboard.md",
+        "RawFilePath": "https://raw.githubusercontent.com/fardeena-spektra/AWS-IoT-ML-GenAI-Bedrock-Lab/main/lab-guides/04-Cognito-Auth.md",
         "Order": 6
       },
       {
-        "RawFilePath": "https://raw.githubusercontent.com/fardeena-spektra/AWS-IoT-ML-GenAI-Bedrock-Lab/main/lab-guides/06-SageMaker-Anomaly-Model.md",
+        "RawFilePath": "https://raw.githubusercontent.com/fardeena-spektra/AWS-IoT-ML-GenAI-Bedrock-Lab/main/lab-guides/05-Amplify-Dashboard.md",
         "Order": 7
       },
       {
-        "RawFilePath": "https://raw.githubusercontent.com/fardeena-spektra/AWS-IoT-ML-GenAI-Bedrock-Lab/main/lab-guides/07-Scoring-Pipeline.md",
+        "RawFilePath": "https://raw.githubusercontent.com/fardeena-spektra/AWS-IoT-ML-GenAI-Bedrock-Lab/main/lab-guides/06-SageMaker-Anomaly-Model.md",
         "Order": 8
       },
       {
-        "RawFilePath": "https://raw.githubusercontent.com/fardeena-spektra/AWS-IoT-ML-GenAI-Bedrock-Lab/main/lab-guides/08-Bedrock-Assistant.md",
+        "RawFilePath": "https://raw.githubusercontent.com/fardeena-spektra/AWS-IoT-ML-GenAI-Bedrock-Lab/main/lab-guides/07-Scoring-Pipeline.md",
         "Order": 9
       },
       {
-        "RawFilePath": "https://raw.githubusercontent.com/fardeena-spektra/AWS-IoT-ML-GenAI-Bedrock-Lab/main/lab-guides/09-Observability-and-Teardown.md",
+        "RawFilePath": "https://raw.githubusercontent.com/fardeena-spektra/AWS-IoT-ML-GenAI-Bedrock-Lab/main/lab-guides/08-Bedrock-Assistant.md",
         "Order": 10
+      },
+      {
+        "RawFilePath": "https://raw.githubusercontent.com/fardeena-spektra/AWS-IoT-ML-GenAI-Bedrock-Lab/main/lab-guides/09-Observability-and-Teardown.md",
+        "Order": 11
       }
     ]
   }
